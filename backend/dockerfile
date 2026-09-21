@@ -1,0 +1,13 @@
+FROM python:3.14.0
+
+WORKDIR /app
+
+# Копируем зависимости сначала (для кеширования)
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем весь проект
+COPY . .
+
+# Команда по умолчанию: миграции и запуск
+CMD ["/bin/sh", "-c", "alembic upgrade head && python src/main.py"]

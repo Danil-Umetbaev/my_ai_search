@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16
+    container_name: my_ai_search_db
+    environment:
+      POSTGRES_USER: dodanil
+      POSTGRES_PASSWORD: dodanil
+      POSTGRES_DB: my_ai_search
+    ports:
+      - "6432:5432"  # пробрасываем на хост, чтобы можно было подключаться снаружи (опционально)
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dodanil -d my_ai_search"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: my_ai_search_app
+    ports:
+      - "7777:8000"
+    depends_on:
+      db:
+        condition: service_healthy  # ждём, пока БД не станет здоровой
+    env_file:
+      - .env
+    networks:
+      - my_network
+
+volumes:
+  pg_data:
+
+networks:
+  my_network:
+    external: true  # если сеть уже создана, или уберите, если хотите, чтобы compose создал её сам
