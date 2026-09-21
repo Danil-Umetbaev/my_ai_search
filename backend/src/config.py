@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Literal
-
+from sqlalchemy import URL
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,8 +18,15 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     @property
-    def DB_URL(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    def DB_URL(self) -> URL:
+        return URL.create(
+            drivername='postgresql+asyncpg',
+            username=self.DB_USER,
+            password=self.DB_PASS,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            database=self.DB_NAME
+        )
 
 
 settings = Settings()

@@ -12,7 +12,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.database import Base
 from src.config import settings
-from src.models.example import ExampleORM
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,16 +23,11 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-#
-# Замените драйвер на синхронный (например, postgresql+psycopg2:// или postgresql+psycopg://)
-# Если у вас в настройках указан асинхронный драйвер (asyncpg), замените его на psycopg
-sync_database_url = settings.DB_URL.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-config.set_main_option("sqlalchemy.url", sync_database_url)
+config.set_main_option("sqlalchemy.url", settings.DB_URL.render_as_string(hide_password=False))
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
