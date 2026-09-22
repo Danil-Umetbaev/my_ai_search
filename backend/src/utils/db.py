@@ -1,5 +1,5 @@
 from src.repositories.conversations import ConversationsRepository
-
+from src.repositories.messages import MessageRepository
 
 class DBManager:
     def __init__(self, session_factory):
@@ -9,6 +9,7 @@ class DBManager:
         self.session = self.session_factory()
 
         self.conversations = ConversationsRepository(self.session)
+        self.messages = MessageRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
