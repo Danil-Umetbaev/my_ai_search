@@ -1,4 +1,4 @@
-from src.repositories.example import ExampleRepository
+from src.repositories.conversations import ConversationsRepository
 
 
 class DBManager:
@@ -8,11 +8,12 @@ class DBManager:
     async def __aenter__(self):
         self.session = self.session_factory()
 
-        self.examples = ExampleRepository(self.session)
+        self.conversations = ConversationsRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.session.rollback()
+        if exc_type:
+            await self.session.rollback()
         await self.session.close()
 
     async def commit(self):

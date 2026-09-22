@@ -21,13 +21,20 @@ services:
   app:
     build: .
     container_name: my_ai_search_app
+
     ports:
       - "7777:8000"
+
     depends_on:
       db:
-        condition: service_healthy  # ждём, пока БД не станет здоровой
+        condition: service_healthy
+
     env_file:
       - .env
+
+    volumes:
+      - ./src:/app/src
+
     networks:
       - my_network
 

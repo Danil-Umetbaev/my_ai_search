@@ -1,9 +1,9 @@
-from backend.src.models.documents import ExampleORM
-from src.schemas.example import ExampleSchema
+from src.models.conversations import ConversationORM
+from src.schemas.conversations import ConversationSchema
 from src.repositories.mappers.base import DataMapper
 
 
-class ExampleDataMapper(DataMapper):
-    db_model = ExampleORM
-    schema = ExampleSchema
+class ConversationDataMapper(DataMapper):
+    db_model = ConversationORM
+    schema = ConversationSchema
 
