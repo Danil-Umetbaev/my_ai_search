@@ -12,6 +12,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.database import Base
 from src.config import settings
+from src.models.conversations import ConversationORM
+from src.models.documents import DocumentORM
+from src.models.escalations import EscalationORM
+from src.models.messages import MessageORM
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
