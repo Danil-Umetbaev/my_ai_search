@@ -4,13 +4,14 @@ from src.models.enums import Role
 from datetime import datetime
 
 
-
-class MessageAddSchema(BaseModel):
+class MessageAddRequestSchema(BaseModel):
     conversation_id: UUID
-    role: Role
     content: str
-    created_at: datetime
 
+
+class MessageAddSchema(MessageAddRequestSchema):
+    role: Role
 
 class MessageSchema(MessageAddSchema):
     id: UUID
+    created_at: datetime

@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 class BaseException(Exception):
     detail = 'Не ехала что-ли...'
     def __init__(self, *args, **kwargs):
@@ -37,3 +37,12 @@ class TooMuchExampleFoundException(BaseException):
 class TooMuchExampleFoundHTTPException(BaseHTTPException):
     detail = 'Слишком много примеров найдено'
     status_code = 409
+
+
+class NoConversationFoundException(BaseException):
+    detail = 'Нет такой беседы'
+
+class NoConversationFoundHTTPException(BaseHTTPException):
+    detail = 'Нет такой беседы'
+    status_code = 404
+

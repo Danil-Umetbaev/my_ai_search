@@ -12,10 +12,6 @@ class MessageRepository(BaseRepository):
 
 
     async def get_messages_by_conversation_id(self, conversation_id: UUID):
-
-
-
-
         query = (select(self.model)).filter_by(conversation_id=conversation_id).order_by(self.model.created_at)
         result = await self.session.execute(query)
         objects = result.scalars().all()
