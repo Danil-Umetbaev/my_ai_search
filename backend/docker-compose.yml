@@ -31,16 +31,19 @@ services:
 
     env_file:
       - .env
-
+    environment:
+      HF_HOME: /cache/huggingface
     volumes:
       - ./src:/app/src
+      - hf_cache:/cache/huggingface
 
     networks:
       - my_network
 
 volumes:
   pg_data:
-
+  hf_cache:
+  
 networks:
   my_network:
     external: true  # если сеть уже создана, или уберите, если хотите, чтобы compose создал её сам
