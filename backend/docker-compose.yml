@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: my_ai_search_db
     environment:
       POSTGRES_USER: dodanil
@@ -39,11 +39,12 @@ services:
 
     networks:
       - my_network
+    command: fastapi dev src/main.py --host 0.0.0.0 --port 8000
 
 volumes:
   pg_data:
   hf_cache:
-  
+
 networks:
   my_network:
     external: true  # если сеть уже создана, или уберите, если хотите, чтобы compose создал её сам

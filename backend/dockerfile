@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Копируем зависимости сначала (для кеширования)
 COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip python -m pip install -r requirements.txt
 
 # Копируем весь проект
 COPY . .
