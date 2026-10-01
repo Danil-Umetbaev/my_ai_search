@@ -19,10 +19,11 @@ class QwenLLMProvider(LLMProvider):
 
     def generate(self, question: str, context: str) -> str:
         messages = [{'role': 'system', 'content': """Ты корпоративный AI-помощник.
-                        Отвечай только на основании предоставленного контекста.
-                        Если в контексте нет ответа, сообщи, что информации недостаточно.
-                        Не придумывай факты."""},
-                    {'role': 'user', 'content': f'Контекст: {context}, вопрос: {question}'}]
+                        Ответь на вопрос только по предоставленному контексту.
+                        Если ответа в контексте нет, ответь: "Информация недостаточна."""},
+                    {'role': 'user', 'content': f'''Контекст: {context}
+
+                                                        вопрос: {question}'''}]
 
         result = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=False)
         tokens = self.tokenizer(result, return_tensors='pt')
