@@ -4,6 +4,7 @@ from src.ai.llm.qwen import QwenLLMProvider
 from src.services.rag import RAGService
 from src.utils.db import DBManager
 from src.database import async_session_maker
+from src.ai.reranking.cross_encoder import CrossEncoderRerankerProvider
 import asyncio
 
 async def main():
@@ -12,15 +13,16 @@ async def main():
         qwen_provider = QwenEmbeddingProvider()
         llm = QwenLLMProvider()
         vector_search = VectorSearchService(db, qwen_provider)
-        rag_service = RAGService(vector_search, llm)
+        reranker = CrossEncoderRerankerProvider()
+        rag_service = RAGService(vector_search, llm, reranker)
 
         question = "Что находилось вдали за горизонтом?"
-        answer = await rag_service.answer(question, 1)
+        answer = await rag_service.answer(question, 10, 1, 0.5)
         print(answer)
 
 
         question = "Какого цвета был автомобиль?"
-        answer = await rag_service.answer(question, 1)
+        answer = await rag_service.answer(question, 10, 1, 0.5)
         print(answer)
 
 if __name__ == '__main__':
