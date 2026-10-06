@@ -3,7 +3,7 @@ from sentence_transformers import CrossEncoder
 
 class CrossEncoderRerankerProvider(RerankerProvider):
 
-    MODEL_NAME = 'cross-encoder/mmarco-mMiniLMv2-L12-H384-v1'
+    MODEL_NAME = 'BAAI/bge-reranker-v2-m3'
 
     def __init__(self):
         self.model = CrossEncoder(self.MODEL_NAME)

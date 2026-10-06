@@ -14,16 +14,31 @@ async def main():
         llm = QwenLLMProvider()
         vector_search = VectorSearchService(db, qwen_provider)
         reranker = CrossEncoderRerankerProvider()
-        rag_service = RAGService(vector_search, llm, reranker)
+        rag_service = RAGService(db, vector_search, llm, reranker)
 
-        question = "Что находилось вдали за горизонтом?"
-        answer = await rag_service.answer(question, 10, 1, 0.5)
-        print(answer)
+        # questions = [
+        #     "Что находится в разделе 'Справочники'?",
+        #     "Как создать отдел?",
+        #     "Что такое штучный товар?",
+        #     "Можно ли вернуть весовой товар?",
+        #     "Как настроить ограничение продажи алкоголя по времени?",
+        #     "Как настроить интерфейс кассового модуля?",
+        #     "Не могу найти раздел карты, где он находится?",
+        #     "Как отменить оплату после печати чека?",
+        #     "Какие ограничения есть при работе кассы в режиме общепита?",
+        #     "Как выбрать язык интерефейса?"
+        # ]
+        questions = [
+            "Что находится в разделе 'Справочники'?",
+            "Не могу найти раздел карты, где он находится?",
+            "Как отменить оплату после печати чека?",
+            "Какие ограничения есть при работе кассы в режиме общепита?",
+        ]
 
-
-        question = "Какого цвета был автомобиль?"
-        answer = await rag_service.answer(question, 10, 1, 0.5)
-        print(answer)
+        for question in questions:
+            print(f'ВОПРОС: {question}')
+            answer = await rag_service.answer(question, 30, 5, 0.5)
+            print(answer)
 
 if __name__ == '__main__':
     asyncio.run(main())

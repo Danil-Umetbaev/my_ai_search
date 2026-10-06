@@ -2,12 +2,18 @@ FROM python:3.14.0
 
 WORKDIR /app
 
-# Копируем зависимости сначала (для кеширования)
-COPY requirements.txt requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip python -m pip install -r requirements.txt
+# Тяжёлые AI-зависимости — меняются крайне редко
+COPY requirements-ai.txt requirements-ai.txt
 
-# Копируем весь проект
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install -r requirements-ai.txt
+
+# Обычные зависимости проекта
+COPY requirements.txt requirements.txt
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install -r requirements.txt
+
 COPY . .
 
-# Команда по умолчанию: миграции и запуск
 CMD ["/bin/sh", "-c", "alembic upgrade head && python src/main.py"]
