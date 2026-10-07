@@ -43,19 +43,31 @@ async def main():
             "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/6045171745/SetRetail10",
         ]
         for url in urls:
-            print(f'url: {url}')
-            document_add = await confluence.fetch(url)
+            try:
+                print(f'url: {url}')
+                document_add = await confluence.fetch(url)
 
-            existing_document = await db.documents.get_one_or_none(source_url=document_add.source_url)
-            if existing_document is not None:
-                print('Документ уже загружен')
+                existing_document = await db.documents.get_one_or_none(source_url=document_add.source_url)
+                if existing_document is not None:
+                    if document_add.checksum == existing_document.checksum:
+                        print('Документ уже загружен')
+                        continue
+                    update_document = await db.documents.update_by_id(document_id=existing_document.id, document=document_add)
+                    await db.document_chunks.delete_by_document_id(document_id=existing_document.id)
+                    await indexer.index_document(update_document)
+                    await db.commit()
+                    print('Документ обновлён')
+                    continue
+                saved_document = await db.documents.add(document_add)
+
+                await indexer.index_document(saved_document)
+
+                await db.commit()
+                print('Готово')
+            except Exception as e:
+                await db.rollback()
+                print(f'ОШибка произошёл: {url}: {e}')
                 continue
-            saved_document = await db.documents.add(document_add)
-
-            await indexer.index_document(saved_document)
-
-            await db.commit()
-            print('Готово')
 
 if __name__ == '__main__':
     asyncio.run(main())

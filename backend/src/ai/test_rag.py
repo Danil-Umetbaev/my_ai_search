@@ -29,16 +29,30 @@ async def main():
         #     "Как выбрать язык интерефейса?"
         # ]
         questions = [
-            "Что находится в разделе 'Справочники'?",
-            "Не могу найти раздел карты, где он находится?",
+            # есть ответ
+            # "Что находится в разделе Справочники?",
             "Как отменить оплату после печати чека?",
-            "Какие ограничения есть при работе кассы в режиме общепита?",
+            # "Какие ограничения есть при работе кассы в режиме общепита?",
+            # "Как создать отдел?",
+
+            # # ответа в базе быть не должно
+            # "Как оформить отпуск сотруднику?",
+            # "Какая зарплата у директора компании?",
+            # "Как настроить Wi-Fi в офисе?",
+            # "Как заказать корпоративное такси?",
         ]
 
         for question in questions:
-            print(f'ВОПРОС: {question}')
-            answer = await rag_service.answer(question, 30, 5, 0.5)
-            print(answer)
+            result = await rag_service.answer(question, 30, 5)
+            print("STATUS:", result.status)
+            print("ANSWER:", result.answer)
+
+            for source in result.sources:
+                print(
+                    source.title,
+                    source.url,
+                    source.score
+                )
 
 if __name__ == '__main__':
     asyncio.run(main())

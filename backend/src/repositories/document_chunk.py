@@ -4,7 +4,7 @@ from src.repositories.mappers.mappers import DocumentChunkMapper
 from src.models.document_chunk import DocumentChunkORM
 from src.schemas.document_chunks import DocumentChunkSchema
 from src.schemas.vector_search import VectorSearchResultSchema
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from uuid import UUID
 class DocumentChunkRepository(BaseRepository):
     mapper = DocumentChunkMapper
@@ -13,7 +13,7 @@ class DocumentChunkRepository(BaseRepository):
 
     async def search_similar(self, query_embedding: list[float], top_k: int) -> list[VectorSearchResultSchema]:
         distance = self.model.embedding.cosine_distance(query_embedding).label('distance')
-        query = (select(self.model, distance, DocumentORM.title)
+        query = (select(self.model, distance, DocumentORM.title, DocumentORM.source_url)
                 .join(DocumentORM, self.model.document_id == DocumentORM.id)
                 .order_by(distance)
                 .limit(top_k))
@@ -26,9 +26,10 @@ class DocumentChunkRepository(BaseRepository):
                 chunk_index=chunk.chunk_index,
                 content=chunk.content,
                 similarity= 1 - distance,
-                document_title=document_title
+                document_title=document_title,
+                document_url=document_url
             )
-            for chunk, distance, document_title in result_query
+            for chunk, distance, document_title, document_url in result_query
         ]
 
         return result_list
@@ -65,3 +66,8 @@ class DocumentChunkRepository(BaseRepository):
         return [self.mapper.map_to_domain_entity(obj) for obj in result_query]
 
 
+    async def delete_by_document_id(self, document_id: UUID) -> None:
+        query = (delete(self.model)
+                 .where(self.model.document_id==document_id))
+
+        await self.session.execute(query)

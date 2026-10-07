@@ -32,6 +32,5 @@ class DocumentIndexerService(BaseService):
         ]
 
         await self.db.document_chunks.add_bulk(documents_chunks)
-        await self.db.commit()
 
 
