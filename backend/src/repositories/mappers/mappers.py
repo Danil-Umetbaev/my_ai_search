@@ -7,6 +7,8 @@ from src.models.document_chunk import DocumentChunkORM
 from src.schemas.document_chunks import DocumentChunkSchema
 from src.models.documents import DocumentORM
 from src.schemas.documents import DocumentSchema
+from src.schemas.messages import MessageSourceSchema
+from src.models.message_sources import MessageSourceORM
 
 class ConversationDataMapper(DataMapper):
     db_model = ConversationORM
@@ -24,3 +26,8 @@ class DocumentDataMapper(DataMapper):
 class DocumentChunkMapper(DataMapper):
     db_model = DocumentChunkORM
     schema = DocumentChunkSchema
+
+
+class MessageSourceMapper(DataMapper):
+    db_model = MessageSourceORM
+    schema = MessageSourceSchema

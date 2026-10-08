@@ -17,6 +17,7 @@ from src.models.documents import DocumentORM
 from src.models.escalations import EscalationORM
 from src.models.messages import MessageORM
 from src.models.document_chunk import DocumentChunkORM
+from src.models.message_sources import MessageSourceORM
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

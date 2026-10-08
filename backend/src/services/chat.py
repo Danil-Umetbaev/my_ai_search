@@ -2,7 +2,7 @@ from src.schemas.chat import ChatRequest, ChatResponse, SourceResponse
 from src.services.rag import RAGService
 from src.utils.db import DBManager
 from src.services.base import BaseService
-from src.schemas.messages import MessageAddSchema
+from src.schemas.messages import MessageAddSchema, MessageSourceAddSchema
 from src.exceptions import NoResultFoundException, NoConversationFoundException
 from src.models.enums import Role
 from src.schemas.rag import RAGStatus
@@ -36,8 +36,9 @@ class ChatService(BaseService):
             )
         assistant_message = MessageAddSchema(conversation_id=data.conversation_id, content=rag_result.answer, role=Role.assistant)
         saved_assistant_message = await self.db.messages.add(assistant_message)
-
-        sources = [SourceResponse(title=source.title, url=source.url) for source in rag_result.sources]
+        message_sources = [MessageSourceAddSchema(message_id=saved_assistant_message.id, chunk_id=chunk.chunk_id, relevance_score=chunk.score) for chunk in rag_result.used_chunks]
+        await self.db.message_sources.add_bulk(message_sources)
+        sources = [SourceResponse(title=source.title, url=source.url, score=source.score) for source in rag_result.sources]
         await self.db.commit()
 
 

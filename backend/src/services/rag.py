@@ -3,7 +3,7 @@ from src.utils.db import DBManager
 from src.ai.llm.base import LLMProvider
 from src.services.vector_search import VectorSearchService
 from src.ai.reranking.base import RerankerProvider
-from src.schemas.rag import RAGResultSchema, RAGStatus, SourceSchema
+from src.schemas.rag import RAGResultSchema, RAGStatus, SourceSchema, RAGChunkSourceSchema
 import asyncio
 class RAGService(BaseService):
 
@@ -15,12 +15,11 @@ class RAGService(BaseService):
         self.db = db
 
 
-    async def answer(self, question: str, candidate_k: int = 10, top_k: int=5, threshold: float=0.8) -> RAGResultSchema:
+    async def answer(self, question: str, candidate_k: int = 20, top_k: int=3, threshold: float=0.8) -> RAGResultSchema:
         search_query = await asyncio.to_thread(
             self.llm.rewrite_query,
             question
         )
-
         original_chunks = await self.vector_search.search(
             question,
             candidate_k
@@ -74,15 +73,18 @@ class RAGService(BaseService):
                 answer=None,
                 sources=[],
                 confidence=confidence,
+                used_chunks=[]
             )
         best_chunks = chunks_with_scores[:top_k]
 
+        used_chunks = []
         sources = []
         seen_documents = set()
         context_chunks = []
         seen_chunks = set()
 
         for chunk, score in best_chunks:
+            used_chunks.append(RAGChunkSourceSchema(chunk_id=chunk.chunk_id, score=score))
             if chunk.document_id not in seen_documents:
                 seen_documents.add(chunk.document_id)
                 sources.append(
@@ -122,4 +124,5 @@ class RAGService(BaseService):
                 answer=answer_llm,
                 sources=sources,
                 confidence=confidence,
+                used_chunks=used_chunks
             )

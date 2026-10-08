@@ -15,3 +15,13 @@ class MessageAddSchema(MessageAddRequestSchema):
 class MessageSchema(MessageAddSchema):
     id: UUID
     created_at: datetime
+
+
+class MessageSourceAddSchema(BaseModel):
+    message_id: UUID
+    chunk_id: UUID
+    relevance_score: float
+    
+class MessageSourceSchema(MessageSourceAddSchema):
+    id: UUID
+

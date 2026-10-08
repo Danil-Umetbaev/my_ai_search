@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from pydantic import BaseModel, Field
 from uuid import UUID
 
@@ -12,6 +11,7 @@ class ChatRequest(BaseModel):
 class SourceResponse(BaseModel):
     title: str
     url: str
+    score: float
 
 
 class ChatResponse(BaseModel):
