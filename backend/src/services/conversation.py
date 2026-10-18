@@ -1,3 +1,4 @@
+from uuid import UUID
 from src.services.base import BaseService
 from src.schemas.conversations import ConversationAddSchema
 from src.schemas.messages import MessageSchema
@@ -11,7 +12,7 @@ class ConversationService(BaseService):
         await self.db.commit()
         return result
 
-    async def get_messages(self, conversation_id: int) -> list[MessageSchema]:
+    async def get_messages(self, conversation_id: UUID) -> list[MessageSchema]:
         try:
             await self.db.conversations.get_one(id=conversation_id)
             return await self.db.messages.get_messages_by_conversation_id(conversation_id)

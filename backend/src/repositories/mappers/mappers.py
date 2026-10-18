@@ -9,6 +9,9 @@ from src.models.documents import DocumentORM
 from src.schemas.documents import DocumentSchema
 from src.schemas.messages import MessageSourceSchema
 from src.models.message_sources import MessageSourceORM
+from src.models.escalations import EscalationORM
+from src.schemas.escalations import EscalationSchema
+
 
 class ConversationDataMapper(DataMapper):
     db_model = ConversationORM
@@ -31,3 +34,8 @@ class DocumentChunkMapper(DataMapper):
 class MessageSourceMapper(DataMapper):
     db_model = MessageSourceORM
     schema = MessageSourceSchema
+
+
+class EscalationDataMapper(DataMapper):
+    db_model = EscalationORM
+    schema = EscalationSchema

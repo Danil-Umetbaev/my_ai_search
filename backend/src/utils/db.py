@@ -3,7 +3,7 @@ from src.repositories.messages import MessageRepository
 from src.repositories.document_chunk import DocumentChunkRepository
 from src.repositories.documents import DocumentRepository
 from src.repositories.message_sources import MessageSourceRepository
-
+from src.repositories.escalations import EscalationRepository
 
 class DBManager:
     def __init__(self, session_factory):
@@ -17,6 +17,7 @@ class DBManager:
         self.document_chunks = DocumentChunkRepository(self.session)
         self.documents = DocumentRepository(self.session)
         self.message_sources = MessageSourceRepository(self.session)
+        self.escalations = EscalationRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -26,3 +27,5 @@ class DBManager:
 
     async def commit(self):
         await self.session.commit()
+    async def rollback(self):
+        await self.session.rollback()

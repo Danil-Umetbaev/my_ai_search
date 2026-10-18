@@ -1,3 +1,2 @@
-torch
-transformers
-sentence-transformers
+transformers==5.19.0
+sentence-transformers==6.1.0

@@ -6,6 +6,7 @@ from enum import StrEnum
 class RAGStatus(StrEnum):
     ANSWERED = 'answered'
     NOT_FOUND = 'not_found'
+    OFF_TOPIC = 'off_topic'
 
 class RAGChunkSourceSchema(BaseModel):
     chunk_id: UUID
@@ -24,5 +25,5 @@ class RAGResultSchema(BaseModel):
     sources: list[SourceSchema] = Field(default_factory=list)
     confidence: float | None = None
     used_chunks: list[RAGChunkSourceSchema] = Field(default_factory=list)
-    
+
 

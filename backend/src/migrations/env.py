@@ -28,7 +28,8 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-config.set_main_option("sqlalchemy.url", settings.DB_URL.render_as_string(hide_password=False))
+# Alembic uses ConfigParser interpolation: URL-encoded '%' must be escaped.
+config.set_main_option("sqlalchemy.url", settings.DB_URL.render_as_string(hide_password=False).replace("%", "%%"))
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel

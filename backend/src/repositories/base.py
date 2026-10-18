@@ -7,7 +7,13 @@ from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from src.database import Base
-from src.exceptions import NoResultFoundException, TooMuchResultFoundException, ObjectAlreadyExistsException
+from src.exceptions import (
+    NoResultFoundException,
+    TooMuchResultFoundException,
+    ObjectAlreadyExistsException,
+    DataIntegrityException,
+)
+
 from src.repositories.mappers.base import DataMapper
 
 
@@ -62,11 +68,13 @@ class BaseRepository:
 
 
     async def add_bulk(self, data: Sequence[BaseModel]):
+        if not data:
+            return
         try:
             add_model = insert(self.model).values([item.model_dump() for item in data])
             await self.session.execute(add_model)
         except IntegrityError as ex:
-            raise NoResultFoundException
+            raise DataIntegrityException from ex
 
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
         edit_model = (

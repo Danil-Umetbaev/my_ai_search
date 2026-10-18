@@ -1,12 +1,17 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
+from enum import StrEnum
 from uuid import UUID
 
-from src.schemas.rag import RAGStatus
+class ChatStatus(StrEnum):
+    ANSWERED = 'answered'
+    NOT_FOUND = 'not_found'
+    ESCALATED = 'escalated'
+    OFF_TOPIC = 'off_topic'
 
 class ChatRequest(BaseModel):
     conversation_id: UUID
-    message: str
+    message: str = Field(min_length=1, max_length=4000, pattern=r"\S")
 
 class SourceResponse(BaseModel):
     title: str
@@ -16,7 +21,8 @@ class SourceResponse(BaseModel):
 
 class ChatResponse(BaseModel):
     message_id: UUID | None = None
-    status: RAGStatus
+    message: str | None = None
+    status: ChatStatus
     answer: str | None
     sources: list[SourceResponse] = Field(default_factory=list)
     confidence: float | None

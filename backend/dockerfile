@@ -1,19 +1,51 @@
-FROM python:3.14.0
+# syntax=docker/dockerfile:1.7
 
-WORKDIR /app
+FROM python:3.14-slim
 
-# Тяжёлые AI-зависимости — меняются крайне редко
-COPY requirements-ai.txt requirements-ai.txt
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV HF_HOME=/cache/huggingface
+
+
+WORKDIR /backend
+
+
+RUN apt-get update \
+    && apt-get install -y \
+        --no-install-recommends \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY requirements.txt .
+COPY requirements-ai.txt .
+
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python -m pip install -r requirements-ai.txt
+    python -m pip install --upgrade pip
 
-# Обычные зависимости проекта
-COPY requirements.txt requirements.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install -r requirements.txt
 
+
+# PyTorch 2.11 + CUDA 12.8
+# Берём конкретный официальный wheel для Python 3.14 / Linux x86_64,
+# чтобы pip не пытался сам подобрать optional CUDA wheel.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install \
+    "https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp314-cp314-manylinux_2_28_x86_64.whl"
+
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install -r requirements-ai.txt
+
+
 COPY . .
 
-CMD ["/bin/sh", "-c", "alembic upgrade head && python src/main.py"]
+
+EXPOSE 8000
+
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

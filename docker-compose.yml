@@ -1,0 +1,76 @@
+name: my_ai_search
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./deploy/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  app:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    image: my_ai_search_backend:${RELEASE_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MODE: prod
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      ENABLE_DOCS: 'false'
+      CORS_ORIGINS: '[]'
+      HF_HOME: /cache/huggingface
+      PYTHONUNBUFFERED: '1'
+    volumes:
+      - hf_cache:/cache/huggingface
+    gpus: all
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [sh, -c, 'alembic upgrade head && exec uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 1']
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"]
+      interval: 30s
+      timeout: 6s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+  frontend:
+    build: ./frontend
+    image: my_ai_search_frontend:${RELEASE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-8080}:80'
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging: *logging
+
+volumes:
+  pg_data:
+  hf_cache:

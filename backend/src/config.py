@@ -13,7 +13,13 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_USER: str
     DB_PASS: str
+    VK_TOKEN: str = ""
+    VK_PEER_ID: int = 0
+    VK_API_VERSION: str = "5.199"
+    VK_GROUP_ID: int = 0
     MODE: Literal["test", "local", "dev", "prod"]
+    ENABLE_DOCS: bool = False
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 

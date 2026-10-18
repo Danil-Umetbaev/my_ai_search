@@ -1,5 +1,5 @@
 from typing import Annotated
-
+from functools import lru_cache
 from fastapi import Depends
 
 from src.database import async_session_maker
@@ -10,6 +10,13 @@ from src.ai.reranking.cross_encoder import CrossEncoderRerankerProvider
 from src.services.rag import RAGService
 from src.services.chat import ChatService
 from src.services.vector_search import VectorSearchService
+from src.notifications.vk import VKNotificationProvider
+from src.notifications.base import NotificationProvider
+from src.services.escalation import EscalationService
+from src.services.conversation import ConversationService
+from src.config import settings
+
+
 async def get_db():
     async with DBManager(async_session_maker) as db:
         yield db
@@ -18,23 +25,23 @@ async def get_db():
 DBDep = Annotated[DBManager, Depends(get_db)]
 
 
-embedding_provider = QwenEmbeddingProvider()
 
+@lru_cache
 def get_embedding_provider():
-    return embedding_provider
+    return QwenEmbeddingProvider()
 
 embeddingDep = Annotated[QwenEmbeddingProvider, Depends(get_embedding_provider)]
 
-llm = QwenLLMProvider()
 
+@lru_cache
 def get_llm_provider():
-    return llm
+    return QwenLLMProvider()
 
 llmDep = Annotated[QwenLLMProvider, Depends(get_llm_provider)]
 
-reranker = CrossEncoderRerankerProvider()
+@lru_cache
 def get_reranker_provider():
-    return reranker
+    return CrossEncoderRerankerProvider()
 
 rerankerDep = Annotated[CrossEncoderRerankerProvider, Depends(get_reranker_provider)]
 
@@ -46,7 +53,34 @@ def get_rag_service(db: DBDep, embedding: embeddingDep, llm: llmDep, reranker: r
 rag_serviceDep = Annotated[RAGService, Depends(get_rag_service)]
 
 
-def get_chat_service(db: DBDep, rag_service: rag_serviceDep):
-    return ChatService(db, rag_service)
+
+
+@lru_cache
+def get_notification_provider():
+    if not settings.VK_TOKEN or not settings.VK_PEER_ID or not settings.VK_GROUP_ID:
+        return None
+    return VKNotificationProvider(
+        settings.VK_TOKEN,
+        settings.VK_PEER_ID,
+        settings.VK_GROUP_ID,
+        settings.VK_API_VERSION
+    )
+
+NotificationProviderDep = Annotated[NotificationProvider | None, Depends(get_notification_provider)]
+
+def get_escalation_service(db: DBDep, notification_provider: NotificationProviderDep):
+    return EscalationService(db, notification_provider)
+
+EscalationServiceDep = Annotated[EscalationService, Depends(get_escalation_service)]
+def get_chat_service(db: DBDep, rag_service: rag_serviceDep, escalation_service: EscalationServiceDep):
+    return ChatService(db, rag_service, escalation_service)
+
 
 ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
+
+
+def get_conversation_service(db: DBDep):
+    return ConversationService(db)
+
+
+ConversationServiceDep = Annotated[ConversationService, Depends(get_conversation_service)]
