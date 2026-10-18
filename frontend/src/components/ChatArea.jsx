@@ -298,8 +298,7 @@ export default function ChatArea({
   return (
     <div className="chat-area">
       <aside className="knowledge-banner" aria-label="База знаний">
-        <span className="knowledge-banner__badge">MVP · открытый доступ</span>
-        <div><strong>Спросите о SetRetail10</strong><span>Поиск по публичной документации. Проверяйте ответы по источникам.</span></div>
+        <strong>Спросите о SetRetail10</strong>
         <a href="https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/overview" target="_blank" rel="noopener noreferrer">Открыть базу знаний ↗</a>
       </aside>
 

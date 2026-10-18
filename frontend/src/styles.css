@@ -2279,9 +2279,6 @@ span:not(.details-chevron) {
 }
 
 .knowledge-banner { display:flex; align-items:center; gap:16px; margin:16px 24px 0; padding:16px 20px; border:1px solid #dce6ed; border-radius:18px; background:linear-gradient(120deg,#f2f8fc,#f4f4ff); flex-shrink:0; }
-.knowledge-banner__badge { border-radius:20px; padding:6px 10px; background:#e2ecff; color:#35559b; font-size:11px; font-weight:700; white-space:nowrap; }
-.knowledge-banner div { display:flex; flex-direction:column; gap:4px; flex:1; }
-.knowledge-banner strong { color:#26334b; font-size:14px; }
-.knowledge-banner div span { color:#64748b; font-size:12px; }
+.knowledge-banner strong { flex:1; color:#26334b; font-size:14px; }
 .knowledge-banner a { color:#4563b2; font-size:12px; font-weight:600; }
-@media(max-width:760px) { .knowledge-banner { margin:10px 12px 0; padding:12px; gap:9px; flex-wrap:wrap; } .knowledge-banner div { flex-basis:100%; order:2; } .knowledge-banner a { margin-left:auto; } }
+@media(max-width:760px) { .knowledge-banner { margin:10px 12px 0; padding:12px; gap:9px; flex-wrap:wrap; } .knowledge-banner a { margin-left:auto; } }
