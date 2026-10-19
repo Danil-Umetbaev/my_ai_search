@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -23,11 +24,14 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
-    # await redis_manager.connect()
-    # FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    from src.api.dependencies import (
+        get_embedding_provider, get_llm_provider, get_reranker_provider,
+    )
+    logger.info("Preparing search models before accepting requests")
+    for load in (get_embedding_provider, get_llm_provider, get_reranker_provider):
+        await asyncio.to_thread(load)
+    logger.info("Search models ready")
     yield
-    # await redis_manager.close()
 
 setup_logging()
 logger = logging.getLogger(__name__)

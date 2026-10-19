@@ -52,7 +52,7 @@ services:
       interval: 30s
       timeout: 6s
       retries: 5
-      start_period: 60s
+      start_period: 30m
     logging: *logging
 
   frontend:
@@ -74,3 +74,5 @@ services:
 volumes:
   pg_data:
   hf_cache:
+    name: ${HF_CACHE_VOLUME:-my_ai_search_hf_cache}
+    external: ${HF_CACHE_EXTERNAL:-false}
