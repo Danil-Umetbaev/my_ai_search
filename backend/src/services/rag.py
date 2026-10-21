@@ -299,7 +299,7 @@ class RAGService(BaseService):
             chunks_with_scores[:5],
             start=1,
         ):
-            logger.info(
+            logger.debug(
                 "RAG candidate | rank=%s | score=%.4f | chunk_id=%s "
                 "| title=%r | expanded_content=%r",
                 rank,
@@ -472,7 +472,8 @@ class RAGService(BaseService):
                 sentences = re.findall(r".+?[.!?](?=\s|$)", following)
                 if len(sentences) < 2 or not following.startswith(("Весь ", "Любой ", "Это ")):
                     break
-                definitions.append(f"**{subject}** — {' '.join(s.strip() for s in sentences[:2])}")
+                definition = ' '.join(s.strip() for s in sentences[:2])
+                definitions.append(f"{subject} — {re.sub(r'\s+([.,;:])', r'\1', definition)}")
             if len(definitions) == 2:
                 logger.info("RAG decision | reason=explicit_definitions")
                 return RAGResultSchema(
@@ -561,11 +562,7 @@ class RAGService(BaseService):
             "RAG generation | duration=%.2fs",
             perf_counter() - started,
         )
-        logger.info(
-            "RAG output | answerable=%s | answer=%r",
-            answer_llm.answerable,
-            answer_llm.answer,
-        )
+        logger.info("RAG output | answerable=%s", answer_llm.answerable)
 
         if not answer_llm.answerable:
             logger.info("RAG decision | reason=llm_not_answerable")

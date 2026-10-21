@@ -70,7 +70,8 @@ Partial instructions count as YES, even if some button icons are missing. NO if 
             return LLMAnswerSchema(answerable=False, answer=None)
         _, _, body = context.partition("\n")
         passages = [part.strip() for part in body.split("\n\n") if part.strip()]
-        answer = "\n\n".join("> " + part.replace("\n", "\n> ") for part in passages)
+        answer = "Из документации:\n\n" + "\n\n".join(passages)
+        answer = re.sub(r"\s+([.,;:])", r"\1", answer)
         if re.search(r"(?:нажмите|кликните|клавиш[ау])\s*[.→]", body, re.IGNORECASE):
             answer = "В выгрузке пропущены обозначения некоторых кнопок; сверяйтесь с исходной инструкцией.\n\n" + answer
         return LLMAnswerSchema(answerable=bool(passages), answer=answer or None)
