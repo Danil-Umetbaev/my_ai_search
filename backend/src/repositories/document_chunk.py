@@ -379,6 +379,37 @@ class DocumentChunkRepository(BaseRepository):
             for obj in result_query
         ]
 
+    async def get_neighbors_bulk(
+        self,
+        positions: list[tuple[UUID, int]],
+        radius: int = 1,
+    ) -> dict[tuple[UUID, int], list[DocumentChunkSchema]]:
+        if not positions:
+            return {}
+        indexes_by_document = {}
+        for document_id, index in positions:
+            indexes_by_document.setdefault(document_id, set()).update(
+                range(max(0, index - radius), index + radius + 1)
+            )
+        query = select(self.model).where(or_(*[
+            (self.model.document_id == document_id)
+            & self.model.chunk_index.in_(indexes)
+            for document_id, indexes in indexes_by_document.items()
+        ]))
+        rows = (await self.session.execute(query)).scalars().all()
+        chunks = {
+            (row.document_id, row.chunk_index): self.mapper.map_to_domain_entity(row)
+            for row in rows
+        }
+        return {
+            (document_id, index): [
+                chunks[(document_id, neighbor)]
+                for neighbor in range(max(0, index - radius), index + radius + 1)
+                if (document_id, neighbor) in chunks
+            ]
+            for document_id, index in positions
+        }
+
     async def get_by_document_id(
         self,
         document_id: UUID,

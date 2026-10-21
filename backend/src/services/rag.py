@@ -100,7 +100,12 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        same_query = question == search_query
+        def normalized_query(value: str) -> str:
+            return " ".join(
+                value.translate(str.maketrans("", "", '\"«»“”')).casefold().split()
+            ).strip(" ?.!")
+
+        same_query = normalized_query(question) == normalized_query(search_query)
         started = perf_counter()
 
         original_vector = await self.vector_search.search(
@@ -165,11 +170,12 @@ class RAGService(BaseService):
         expanded_texts = {}
         texts = []
 
+        neighbor_windows = await self.db.document_chunks.get_neighbors_bulk(
+            [(chunk.document_id, chunk.chunk_index) for chunk in documents]
+        )
+
         for candidate in documents:
-            neighbors = await self.db.document_chunks.get_neigbors(
-                candidate.document_id,
-                candidate.chunk_index,
-            )
+            neighbors = neighbor_windows[(candidate.document_id, candidate.chunk_index)]
 
             window_by_index = {
                 chunk.chunk_index: chunk
