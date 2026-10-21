@@ -415,7 +415,13 @@ class RAGService(BaseService):
         context_parts = []
         context_chunk_count = 0
 
-        for document in context_documents.values():
+        primary_id = best_chunks[0][0].document_id
+        primary_document = await self.db.documents.get_one(id=primary_id)
+        for document_id, document in context_documents.items():
+            if document_id == primary_id and len(primary_document.content) <= 4500:
+                context_parts.append(f"Документ: {document['title']}\n{primary_document.content}")
+                context_chunk_count += len(document["chunks"])
+                continue
             ordered_chunks = sorted(
                 document["chunks"].values(),
                 key=lambda chunk: chunk.chunk_index,
