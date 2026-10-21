@@ -112,9 +112,22 @@ If uncertain, reply WORK. Do not answer or rewrite the request.""",
         if result.upper().strip(" .!\"'") == "OFF_TOPIC":
             return "OFF_TOPIC"
         corrections = {"разде": "раздел", "настрйки": "настройки"}
-        return re.sub(
+        query = re.sub(
             r"\b(?:разде|настрйки)\b",
             lambda match: corrections[match[0].casefold()],
             question.strip(),
             flags=re.IGNORECASE,
         )
+        navigation = re.fullmatch(
+            r"не могу найти\s+((?:раздел|вкладк[ау]|пункт меню)\s+[^,?]+)(?:,?\s*где (?:он|она|это))?\??",
+            query,
+            flags=re.IGNORECASE,
+        )
+        if navigation:
+            query = f"Где находится {navigation[1].strip()}?"
+        if (
+            re.search(r"карт|товар|чек|весы|касс|рол[ьи]|пользовател|интерфейс|\bPLU\b", query, re.IGNORECASE)
+            and not re.search(r"[a-z]|офис|компани|пароль|телефон", query, re.IGNORECASE)
+        ):
+            query = query.rstrip(" ?.!") + " в SetRetail10?"
+        return query
