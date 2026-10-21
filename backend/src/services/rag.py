@@ -52,8 +52,14 @@ class RAGService(BaseService):
             "RAG rewrite | duration=%.2fs",
             perf_counter() - started,
         )
+        logger.info(
+            "RAG input | question=%r | rewrite=%r",
+            question,
+            search_query,
+        )
 
         if search_query.strip().upper() == "OFF_TOPIC":
+            logger.info("RAG decision | reason=off_topic")
             return RAGResultSchema(
                 status=RAGStatus.OFF_TOPIC,
                 answer=(
@@ -117,6 +123,7 @@ class RAGService(BaseService):
         )
 
         if not documents:
+            logger.info("RAG decision | reason=no_candidates")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -171,7 +178,29 @@ class RAGService(BaseService):
             perf_counter() - started,
         )
 
+        for rank, (chunk, score) in enumerate(
+            chunks_with_scores[:5],
+            start=1,
+        ):
+            logger.info(
+                "RAG candidate | rank=%s | score=%.4f | chunk_id=%s "
+                "| title=%r | content=%r",
+                rank,
+                score,
+                chunk.chunk_id,
+                chunk.document_title,
+                chunk.content,
+            )
+
+        logger.info(
+            "RAG threshold | confidence=%.4f | threshold=%.4f | passed=%s",
+            confidence,
+            threshold,
+            confidence >= threshold,
+        )
+
         if confidence < threshold:
+            logger.info("RAG decision | reason=below_threshold")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -198,6 +227,13 @@ class RAGService(BaseService):
         seen_documents = set()
 
         for chunk, score in best_chunks:
+            logger.info(
+                "RAG selected | chunk_id=%s | score=%.4f | title=%r",
+                chunk.chunk_id,
+                score,
+                chunk.document_title,
+            )
+
             used_chunks.append(
                 RAGChunkSourceSchema(
                     chunk_id=chunk.chunk_id,
@@ -263,6 +299,7 @@ class RAGService(BaseService):
             len(context),
             perf_counter() - started,
         )
+        logger.info("RAG full context | %r", context)
 
         started = perf_counter()
 
@@ -277,8 +314,14 @@ class RAGService(BaseService):
             "RAG generation | duration=%.2fs",
             perf_counter() - started,
         )
+        logger.info(
+            "RAG output | answerable=%s | answer=%r",
+            answer_llm.answerable,
+            answer_llm.answer,
+        )
 
         if not answer_llm.answerable:
+            logger.info("RAG decision | reason=llm_not_answerable")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -287,6 +330,7 @@ class RAGService(BaseService):
                 used_chunks=used_chunks,
             )
 
+        logger.info("RAG decision | reason=answered")
         return RAGResultSchema(
             status=RAGStatus.ANSWERED,
             answer=answer_llm.answer,
