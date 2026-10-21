@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from time import perf_counter
 
 from src.ai.llm.base import LLMProvider
@@ -105,11 +106,18 @@ class RAGService(BaseService):
                 value.translate(str.maketrans("", "", '\"«»“”')).casefold().split()
             ).strip(" ?.!")
 
-        same_query = normalized_query(question) == normalized_query(search_query)
+        comparison = re.fullmatch(
+            r"чем\s+(.+?)\s+отлича(?:ется|ются)\s+от\s+(.+)",
+            question.strip().rstrip("?.!"),
+            flags=re.IGNORECASE,
+        )
+        first_query = comparison[1] if comparison else question
+        second_query = comparison[2] if comparison else search_query
+        same_query = normalized_query(first_query) == normalized_query(second_query)
         started = perf_counter()
 
         original_vector = await self.vector_search.search(
-            question,
+            first_query,
             candidate_k,
         )
 
@@ -117,12 +125,12 @@ class RAGService(BaseService):
             rewritten_vector = original_vector
         else:
             rewritten_vector = await self.vector_search.search(
-                search_query,
+                second_query,
                 candidate_k,
             )
 
         original_lexical = await self.db.document_chunks.search_lexical(
-            question,
+            first_query,
             lexical_k,
         )
 
@@ -130,7 +138,7 @@ class RAGService(BaseService):
             rewritten_lexical = original_lexical
         else:
             rewritten_lexical = await self.db.document_chunks.search_lexical(
-                search_query,
+                second_query,
                 lexical_k,
             )
 
@@ -208,7 +216,7 @@ class RAGService(BaseService):
 
         original_scores = await asyncio.to_thread(
             self.reranker.rerank,
-            question,
+            first_query,
             texts,
         )
 
@@ -217,7 +225,7 @@ class RAGService(BaseService):
         else:
             rewritten_scores = await asyncio.to_thread(
                 self.reranker.rerank,
-                search_query,
+                second_query,
                 texts,
             )
 
@@ -285,6 +293,23 @@ class RAGService(BaseService):
         ]
 
         best_chunks = strong_chunks[:top_k]
+
+        if comparison and not same_query:
+            comparison_chunks = {}
+            for side_scores in (original_scores, rewritten_scores):
+                index = max(range(len(documents)), key=side_scores.__getitem__)
+                if side_scores[index] < threshold:
+                    logger.info("RAG decision | reason=comparison_missing_evidence")
+                    return RAGResultSchema(
+                        status=RAGStatus.NOT_FOUND,
+                        answer=None,
+                        sources=[],
+                        confidence=confidence,
+                        used_chunks=[],
+                    )
+                chunk = documents[index]
+                comparison_chunks[chunk.chunk_id] = (chunk, scores[index])
+            best_chunks = list(comparison_chunks.values())
 
         if not best_chunks:
             best_chunks = [chunks_with_scores[0]]
