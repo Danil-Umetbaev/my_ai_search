@@ -32,6 +32,34 @@ class RAGService(BaseService):
         self.llm = llm
         self.reranker = reranker
 
+    @staticmethod
+    def _merge_contents(chunks) -> str:
+        result = ""
+
+        for chunk in chunks:
+            content = chunk.content
+
+            if not content:
+                continue
+
+            if not result:
+                result = content
+                continue
+
+            overlap = 0
+
+            for size in range(min(len(result), len(content)), 0, -1):
+                if result.endswith(content[:size]):
+                    overlap = size
+                    break
+
+            if overlap:
+                result += content[overlap:]
+            else:
+                result += "\n" + content
+
+        return result
+
     @log_execution_time("RAG")
     async def answer(
         self,
@@ -132,10 +160,43 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        texts = [
-            f"Документ: {chunk.document_title}\n{chunk.content}"
-            for chunk in documents
-        ]
+        started = perf_counter()
+        windows = {}
+        expanded_texts = {}
+        texts = []
+
+        for candidate in documents:
+            neighbors = await self.db.document_chunks.get_neigbors(
+                candidate.document_id,
+                candidate.chunk_index,
+            )
+
+            window_by_index = {
+                chunk.chunk_index: chunk
+                for chunk in neighbors
+                if chunk.document_id == candidate.document_id
+            }
+            window_by_index[candidate.chunk_index] = candidate
+
+            window = sorted(
+                window_by_index.values(),
+                key=lambda chunk: chunk.chunk_index,
+            )
+
+            windows[candidate.chunk_id] = window
+
+            content = self._merge_contents(window)
+            text = f"Документ: {candidate.document_title}\n{content}"
+
+            expanded_texts[candidate.chunk_id] = text
+            texts.append(text)
+
+        logger.info(
+            "RAG candidate expansion | candidates=%s | chars=%s | duration=%.2fs",
+            len(documents),
+            sum(len(text) for text in texts),
+            perf_counter() - started,
+        )
 
         started = perf_counter()
 
@@ -184,12 +245,12 @@ class RAGService(BaseService):
         ):
             logger.info(
                 "RAG candidate | rank=%s | score=%.4f | chunk_id=%s "
-                "| title=%r | content=%r",
+                "| title=%r | expanded_content=%r",
                 rank,
                 score,
                 chunk.chunk_id,
                 chunk.document_title,
-                chunk.content,
+                expanded_texts[chunk.chunk_id],
             )
 
         logger.info(
@@ -257,45 +318,59 @@ class RAGService(BaseService):
             )
 
         started = perf_counter()
-        context_chunks = []
-        seen_context_chunks = set()
+        context_documents = {}
 
         for best_chunk, _ in best_chunks:
-            neighbors = await self.db.document_chunks.get_neigbors(
-                best_chunk.document_id,
-                best_chunk.chunk_index,
+            document_id = best_chunk.document_id
+
+            if document_id not in context_documents:
+                context_documents[document_id] = {
+                    "title": best_chunk.document_title,
+                    "chunks": {},
+                }
+
+            document_chunks = context_documents[document_id]["chunks"]
+
+            for chunk in windows[best_chunk.chunk_id]:
+                document_chunks[chunk.chunk_index] = chunk
+
+        context_parts = []
+        context_chunk_count = 0
+
+        for document in context_documents.values():
+            ordered_chunks = sorted(
+                document["chunks"].values(),
+                key=lambda chunk: chunk.chunk_index,
             )
 
-            window = list(neighbors)
+            context_chunk_count += len(ordered_chunks)
+            groups = []
+            current_group = []
 
-            central_exists = any(
-                chunk.document_id == best_chunk.document_id
-                and chunk.chunk_index == best_chunk.chunk_index
-                for chunk in window
-            )
+            for chunk in ordered_chunks:
+                if (
+                    current_group
+                    and chunk.chunk_index != current_group[-1].chunk_index + 1
+                ):
+                    groups.append(current_group)
+                    current_group = []
 
-            if not central_exists:
-                window.append(best_chunk)
+                current_group.append(chunk)
 
-            window.sort(key=lambda chunk: chunk.chunk_index)
+            if current_group:
+                groups.append(current_group)
 
-            for chunk in window:
-                key = (chunk.document_id, chunk.chunk_index)
-
-                if key in seen_context_chunks:
-                    continue
-
-                seen_context_chunks.add(key)
-
-                context_chunks.append(
-                    f"Документ: {best_chunk.document_title}\n{chunk.content}"
+            for group in groups:
+                content = self._merge_contents(group)
+                context_parts.append(
+                    f"Документ: {document['title']}\n{content}"
                 )
 
-        context = "\n\n---\n\n".join(context_chunks)
+        context = "\n\n---\n\n".join(context_parts)
 
         logger.info(
             "RAG context | chunks=%s | chars=%s | duration=%.2fs",
-            len(context_chunks),
+            context_chunk_count,
             len(context),
             perf_counter() - started,
         )
