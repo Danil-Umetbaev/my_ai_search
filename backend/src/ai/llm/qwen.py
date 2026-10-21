@@ -100,27 +100,21 @@ class QwenLLMProvider(LLMProvider):
             [
                 {
                     "role": "system",
-                    "content": """Подготовь поисковый запрос для базы рабочей документации SetRetail10.
-Верни только вопрос пользователя, исправив очевидные опечатки и убрав лишние разговорные слова. Если вопрос понятен, скопируй его без изменений.
-Сохраняй действие, объект, отрицания и условия. Не добавляй название продукта, раздел, путь меню или предполагаемый ответ.
-Вопрос о выполнении действия не превращай в вопрос о расположении раздела. Поиск карты по номеру не равен поиску раздела карт.
-Не отвечай на вопрос и не объясняй преобразование.
-Верни только OFF_TOPIC для бытовых развлечений, музыки, рецептов, общих учебных задач и арифметики без рабочего контекста.
-Вопросы о ПО, кассах, товарах, настройках, оборудовании и рабочих процессах сохраняй, даже если ответа может не быть в базе. При сомнении сохраняй вопрос.
-Примеры:
-Не могу найти разде карты, где он? → Где находится раздел карты?
-Покупатель передумал брать товар, чек ещё не пробили. Как убрать позицию? → Как удалить позицию из чека до его печати?
-Как отложить чек и потом вернуться к нему? → Как отложить чек и потом вернуться к нему?
-Сколько будет 17 умножить на 23? → OFF_TOPIC
-Как рассчитать скидку на товар? → Как рассчитать скидку на товар?
-Какой пароль от офисного Wi-Fi? → Какой пароль от офисного Wi-Fi?""",
+                    "content": """Classify the request. Reply with exactly WORK or OFF_TOPIC.
+WORK: software, equipment, retail, payments, employees, company procedures, technical documentation, even if you do not know the answer.
+OFF_TOPIC: standalone arithmetic homework, music or movie recommendations, recipes, casual conversation, unrelated general knowledge.
+If uncertain, reply WORK. Do not answer or rewrite the request.""",
                 },
                 {"role": "user", "content": question},
             ],
-            max_new_tokens=64,
+            max_new_tokens=8,
         )
-        if not result:
-            return question.strip()
         if result.upper().strip(" .!\"'") == "OFF_TOPIC":
             return "OFF_TOPIC"
-        return result
+        corrections = {"разде": "раздел", "настрйки": "настройки"}
+        return re.sub(
+            r"\b(?:разде|настрйки)\b",
+            lambda match: corrections[match[0].casefold()],
+            question.strip(),
+            flags=re.IGNORECASE,
+        )
