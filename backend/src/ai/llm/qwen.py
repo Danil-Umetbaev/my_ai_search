@@ -1,9 +1,11 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+
 from src.ai.llm.base import LLMProvider
-from src.schemas.llm import LLMAnswerSchema
 from src.core.logging import log_execution_time
+from src.schemas.llm import LLMAnswerSchema
 from src.utils.retry import load_with_retry
+
 
 class QwenLLMProvider(LLMProvider):
     MODEL_NAME = "Qwen/Qwen3-1.7B"
@@ -32,7 +34,6 @@ class QwenLLMProvider(LLMProvider):
 
         return tokenizer, model
 
-
     @log_execution_time("LLM answer generation")
     def generate(
         self,
@@ -40,7 +41,6 @@ class QwenLLMProvider(LLMProvider):
         search_query: str,
         context: str,
     ) -> LLMAnswerSchema:
-
         messages = [
             {
                 "role": "system",
@@ -103,7 +103,7 @@ class QwenLLMProvider(LLMProvider):
     Если информации нет, верни строго:
 
     NOT_FOUND
-    """
+    """,
             },
             {
                 "role": "user",
@@ -112,13 +112,22 @@ class QwenLLMProvider(LLMProvider):
 
     {context}
 
-    ВОПРОС:
+    ИСХОДНЫЙ ВОПРОС:
 
     {question}
 
-    Дай ответ только на вопрос пользователя.
-    """
-            }
+    УТОЧНЁННАЯ ФОРМУЛИРОВКА ДЛЯ ПОИСКА:
+
+    {search_query}
+
+    Ответь на исходный вопрос пользователя.
+    Уточнённая формулировка помогает понять опечатки
+    и разговорные выражения.
+    Если она меняет смысл исходного вопроса,
+    руководствуйся исходным вопросом.
+    Используй только факты из контекста.
+    """,
+            },
         ]
 
         prompt = self.tokenizer.apply_chat_template(
@@ -134,16 +143,13 @@ class QwenLLMProvider(LLMProvider):
         ).to(self.device)
 
         with torch.inference_mode():
-
             answer_llm = self.model.generate(
                 **tokens,
                 max_new_tokens=200,
                 do_sample=False,
             )
 
-        tokens_prompt_len = (
-            tokens["input_ids"].shape[-1]
-        )
+        tokens_prompt_len = tokens["input_ids"].shape[-1]
 
         result = self.tokenizer.decode(
             answer_llm[0][tokens_prompt_len:],
@@ -156,12 +162,7 @@ class QwenLLMProvider(LLMProvider):
                 answer=None,
             )
 
-        normalized = (
-            result
-            .upper()
-            .strip()
-            .strip(" .!\"'")
-        )
+        normalized = result.upper().strip().strip(" .!\"'")
 
         if normalized == "NOT_FOUND":
             return LLMAnswerSchema(
@@ -180,7 +181,6 @@ class QwenLLMProvider(LLMProvider):
             question.strip().lower().split()
         )
 
-        # То, что мы можем определить без LLM наверняка.
         obvious_off_topic = {
             "как дела",
             "как дела?",
@@ -324,7 +324,6 @@ class QwenLLMProvider(LLMProvider):
     Результат:
     OFF_TOPIC
 
-
     Если запрос рабочий,
     верни ОДИН короткий поисковый запрос.
 
@@ -333,21 +332,69 @@ class QwenLLMProvider(LLMProvider):
     - сохраняй исходный смысл;
     - не отвечай на вопрос;
     - не придумывай новые факты;
-    - исправляй очевидные опечатки;
+    - исправляй очевидные опечатки в обычных словах;
+    - сохраняй названия продуктов и технические термины;
     - убирай разговорный мусор;
-    - сохраняй технические термины;
     - если вопрос уже сформулирован хорошо,
-    меняй его минимально;
+      меняй его минимально;
     - если пользователь спрашивает "что",
-    сохрани "что";
+      сохрани "что";
     - если спрашивает "где",
-    сохрани "где";
+      сохрани "где";
     - если спрашивает "как",
-    сохрани "как";
+      сохрани "как";
     - если спрашивает "можно ли",
-    сохрани "можно ли".
+      сохрани "можно ли".
+
+    ОСОБО ВАЖНО ДЛЯ ВОПРОСОВ ОБ ИНТЕРФЕЙСЕ:
+
+    Сохраняй объект поиска и намерение пользователя.
+
+    Поиск раздела, вкладки или пункта меню
+    не равнозначен поиску объектов внутри этого раздела.
+
+    "Не могу найти раздел" означает вопрос
+    о расположении раздела интерфейса.
+
+    Если пользователь спрашивает, где находится раздел,
+    формулируй запрос "Где находится раздел ...?".
+
+    Сохраняй слова "раздел", "вкладка", "пункт меню",
+    если пользователь указал их в вопросе.
+
+    Исправляй очевидные опечатки:
+    "разде" → "раздел", "настрйки" → "настройки".
+
+    Не заменяй поиск раздела "Карты" поиском карты клиента.
+    Не заменяй поиск раздела "Товары" поиском отдельного товара.
+
+    Если пользователь действительно ищет карту по номеру
+    или товар по штрихкоду, сохраняй именно эту задачу.
+
+    Не добавляй предполагаемый путь меню или ответ.
+    Не придумывай название продукта, если оно неоднозначно.
 
     Примеры:
+
+    Вопрос:
+    Не могу найти разде карты, где он?
+    Результат:
+    Где находится раздел «Карты»?
+
+    Вопрос:
+    Не могу найти раздел карты в SetRetail10, где он?
+    Результат:
+    Где находится раздел «Карты» в SetRetail10?
+
+    Вопрос:
+    Куда зайти, чтобы открыть раздел товары?
+    Результат:
+    Где находится раздел «Товары»?
+
+    Вопрос:
+    Как найти карту клиента по номеру?
+    Результат:
+    Как найти карту клиента по номеру?
 
     Вопрос:
     Что такое штучный товар в SetRetail10?
@@ -383,54 +430,48 @@ class QwenLLMProvider(LLMProvider):
     Для чего нужна клавиша ОПЛАТЫ на клавиатурной кассе?
     Результат:
     Назначение клавиши ОПЛАТЫ на клавиатурной кассе SetRetail10
-    """
+    """,
             },
             {
                 "role": "user",
                 "content": f"""Вопрос:
     {question}
 
-    Результат:"""
-            }
+    Результат:""",
+            },
         ]
 
         result = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,
             add_generation_prompt=True,
-            enable_thinking=False
+            enable_thinking=False,
         )
 
         tokens = self.tokenizer(
             result,
-            return_tensors="pt"
+            return_tensors="pt",
         ).to(self.device)
 
         with torch.inference_mode():
             answer_llm = self.model.generate(
                 **tokens,
                 max_new_tokens=64,
-                do_sample=False
+                do_sample=False,
             )
 
         tokens_prompt_len = tokens["input_ids"].shape[-1]
 
         answer = self.tokenizer.decode(
             answer_llm[0][tokens_prompt_len:],
-            skip_special_tokens=True
+            skip_special_tokens=True,
         ).strip()
 
         if not answer:
             return question.strip()
 
-        normalized_answer = (
-            answer
-            .upper()
-            .strip()
-            .strip(" .!\"'")
-        )
+        normalized_answer = answer.upper().strip().strip(" .!\"'")
 
-        # Только ТОЧНОЕ совпадение.
         if normalized_answer == "OFF_TOPIC":
             return "OFF_TOPIC"
 
