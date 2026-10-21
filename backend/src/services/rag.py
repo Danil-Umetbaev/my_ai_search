@@ -1,25 +1,25 @@
-from src.services.base import BaseService
-from src.utils.db import DBManager
+import asyncio
+import logging
+from time import perf_counter
+
 from src.ai.llm.base import LLMProvider
-from src.services.vector_search import VectorSearchService
 from src.ai.reranking.base import RerankerProvider
+from src.core.logging import log_execution_time
 from src.schemas.rag import (
+    RAGChunkSourceSchema,
     RAGResultSchema,
     RAGStatus,
     SourceSchema,
-    RAGChunkSourceSchema,
 )
-from src.core.logging import log_execution_time
+from src.services.base import BaseService
+from src.services.vector_search import VectorSearchService
+from src.utils.db import DBManager
 
-import asyncio
-import logging
 
-
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class RAGService(BaseService):
-
     def __init__(
         self,
         db: DBManager,
@@ -27,10 +27,10 @@ class RAGService(BaseService):
         llm: LLMProvider,
         reranker: RerankerProvider,
     ):
+        super().__init__(db)
         self.vector_search = search_service
         self.llm = llm
         self.reranker = reranker
-        self.db = db
 
     @log_execution_time("RAG")
     async def answer(
@@ -41,28 +41,21 @@ class RAGService(BaseService):
         top_k: int = 3,
         threshold: float = 0.30,
     ) -> RAGResultSchema:
-
-        # ============================================================
-        # 1. REWRITE
-        # ============================================================
+        started = perf_counter()
 
         search_query = await asyncio.to_thread(
             self.llm.rewrite_query,
             question,
         )
 
-        print()
-        print(">>> REWRITE")
-        print(">>> ORIGINAL:", question)
-        print(">>> SEARCH QUERY:", search_query)
+        logger.info(
+            "RAG rewrite | duration=%.2fs",
+            perf_counter() - started,
+        )
 
-        if (
-            search_query
-            .strip()
-            .upper()
-            == "OFF_TOPIC"
-        ):
+        if search_query.strip().upper() == "OFF_TOPIC":
             return RAGResultSchema(
+                status=RAGStatus.OFF_TOPIC,
                 answer=(
                     "Я могу помочь с вопросами по базе знаний компании. "
                     "Попробуйте задать вопрос по рабочим инструкциям, "
@@ -70,62 +63,37 @@ class RAGService(BaseService):
                 ),
                 sources=[],
                 confidence=None,
-                status=RAGStatus.OFF_TOPIC,
+                used_chunks=[],
             )
 
-        # ============================================================
-        # 2. VECTOR SEARCH
-        # ============================================================
+        same_query = question == search_query
+        started = perf_counter()
 
-        original_vector = (
-            await self.vector_search.search(
-                question,
-                candidate_k,
-            )
+        original_vector = await self.vector_search.search(
+            question,
+            candidate_k,
         )
 
-        rewritten_vector = (
-            await self.vector_search.search(
+        if same_query:
+            rewritten_vector = original_vector
+        else:
+            rewritten_vector = await self.vector_search.search(
                 search_query,
                 candidate_k,
             )
+
+        original_lexical = await self.db.document_chunks.search_lexical(
+            question,
+            lexical_k,
         )
 
-        # ============================================================
-        # 3. LEXICAL SEARCH
-        #
-        # Ищем точные термины напрямую в тексте.
-        # ============================================================
-
-        original_lexical = (
-            await self.db.document_chunks
-            .search_lexical(
-                question,
-                lexical_k,
-            )
-        )
-
-        rewritten_lexical = (
-            await self.db.document_chunks
-            .search_lexical(
+        if same_query:
+            rewritten_lexical = original_lexical
+        else:
+            rewritten_lexical = await self.db.document_chunks.search_lexical(
                 search_query,
                 lexical_k,
             )
-        )
-
-        # ============================================================
-        # 4. UNION
-        #
-        # vector original
-        # +
-        # vector rewrite
-        # +
-        # lexical original
-        # +
-        # lexical rewrite
-        #
-        # Дубликаты удаляем по chunk_id.
-        # ============================================================
 
         all_candidates = (
             original_vector
@@ -134,46 +102,21 @@ class RAGService(BaseService):
             + rewritten_lexical
         )
 
-        documents = list({
-            chunk.chunk_id: chunk
-            for chunk in all_candidates
-        }.values())
-
-        print()
-        print(">>> HYBRID SEARCH")
-
-        print(
-            ">>> VECTOR ORIGINAL:",
-            len(original_vector),
+        documents = list(
+            {
+                chunk.chunk_id: chunk
+                for chunk in all_candidates
+            }.values()
         )
 
-        print(
-            ">>> VECTOR REWRITE:",
-            len(rewritten_vector),
-        )
-
-        print(
-            ">>> LEXICAL ORIGINAL:",
-            len(original_lexical),
-        )
-
-        print(
-            ">>> LEXICAL REWRITE:",
-            len(rewritten_lexical),
-        )
-
-        print(
-            ">>> UNIQUE CANDIDATES:",
+        logger.info(
+            "RAG retrieval | candidates=%s | same_query=%s | duration=%.2fs",
             len(documents),
+            same_query,
+            perf_counter() - started,
         )
 
         if not documents:
-
-            print(
-                ">>> NOT_FOUND REASON: "
-                "HYBRID SEARCH"
-            )
-
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -182,128 +125,53 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        # ============================================================
-        # 5. RERANK
-        #
-        # Архитектуру НЕ меняем:
-        #
-        # original query rerank
-        # +
-        # rewritten query rerank
-        # ↓
-        # max score
-        # ============================================================
-
         texts = [
-            (
-                f"Документ: "
-                f"{chunk.document_title}\n"
-                f"{chunk.content}"
-            )
+            f"Документ: {chunk.document_title}\n{chunk.content}"
             for chunk in documents
         ]
 
-        original_scores = (
-            await asyncio.to_thread(
-                self.reranker.rerank,
-                question,
-                texts,
-            )
+        started = perf_counter()
+
+        original_scores = await asyncio.to_thread(
+            self.reranker.rerank,
+            question,
+            texts,
         )
 
-        rewritten_scores = (
-            await asyncio.to_thread(
+        if same_query:
+            scores = original_scores
+        else:
+            rewritten_scores = await asyncio.to_thread(
                 self.reranker.rerank,
                 search_query,
                 texts,
             )
-        )
 
-        scores = [
-            max(
-                original_score,
-                rewritten_score,
-            )
-            for (
-                original_score,
-                rewritten_score,
-            )
-            in zip(
-                original_scores,
-                rewritten_scores,
-            )
-        ]
+            scores = [
+                max(original, rewritten)
+                for original, rewritten in zip(
+                    original_scores,
+                    rewritten_scores,
+                    strict=True,
+                )
+            ]
 
-        chunks_with_scores = list(
-            zip(
-                documents,
-                scores,
-            )
-        )
-
-        chunks_with_scores.sort(
+        chunks_with_scores = sorted(
+            zip(documents, scores, strict=True),
             key=lambda item: item[1],
             reverse=True,
         )
 
-        confidence = (
-            chunks_with_scores[0][1]
-        )
+        confidence = chunks_with_scores[0][1]
 
-        print()
-        print(">>> RERANK TOP 10")
-
-        for (
-            position,
-            (chunk, score),
-        ) in enumerate(
-            chunks_with_scores[:10],
-            start=1,
-        ):
-
-            print(
-                f">>> {position:02d}. "
-                f"score={score:.4f} | "
-                f"title={chunk.document_title} | "
-                f"chunk={chunk.chunk_index}"
-            )
-
-        # ============================================================
-        # 6. THRESHOLD
-        #
-        # Было: 0.55
-        #
-        # Но прямой правильный chunk:
-        #
-        # "Товарные полки – настройка правил..."
-        #
-        # reranker оценил примерно в 0.33.
-        #
-        # Поэтому стартовая экспериментальная граница = 0.30.
-        # После evaluation её откалибруем.
-        # ============================================================
-
-        print()
-        print(
-            ">>> BEST SCORE:",
-            round(
-                confidence,
-                4,
-            ),
-        )
-
-        print(
-            ">>> THRESHOLD:",
-            threshold,
+        logger.info(
+            "RAG rerank | passes=%s | confidence=%.4f | duration=%.2fs",
+            1 if same_query else 2,
+            confidence,
+            perf_counter() - started,
         )
 
         if confidence < threshold:
-
-            print(
-                ">>> NOT_FOUND REASON: "
-                "THRESHOLD"
-            )
-
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -312,78 +180,24 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        # ============================================================
-        # 7. СИЛЬНЫЕ CHUNKS
-        # ============================================================
-
-        relative_threshold = (
-            confidence * 0.70
-        )
+        relative_threshold = confidence * 0.70
 
         strong_chunks = [
-            (
-                chunk,
-                score,
-            )
-            for (
-                chunk,
-                score,
-            )
-            in chunks_with_scores
+            (chunk, score)
+            for chunk, score in chunks_with_scores
             if score >= relative_threshold
         ]
 
-        best_chunks = (
-            strong_chunks[:top_k]
-        )
+        best_chunks = strong_chunks[:top_k]
 
         if not best_chunks:
-            best_chunks = [
-                chunks_with_scores[0]
-            ]
-
-        print()
-        print(
-            ">>> CONTEXT SCORE LIMIT:",
-            round(
-                relative_threshold,
-                4,
-            ),
-        )
-
-        print(
-            ">>> SELECTED CHUNKS:"
-        )
-
-        for (
-            position,
-            (chunk, score),
-        ) in enumerate(
-            best_chunks,
-            start=1,
-        ):
-
-            print(
-                f">>> {position:02d}. "
-                f"score={score:.4f} | "
-                f"title={chunk.document_title} | "
-                f"chunk={chunk.chunk_index}"
-            )
-
-        # ============================================================
-        # 8. SOURCES
-        # ============================================================
+            best_chunks = [chunks_with_scores[0]]
 
         used_chunks = []
         sources = []
-
         seen_documents = set()
 
-        for (
-            chunk,
-            score,
-        ) in best_chunks:
-
+        for chunk, score in best_chunks:
             used_chunks.append(
                 RAGChunkSourceSchema(
                     chunk_id=chunk.chunk_id,
@@ -391,156 +205,80 @@ class RAGService(BaseService):
                 )
             )
 
-            if (
-                chunk.document_id
-                in seen_documents
-            ):
+            if chunk.document_id in seen_documents:
                 continue
 
-            seen_documents.add(
-                chunk.document_id
-            )
+            seen_documents.add(chunk.document_id)
 
             sources.append(
                 SourceSchema(
-                    document_id=(
-                        chunk.document_id
-                    ),
-                    chunk_id=(
-                        chunk.chunk_id
-                    ),
-                    title=(
-                        chunk.document_title
-                    ),
-                    url=(
-                        chunk.document_url
-                    ),
+                    document_id=chunk.document_id,
+                    chunk_id=chunk.chunk_id,
+                    title=chunk.document_title,
+                    url=chunk.document_url,
                     score=score,
                 )
             )
 
-        # ============================================================
-        # 9. CONTEXT
-        #
-        # Каждый сильный chunk + соседние chunks ±1.
-        # ============================================================
-
+        started = perf_counter()
         context_chunks = []
-
         seen_context_chunks = set()
 
-        for (
-            best_chunk,
-            score,
-        ) in best_chunks:
-
-            neighbors = (
-                await self.db
-                .document_chunks
-                .get_neigbors(
-                    best_chunk.document_id,
-                    best_chunk.chunk_index,
-                )
+        for best_chunk, _ in best_chunks:
+            neighbors = await self.db.document_chunks.get_neigbors(
+                best_chunk.document_id,
+                best_chunk.chunk_index,
             )
 
-            window = list(
-                neighbors
-            )
+            window = list(neighbors)
 
             central_exists = any(
-                (
-                    chunk.document_id
-                    == best_chunk.document_id
-                )
-                and (
-                    chunk.chunk_index
-                    == best_chunk.chunk_index
-                )
+                chunk.document_id == best_chunk.document_id
+                and chunk.chunk_index == best_chunk.chunk_index
                 for chunk in window
             )
 
             if not central_exists:
-                window.append(
-                    best_chunk
-                )
+                window.append(best_chunk)
 
-            window.sort(
-                key=lambda chunk:
-                    chunk.chunk_index
-            )
+            window.sort(key=lambda chunk: chunk.chunk_index)
 
             for chunk in window:
+                key = (chunk.document_id, chunk.chunk_index)
 
-                key = (
-                    chunk.document_id,
-                    chunk.chunk_index,
-                )
-
-                if (
-                    key
-                    in seen_context_chunks
-                ):
+                if key in seen_context_chunks:
                     continue
 
-                seen_context_chunks.add(
-                    key
-                )
+                seen_context_chunks.add(key)
 
                 context_chunks.append(
-                    (
-                        f"Документ: "
-                        f"{best_chunk.document_title}\n"
-                        f"{chunk.content}"
-                    )
+                    f"Документ: {best_chunk.document_title}\n{chunk.content}"
                 )
 
-        best_context = (
-            "\n\n---\n\n".join(
-                context_chunks
-            )
-        )
+        context = "\n\n---\n\n".join(context_chunks)
 
-        print()
-        print(">>> CONTEXT")
-
-        print(
-            ">>> CHUNKS:",
+        logger.info(
+            "RAG context | chunks=%s | chars=%s | duration=%.2fs",
             len(context_chunks),
+            len(context),
+            perf_counter() - started,
         )
 
-        print(
-            ">>> CHARS:",
-            len(best_context),
+        started = perf_counter()
+
+        answer_llm = await asyncio.to_thread(
+            self.llm.generate,
+            question,
+            search_query,
+            context,
         )
 
-        print(
-            ">>> PREVIEW:"
-        )
-
-        print(
-            best_context[:2000]
-        )
-
-        # ============================================================
-        # 10. LLM
-        # ============================================================
-
-        answer_llm = (
-            await asyncio.to_thread(
-                self.llm.generate,
-                question,
-                search_query,
-                best_context,
-            )
+        logger.info(
+            "RAG generation | duration=%.2fs",
+            perf_counter() - started,
         )
 
         if not answer_llm.answerable:
-
-            print()
-            print(
-                ">>> NOT_FOUND REASON: LLM"
-            )
-
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -548,11 +286,6 @@ class RAGService(BaseService):
                 confidence=confidence,
                 used_chunks=used_chunks,
             )
-
-        print()
-        print(
-            ">>> RESULT: ANSWERED"
-        )
 
         return RAGResultSchema(
             status=RAGStatus.ANSWERED,
