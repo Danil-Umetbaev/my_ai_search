@@ -217,6 +217,29 @@ class RAGService(BaseService):
             perf_counter() - started,
         )
 
+        if comparison:
+            def subject_words(text: str) -> list[str]:
+                return [
+                    re.sub(r"(?:ого|его|ый|ий|ой|ая|яя|ое|ее|ые|ие|ом|ым|им|ую|юю|а|я|ы|и|у|ю|е)$", "", word)
+                    for word in text.casefold().split()
+                ]
+
+            def canonical_subject(query: str) -> str:
+                subject = query.removeprefix("Что такое ")
+                words = subject_words(subject)
+                for text in texts:
+                    for heading in re.findall(
+                        r"(?<![\w-])[А-ЯЁ][а-яё-]+(?: [а-яё-]+){0,3}(?= [А-ЯЁ])",
+                        text,
+                    ):
+                        if subject_words(heading) == words:
+                            return "Что такое " + heading
+                return query
+
+            first_query = canonical_subject(first_query)
+            second_query = canonical_subject(second_query)
+            logger.info("RAG comparison | first=%r | second=%r", first_query, second_query)
+
         started = perf_counter()
 
         original_scores = await asyncio.to_thread(
