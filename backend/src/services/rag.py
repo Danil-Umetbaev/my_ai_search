@@ -484,12 +484,56 @@ class RAGService(BaseService):
                 )
 
         started = perf_counter()
+        passages = []
+        for part in context_parts:
+            title, _, body = part.partition("\n")
+            for sentence in re.split(r"(?<=[.!?])\s+(?=[А-ЯЁA-Z])", body):
+                if sentence.strip():
+                    passages.append((title, sentence.strip()))
+        passage_scores = await asyncio.to_thread(
+            self.reranker.rerank,
+            search_query,
+            [title + "\n" + text for title, text in passages],
+        )
+        order = sorted(range(len(passages)), key=passage_scores.__getitem__, reverse=True)
+        best = order[0]
+        selected_title = passages[best][0]
+        procedure = bool(re.search(r"\bкак\b|\bкуда\b", question, re.IGNORECASE))
+        candidates = [
+            index for index in order
+            if passages[index][0] == selected_title
+            and passage_scores[index] >= passage_scores[best] * 0.75
+        ]
+        if procedure:
+            actions = [
+                index for index in candidates
+                if re.search(r"нажм|нажим|выбер|выбира|перейд|введ|ввод|установ|создай|добав|отскан|перезагруз|сохран|клик|восстанов", passages[index][1], re.IGNORECASE)
+            ]
+            candidates = actions or candidates
+        selected = set(candidates[:4 if procedure else 1])
+        if procedure:
+            for index in list(selected):
+                added = 0
+                for neighbor in range(index + 1, min(index + 5, len(passages))):
+                    if passages[neighbor][0] != selected_title:
+                        break
+                    selected.add(neighbor)
+                    if len(passages[neighbor][1]) >= 25:
+                        added += 1
+                    if added == 2:
+                        break
+        evidence = selected_title + "\n" + "\n\n".join(passages[index][1] for index in sorted(selected))
+        evidence_sources = [source for source in sources if "Документ: " + source.title == selected_title]
+        source_ids = {source.document_id for source in evidence_sources}
+        evidence_chunk_ids = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in source_ids}
+        logger.info("RAG evidence | passages=%s | selected=%s | duration=%.2fs", len(passages), len(selected), perf_counter() - started)
 
+        started = perf_counter()
         answer_llm = await asyncio.to_thread(
             self.llm.generate,
             question,
             search_query,
-            context,
+            evidence,
         )
 
         logger.info(
@@ -516,7 +560,7 @@ class RAGService(BaseService):
         return RAGResultSchema(
             status=RAGStatus.ANSWERED,
             answer=answer_llm.answer,
-            sources=sources,
+            sources=evidence_sources,
             confidence=confidence,
-            used_chunks=used_chunks,
+            used_chunks=[chunk for chunk in used_chunks if chunk.chunk_id in evidence_chunk_ids],
         )
