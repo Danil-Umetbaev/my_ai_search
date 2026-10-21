@@ -485,11 +485,16 @@ class RAGService(BaseService):
 
         started = perf_counter()
         passages = []
-        for part in context_parts:
+        passage_sections = []
+        for part_index, part in enumerate(context_parts):
             title, _, body = part.partition("\n")
+            section = 0
             for sentence in re.split(r"(?<=[.!?])\s+(?=[А-ЯЁA-Z])", body):
                 if sentence.strip():
+                    if re.match(r"^[А-ЯЁ][а-яё-]+(?: [а-яё-]+){0,5}\s+(?:[А-ЯЁ][а-яё]|\d+[.)])", sentence.strip()):
+                        section += 1
                     passages.append((title, sentence.strip()))
+                    passage_sections.append((part_index, section))
         if not passages:
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND, answer=None, sources=[],
@@ -509,6 +514,13 @@ class RAGService(BaseService):
             if passages[index][0] == selected_title
             and passage_scores[index] >= passage_scores[best] * 0.75
         ]
+        single_position = bool(
+            re.search(r"удал|убра|отмен|сторнир", question, re.IGNORECASE)
+            and re.search(r"позици|товар", question, re.IGNORECASE)
+        )
+        long_primary = selected_title == "Документ: " + primary_document.title and len(primary_document.content) > 4500
+        if procedure and (single_position or long_primary):
+            candidates = [index for index in candidates if passage_sections[index] == passage_sections[best]]
         if procedure:
             actions = [
                 index for index in candidates
@@ -521,6 +533,8 @@ class RAGService(BaseService):
                 added = 0
                 for neighbor in range(index + 1, min(index + 5, len(passages))):
                     if passages[neighbor][0] != selected_title:
+                        break
+                    if passage_sections[neighbor] != passage_sections[index]:
                         break
                     if len(passages[neighbor][1]) >= 25 and passage_scores[neighbor] < passage_scores[best] * 0.15:
                         break
