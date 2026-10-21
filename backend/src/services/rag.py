@@ -458,7 +458,7 @@ class RAGService(BaseService):
             len(context),
             perf_counter() - started,
         )
-        logger.info("RAG full context | %r", context)
+        logger.debug("RAG full context | %r", context)
 
         if comparison and len(best_chunks) == 2:
             definitions = []
@@ -490,6 +490,11 @@ class RAGService(BaseService):
             for sentence in re.split(r"(?<=[.!?])\s+(?=[А-ЯЁA-Z])", body):
                 if sentence.strip():
                     passages.append((title, sentence.strip()))
+        if not passages:
+            return RAGResultSchema(
+                status=RAGStatus.NOT_FOUND, answer=None, sources=[],
+                confidence=confidence, used_chunks=[],
+            )
         passage_scores = await asyncio.to_thread(
             self.reranker.rerank,
             search_query,
@@ -507,7 +512,7 @@ class RAGService(BaseService):
         if procedure:
             actions = [
                 index for index in candidates
-                if re.search(r"нажм|нажим|выбер|выбира|перейд|введ|ввод|установ|создай|добав|отскан|перезагруз|сохран|клик|восстанов", passages[index][1], re.IGNORECASE)
+                if re.search(r"\b(?:нажмите|нажимает|нажимают|выберите|выбирает|выбирают|перейдите|переходит|введите|вводит|установите|устанавливает|создайте|создает|создаёт|добавьте|добавляет|отсканируйте|сканирует|перезагрузите|сохраните|кликните|восстановите)\b", passages[index][1], re.IGNORECASE)
             ]
             candidates = actions or candidates
         selected = set(candidates[:4 if procedure else 1])
@@ -516,6 +521,8 @@ class RAGService(BaseService):
                 added = 0
                 for neighbor in range(index + 1, min(index + 5, len(passages))):
                     if passages[neighbor][0] != selected_title:
+                        break
+                    if len(passages[neighbor][1]) >= 25 and passage_scores[neighbor] < passage_scores[best] * 0.15:
                         break
                     selected.add(neighbor)
                     if len(passages[neighbor][1]) >= 25:
