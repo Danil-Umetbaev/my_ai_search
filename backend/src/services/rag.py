@@ -113,6 +113,11 @@ class RAGService(BaseService):
         )
         first_query = comparison[1] if comparison else question
         second_query = comparison[2] if comparison else search_query
+        if comparison:
+            if len(second_query.split()) == 1 and len(first_query.split()) > 1:
+                second_query += " " + first_query.split()[-1]
+            first_query = "Что такое " + first_query
+            second_query = "Что такое " + second_query
         same_query = normalized_query(first_query) == normalized_query(second_query)
         started = perf_counter()
 
