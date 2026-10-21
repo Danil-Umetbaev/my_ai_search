@@ -128,6 +128,7 @@ If uncertain, reply WORK. Do not answer or rewrite the request.""",
         if (
             re.search(r"карт|товар|чек|весы|касс|рол[ьи]|пользовател|интерфейс|\bPLU\b", query, re.IGNORECASE)
             and not re.search(r"[a-z]|офис|компани|пароль|телефон", query, re.IGNORECASE)
+            and not query.casefold().startswith("где ")
         ):
             query = query.rstrip(" ?.!") + " в SetRetail10?"
         return query

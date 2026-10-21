@@ -118,6 +118,19 @@ class RAGService(BaseService):
                 second_query += " " + first_query.split()[-1]
             first_query = "Что такое " + first_query
             second_query = "Что такое " + second_query
+        heading_patterns = []
+        heading_candidates = []
+        if comparison:
+            for query in (first_query, second_query):
+                words = query.removeprefix("Что такое ").casefold().split()
+                roots = [re.sub(r"(?:ого|его|ый|ий|ой|ая|яя|ое|ее|ые|ие|ом|ым|им|ую|юю|а|я|ы|и|у|ю|е)$", "", word) for word in words]
+                if roots and all(re.fullmatch(r"[а-яё-]+", root) for root in roots):
+                    roots[0] = roots[0].capitalize()
+                    pattern = r"(^|\s)" + r"\s+".join(re.escape(root) + "[а-яё]*" for root in roots) + r"\s+[А-ЯЁ]"
+                    heading_patterns.append(pattern)
+                    heading_candidates.extend(await self.db.document_chunks.search_headings(pattern))
+                else:
+                    heading_patterns.append(None)
         same_query = normalized_query(first_query) == normalized_query(second_query)
         started = perf_counter()
 
@@ -148,7 +161,8 @@ class RAGService(BaseService):
             )
 
         all_candidates = (
-            original_vector
+            heading_candidates
+            + original_vector
             + rewritten_vector
             + original_lexical
             + rewritten_lexical
@@ -324,8 +338,13 @@ class RAGService(BaseService):
 
         if comparison and not same_query:
             comparison_chunks = {}
-            for side_scores in (original_scores, rewritten_scores):
-                index = max(range(len(documents)), key=side_scores.__getitem__)
+            for side, side_scores in enumerate((original_scores, rewritten_scores)):
+                pattern = heading_patterns[side]
+                matching = [
+                    index for index, chunk in enumerate(documents)
+                    if pattern and re.search(pattern, expanded_texts[chunk.chunk_id])
+                ]
+                index = max(matching or range(len(documents)), key=side_scores.__getitem__)
                 if side_scores[index] < threshold:
                     logger.info("RAG decision | reason=comparison_missing_evidence")
                     return RAGResultSchema(

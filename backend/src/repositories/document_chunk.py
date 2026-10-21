@@ -410,6 +410,24 @@ class DocumentChunkRepository(BaseRepository):
             for document_id, index in positions
         }
 
+    async def search_headings(self, pattern: str, top_k: int = 10) -> list[VectorSearchResultSchema]:
+        query = (
+            select(self.model, DocumentORM.title, DocumentORM.source_url)
+            .join(DocumentORM, self.model.document_id == DocumentORM.id)
+            .where(self.model.content.op("~")(pattern))
+            .order_by(self.model.document_id, self.model.chunk_index)
+            .limit(top_k)
+        )
+        rows = (await self.session.execute(query)).all()
+        return [
+            VectorSearchResultSchema(
+                chunk_id=chunk.id, document_id=chunk.document_id,
+                chunk_index=chunk.chunk_index, content=chunk.content,
+                similarity=0.0, document_title=title, document_url=url,
+            )
+            for chunk, title, url in rows
+        ]
+
     async def get_by_document_id(
         self,
         document_id: UUID,
