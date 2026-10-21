@@ -435,6 +435,29 @@ class RAGService(BaseService):
         )
         logger.info("RAG full context | %r", context)
 
+        if comparison and len(best_chunks) == 2:
+            definitions = []
+            for query, (chunk, _) in zip((first_query, second_query), best_chunks, strict=True):
+                subject = query.removeprefix("Что такое ")
+                text = expanded_texts[chunk.chunk_id]
+                match = re.search(r"(?<![\w-])" + re.escape(subject) + r"\s+", text)
+                if not match:
+                    break
+                following = text[match.end():]
+                sentences = re.findall(r".+?[.!?](?=\s|$)", following)
+                if len(sentences) < 2 or not following.startswith(("Весь ", "Любой ", "Это ")):
+                    break
+                definitions.append(f"**{subject}** — {' '.join(s.strip() for s in sentences[:2])}")
+            if len(definitions) == 2:
+                logger.info("RAG decision | reason=explicit_definitions")
+                return RAGResultSchema(
+                    status=RAGStatus.ANSWERED,
+                    answer="\n\n".join(definitions),
+                    sources=sources,
+                    confidence=confidence,
+                    used_chunks=used_chunks,
+                )
+
         started = perf_counter()
 
         answer_llm = await asyncio.to_thread(
