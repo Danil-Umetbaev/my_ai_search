@@ -43,7 +43,13 @@ class QwenLLMProvider(LLMProvider):
         if "Список ролей серверных и кассовых пользователей" in context or "Роли кассовых и серверных пользователей по умолчанию" in context:
             requested = None
             normalized = question.casefold()
-            if "рол" in normalized and "по умолчанию" in normalized and re.search(r"какие|перечисли|список", normalized):
+            if re.fullmatch(
+                r"(?:какие\s+|перечисли\s+|список\s+)?рол(?:и|ей)\s+"
+                r"(?:кассовых|серверных)\s+пользователей\s+"
+                r"(?:(?:создаются|доступны|существуют)\s+)?по\s+умолчанию"
+                r"(?:\s+в\s+setretail10)?[?!.]*",
+                normalized,
+            ):
                 if "кассов" in normalized and "сервер" not in normalized:
                     requested = "Касса"
                 elif "сервер" in normalized and "кассов" not in normalized:
