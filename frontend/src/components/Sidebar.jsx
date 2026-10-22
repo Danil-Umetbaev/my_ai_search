@@ -41,6 +41,7 @@ function formatRelativeTime(
 
 export default function Sidebar({
   open,
+  mobile = false,
 
   conversations,
 
@@ -56,6 +57,11 @@ export default function Sidebar({
 }) {
   return (
     <aside
+      id="history-panel"
+      role={mobile && open ? "dialog" : undefined}
+      aria-modal={mobile && open ? true : undefined}
+      aria-label="История диалогов"
+      inert={mobile && !open ? true : undefined}
       className={[
         "sidebar",
 
@@ -69,6 +75,7 @@ export default function Sidebar({
         type="button"
 
         className="sidebar-toggle"
+        aria-label={mobile ? "Закрыть историю" : "Переключить панель диалогов"}
 
         onClick={
           onToggle

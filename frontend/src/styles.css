@@ -2214,46 +2214,6 @@ span:not(.details-chevron) {
 
 
 /* =========================================================
-   VERY NARROW DESKTOP
-   Интерфейс всё равно остаётся горизонтальным.
-   ========================================================= */
-
-@media (max-width: 760px) {
-  :root {
-    --sidebar-open-width: 210px;
-    --sidebar-collapsed-width: 58px;
-
-    --details-panel-width:
-      min(
-        300px,
-        calc(100vw - 72px)
-      );
-
-    --details-reserved-width:
-      var(--details-panel-width);
-  }
-
-
-  .sidebar {
-    padding-left: 7px;
-    padding-right: 7px;
-  }
-
-
-  .sidebar-brand img {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-  }
-
-
-  .message-source__title {
-    max-width: 210px;
-  }
-}
-
-
-/* =========================================================
    REDUCED MOTION
    ========================================================= */
 
@@ -2282,3 +2242,264 @@ span:not(.details-chevron) {
 .knowledge-banner strong { flex:1; color:#26334b; font-size:14px; }
 .knowledge-banner a { color:#4563b2; font-size:12px; font-weight:600; }
 @media(max-width:760px) { .knowledge-banner { margin:10px 12px 0; padding:12px; gap:9px; flex-wrap:wrap; } .knowledge-banner a { margin-left:auto; } }
+
+
+.mobile-toolbar,
+.mobile-backdrop,
+.mobile-panel-close {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    position: absolute;
+    top: var(--mobile-top, 0px);
+    left: 0;
+    height: var(--mobile-height, 100dvh);
+  }
+
+  .workspace,
+  .workspace--details-pinned {
+    --reserved-details: 0px;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .chat-column {
+    margin-right: 0;
+    min-height: 0;
+  }
+
+  .mobile-toolbar {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 10px;
+    padding: calc(6px + env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 6px max(10px, env(safe-area-inset-left));
+    border-bottom: 1px solid var(--line);
+    background: #f8fcfa;
+  }
+
+  .mobile-toolbar strong {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .mobile-toolbar button,
+  .mobile-panel-close {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: white;
+    color: var(--green-800);
+    font-size: 22px;
+  }
+
+  .mobile-toolbar .mobile-details-button {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .mobile-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: rgba(7, 36, 28, .4);
+    touch-action: none;
+  }
+
+  .sidebar,
+  .sidebar.is-collapsed {
+    position: absolute;
+    z-index: 110;
+    top: 0;
+    left: 0;
+    width: min(320px, calc(100% - 48px));
+    min-width: 0;
+    height: 100%;
+    padding: calc(14px + env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform .22s ease, visibility .22s;
+  }
+
+  .sidebar.is-open {
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .sidebar-toggle {
+    top: calc(16px + env(safe-area-inset-top));
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+  }
+
+  .sidebar-brand {
+    width: calc(100% - 48px);
+  }
+
+  .sidebar-heading {
+    margin-top: 12px;
+  }
+
+  .new-chat-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .details-panel {
+    z-index: 110;
+    width: min(350px, calc(100% - 48px));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    visibility: hidden;
+    transition: transform .24s ease, visibility .24s;
+  }
+
+  .details-panel.is-open {
+    visibility: visible;
+  }
+
+  .details-toolbar {
+    height: 60px;
+    justify-content: space-between;
+  }
+
+  .mobile-panel-close {
+    display: block;
+  }
+
+  .details-pin,
+  .details-handle {
+    display: none;
+  }
+
+  .details-content {
+    height: calc(100% - 60px);
+    overscroll-behavior: contain;
+  }
+
+  .chat-area {
+    height: auto;
+    min-width: 0;
+  }
+
+  .knowledge-banner {
+    margin: 8px 10px 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    gap: 4px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .knowledge-banner strong {
+    font-size: 13px;
+  }
+
+  .knowledge-banner a {
+    margin-left: 0;
+    padding: 6px 0;
+  }
+
+  .chat-messages {
+    padding: 18px max(12px, env(safe-area-inset-right)) 16px max(12px, env(safe-area-inset-left));
+    overscroll-behavior: contain;
+  }
+
+  .chat-thread {
+    gap: 24px;
+  }
+
+  .chat-empty {
+    flex: 1;
+    min-height: 150px;
+    padding: 12px;
+  }
+
+  .message-row {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .assistant-response {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .assistant-response__body {
+    padding-left: 10px;
+  }
+
+  .message-bubble--user {
+    max-width: 92%;
+  }
+
+  .message-text,
+  .question-row,
+  .escalation-row strong {
+    overflow-wrap: anywhere;
+  }
+
+  .assistant-response .message-sources {
+    margin-left: 10px;
+  }
+
+  .message-source {
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .message-source__title {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .message-action {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .composer-shell {
+    position: static;
+    flex-shrink: 0;
+    padding: 8px max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    background: var(--page);
+  }
+
+  .composer {
+    min-height: 58px;
+    padding: 6px 6px 6px 12px;
+    gap: 6px;
+  }
+
+  .composer-input {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .composer-send {
+    width: 44px;
+    height: 44px;
+  }
+
+  .about-modal {
+    max-height: 90dvh;
+    overflow-y: auto;
+    padding: 16px;
+  }
+}

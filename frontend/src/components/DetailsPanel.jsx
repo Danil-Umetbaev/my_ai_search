@@ -277,6 +277,8 @@ function Section({
 
 
 export default function DetailsPanel({
+  mobile = false,
+  onClose,
   open,
   pinned,
   onTogglePin,
@@ -329,6 +331,11 @@ export default function DetailsPanel({
 
   return (
     <aside
+      id="details-panel"
+      role={mobile && open ? "dialog" : undefined}
+      aria-modal={mobile && open ? true : undefined}
+      aria-label="Источники и детали беседы"
+      inert={!open ? true : undefined}
       className={[
         "details-panel",
 
@@ -343,6 +350,10 @@ export default function DetailsPanel({
     >
 
       <div className="details-toolbar">
+        {mobile && <>
+          <strong>Детали беседы</strong>
+          <button type="button" className="mobile-panel-close" onClick={onClose} aria-label="Закрыть детали">×</button>
+        </>}
 
         <button
           type="button"

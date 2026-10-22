@@ -149,6 +149,68 @@ export default function App() {
     }));
   }
 
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 900px)").matches);
+  const [mobilePanel, setMobilePanel] = useState(null);
+  const mobilePanelOpen = isMobile && mobilePanel !== null;
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px)");
+    const update = () => {
+      setIsMobile(media.matches);
+      setMobilePanel(null);
+    };
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const viewport = window.visualViewport;
+    const update = () => {
+      if (viewport && viewport.scale !== 1) return;
+      document.documentElement.style.setProperty("--mobile-height", `${viewport?.height ?? window.innerHeight}px`);
+      document.documentElement.style.setProperty("--mobile-top", `${viewport?.offsetTop ?? 0}px`);
+    };
+    update();
+    viewport?.addEventListener("resize", update);
+    viewport?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      viewport?.removeEventListener("resize", update);
+      viewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      document.documentElement.style.removeProperty("--mobile-height");
+      document.documentElement.style.removeProperty("--mobile-top");
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!mobilePanelOpen) return;
+    const previous = document.activeElement;
+    const panel = document.getElementById(mobilePanel === "history" ? "history-panel" : "details-panel");
+    const focusable = () => [...panel.querySelectorAll('button:not(:disabled), a[href], [tabindex="0"]')]
+      .filter((element) => element.getClientRects().length > 0);
+    focusable()[0]?.focus();
+    const handleKey = (event) => {
+      if (event.key === "Escape") setMobilePanel(null);
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first) { event.preventDefault(); return; }
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+    };
+  }, [mobilePanelOpen, mobilePanel]);
+
   // Левая панель
   const [
     sidebarOpen,
@@ -601,8 +663,9 @@ export default function App() {
     <div className="app-shell">
 
       <Sidebar
+        mobile={isMobile}
         open={
-          sidebarOpen
+          isMobile ? mobilePanel === "history" : sidebarOpen
         }
 
         conversations={
@@ -613,11 +676,7 @@ export default function App() {
           activeConversationId
         }
 
-        onToggle={() =>
-          setSidebarOpen(
-            (current) => !current
-          )
-        }
+        onToggle={() => isMobile ? setMobilePanel(null) : setSidebarOpen((current) => !current)}
 
         onSelectConversation={(
           id
@@ -625,21 +684,22 @@ export default function App() {
           setActiveConversationId(
             id
           );
+          setMobilePanel(null);
 
           setScrollTargetId(
             null
           );
         }}
 
-        onNewConversation={
-          createConversation
-        }
+        onNewConversation={() => { setMobilePanel(null); createConversation(); }}
 
-        onOpenAbout={() =>
-          setAboutOpen(true)
-        }
+        onOpenAbout={() => { setMobilePanel(null); setAboutOpen(true); }}
       />
 
+
+      {mobilePanelOpen && (
+        <button type="button" className="mobile-backdrop" aria-label="Закрыть панель" tabIndex={-1} onClick={() => setMobilePanel(null)} />
+      )}
 
       <main
         className={[
@@ -652,7 +712,12 @@ export default function App() {
         ].join(" ")}
       >
 
-        <section className="chat-column">
+        <section className="chat-column" inert={mobilePanelOpen ? true : undefined}>
+          <header className="mobile-toolbar">
+            <button type="button" aria-label="Открыть историю диалогов" aria-controls="history-panel" aria-expanded={mobilePanel === "history"} onClick={() => setMobilePanel("history")}>☰</button>
+            <strong>Умный поиск</strong>
+            <button type="button" className="mobile-details-button" aria-controls="details-panel" aria-expanded={mobilePanel === "details"} onClick={() => setMobilePanel("details")}>Источники</button>
+          </header>
 
           {/*
             Заголовок полностью убран.
@@ -719,8 +784,10 @@ export default function App() {
 
 
         <DetailsPanel
+          mobile={isMobile}
+          onClose={() => setMobilePanel(null)}
           open={
-            detailsOpen
+            isMobile ? mobilePanel === "details" : detailsOpen
           }
 
           pinned={
@@ -738,13 +805,7 @@ export default function App() {
             messages
           }
 
-          onSelectHistoryMessage={(
-            messageId
-          ) =>
-            setScrollTargetId(
-              messageId
-            )
-          }
+          onSelectHistoryMessage={(messageId) => { setMobilePanel(null); setScrollTargetId(messageId); }}
         />
 
       </main>
