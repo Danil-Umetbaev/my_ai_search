@@ -87,6 +87,16 @@ class RAGService(BaseService):
             search_query,
         )
 
+        if search_query.strip().upper() == "CLARIFY":
+            logger.info("RAG decision | reason=clarification_required")
+            return RAGResultSchema(
+                status=RAGStatus.OFF_TOPIC,
+                answer="Не удалось понять вопрос. Уточните, пожалуйста, что вы хотите узнать о SetRetail10 или рабочих инструкциях.",
+                sources=[],
+                confidence=None,
+                used_chunks=[],
+            )
+
         if search_query.strip().upper() == "OFF_TOPIC":
             logger.info("RAG decision | reason=off_topic")
             return RAGResultSchema(
