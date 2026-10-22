@@ -2,6 +2,7 @@ from src.services.base import BaseService
 from src.utils.db import DBManager
 from src.ai.embeddings.base import EmbeddingProvider
 from src.schemas.vector_search import VectorSearchResultSchema
+from src.middleware.ai_capacity import run_model
 
 class VectorSearchService(BaseService):
 
@@ -13,7 +14,7 @@ class VectorSearchService(BaseService):
         if top_k <= 0:
             raise ValueError('Количество подходящих строк должно быть положительным')
 
-        query_embedding = self.embedding.embed_query(query)
+        query_embedding = await run_model(self.embedding.embed_query, query)
 
         return await self.db.document_chunks.search_similar(query_embedding, top_k)
 

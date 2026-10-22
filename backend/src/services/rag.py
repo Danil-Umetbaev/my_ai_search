@@ -1,4 +1,4 @@
-import asyncio
+from src.middleware.ai_capacity import run_model
 import logging
 import re
 from time import perf_counter
@@ -72,7 +72,7 @@ class RAGService(BaseService):
     ) -> RAGResultSchema:
         started = perf_counter()
 
-        search_query = await asyncio.to_thread(
+        search_query = await run_model(
             self.llm.rewrite_query,
             question,
         )
@@ -256,7 +256,7 @@ class RAGService(BaseService):
 
         started = perf_counter()
 
-        original_scores = await asyncio.to_thread(
+        original_scores = await run_model(
             self.reranker.rerank,
             first_query,
             texts,
@@ -265,7 +265,7 @@ class RAGService(BaseService):
         if same_query:
             scores = original_scores
         else:
-            rewritten_scores = await asyncio.to_thread(
+            rewritten_scores = await run_model(
                 self.reranker.rerank,
                 second_query,
                 texts,
@@ -501,7 +501,7 @@ class RAGService(BaseService):
                 status=RAGStatus.NOT_FOUND, answer=None, sources=[],
                 confidence=confidence, used_chunks=[],
             )
-        passage_scores = await asyncio.to_thread(
+        passage_scores = await run_model(
             self.reranker.rerank,
             search_query,
             [title + "\n" + text for title, text in passages],
@@ -551,7 +551,7 @@ class RAGService(BaseService):
         logger.info("RAG evidence | passages=%s | selected=%s | duration=%.2fs", len(passages), len(selected), perf_counter() - started)
 
         started = perf_counter()
-        answer_llm = await asyncio.to_thread(
+        answer_llm = await run_model(
             self.llm.generate,
             question,
             search_query,

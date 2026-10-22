@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -124,21 +125,29 @@ export default function App() {
     )
   );
 
-  const [
-    messages,
-    setMessages,
-  ] = useState([]);
+  const [messagesByConversation, setMessagesByConversation] = useState({});
+  const [sendingByConversation, setSendingByConversation] = useState({});
+  const [loadingByConversation, setLoadingByConversation] = useState({});
+  const pendingRef = useRef(new Set());
+  const historyVersions = useRef({});
+  const creatingRef = useRef(false);
+  const activeConversationRef = useRef(activeConversationId);
+  const messageMetaRef = useRef(messageMetaStore);
+  activeConversationRef.current = activeConversationId;
+  messageMetaRef.current = messageMetaStore;
 
-  const [
-    sending,
-    setSending,
-  ] = useState(false);
+  const messages = messagesByConversation[activeConversationId] || [];
+  const sending = Boolean(sendingByConversation[activeConversationId]);
+  const loadingMessages = Boolean(loadingByConversation[activeConversationId]);
 
-  const [
-    loadingMessages,
-    setLoadingMessages,
-  ] = useState(false);
-
+  function updateMessages(conversationId, update) {
+    setMessagesByConversation((current) => ({
+      ...current,
+      [conversationId]: typeof update === "function"
+        ? update(current[conversationId] || [])
+        : update,
+    }));
+  }
 
   // Левая панель
   const [
@@ -217,7 +226,6 @@ export default function App() {
 
   useEffect(() => {
     if (!activeConversationId) {
-      setMessages([]);
       return;
     }
 
@@ -243,6 +251,8 @@ export default function App() {
 
 
   async function createConversation() {
+    if (creatingRef.current) return null;
+    creatingRef.current = true;
     try {
       const data =
         await createConversationRequest();
@@ -274,7 +284,8 @@ export default function App() {
         data.id
       );
 
-      setMessages([]);
+      activeConversationRef.current = data.id;
+      updateMessages(data.id, []);
 
       return data.id;
 
@@ -285,43 +296,29 @@ export default function App() {
       );
 
       return null;
+    } finally {
+      creatingRef.current = false;
     }
   }
 
 
-  async function loadConversationMessages(
-    conversationId
-  ) {
-    setLoadingMessages(true);
-
+  async function loadConversationMessages(conversationId) {
+    if (pendingRef.current.has(conversationId)) return;
+    const version = (historyVersions.current[conversationId] || 0) + 1;
+    historyVersions.current[conversationId] = version;
+    setLoadingByConversation((current) => ({ ...current, [conversationId]: true }));
     try {
-      const data =
-        await getMessageHistory(
-          conversationId
-        );
-
-      const conversationMeta =
-        messageMetaStore[
-          conversationId
-        ] || {};
-
-      setMessages(
-        mergeMessagesWithMeta(
-          data,
-          conversationMeta
-        )
-      );
-
+      const data = await getMessageHistory(conversationId);
+      if (historyVersions.current[conversationId] !== version) return;
+      updateMessages(conversationId, mergeMessagesWithMeta(
+        data, messageMetaRef.current[conversationId] || {},
+      ));
     } catch (error) {
-      console.error(
-        "Не удалось загрузить сообщения:",
-        error
-      );
-
-      setMessages([]);
-
+      console.error("Не удалось загрузить сообщения:", error);
     } finally {
-      setLoadingMessages(false);
+      if (historyVersions.current[conversationId] === version) {
+        setLoadingByConversation((current) => ({ ...current, [conversationId]: false }));
+      }
     }
   }
 
@@ -412,7 +409,7 @@ export default function App() {
     const question =
       text.trim();
 
-    if (!question || sending) {
+    if (!question || pendingRef.current.has(activeConversationId)) {
       return;
     }
 
@@ -428,6 +425,12 @@ export default function App() {
       }
     }
 
+
+    if (pendingRef.current.has(conversationId)) return;
+    pendingRef.current.add(conversationId);
+    historyVersions.current[conversationId] = (historyVersions.current[conversationId] || 0) + 1;
+    setLoadingByConversation((current) => ({ ...current, [conversationId]: false }));
+    const setMessages = (update) => updateMessages(conversationId, update);
 
     const temporaryUserMessage = {
       id:
@@ -460,7 +463,7 @@ export default function App() {
     );
 
 
-    setSending(true);
+    setSendingByConversation((current) => ({ ...current, [conversationId]: true }));
 
 
     try {
@@ -538,7 +541,7 @@ export default function App() {
 
       if (
         data.status ===
-        "escalated"
+        "escalated" && activeConversationRef.current === conversationId
       ) {
         setDetailsOpen(true);
       }
@@ -588,7 +591,8 @@ export default function App() {
       );
 
     } finally {
-      setSending(false);
+      pendingRef.current.delete(conversationId);
+      setSendingByConversation((current) => ({ ...current, [conversationId]: false }));
     }
   }
 
@@ -657,6 +661,7 @@ export default function App() {
           */}
 
           <ChatArea
+            key={activeConversationId || "new"}
             messages={messages}
 
             sending={sending}
