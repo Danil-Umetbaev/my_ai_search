@@ -42,14 +42,20 @@ class QwenLLMProvider(LLMProvider):
         passages = []
         for document in context.split("\n\n---\n\n"):
             title, _, body = document.partition("\n")
-            pieces = re.split(
-                r'(?<=[.!?])\s+(?=[А-ЯЁA-Z0-9«\[])|\s+(?=[А-ЯЁ][а-яё]*(?: [а-яё]+){0,2}:)',
-                body,
-            )
-            for piece in pieces:
-                piece = piece.strip()
-                if piece:
-                    passages.append((title, piece))
+            sections = re.split(r'\n\[… \]\n|\s+(?=[А-ЯЁ][а-яё]*(?: [а-яё]+){0,2}:)', body)
+            for section in sections:
+                section = section.strip()
+                if not section:
+                    continue
+                sentences = re.split(r'(?<=[.!?])\s+(?=[А-ЯЁA-Z0-9«\[])', section)
+                block = ""
+                for sentence in sentences:
+                    if block and len(block) + len(sentence) > 1200:
+                        passages.append((title, block))
+                        block = ""
+                    block = f"{block} {sentence}".strip()
+                if block:
+                    passages.append((title, block))
         numbered = "\n".join(f"[{i}] {title}: {text}" for i, (title, text) in enumerate(passages, 1))
         messages = [
             {"role": "system", "content": """Выбери МИНИМАЛЬНЫЙ набор фрагментов, прямо отвечающих на вопрос. Обычно достаточно 1–3 фрагментов.
