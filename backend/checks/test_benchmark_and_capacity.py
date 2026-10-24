@@ -167,6 +167,28 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
                          'Начало ' + overlap + ' конец')
         self.assertIn('[… ]', RAGService._join_chunks({1: overlap, 3: overlap}))
 
+    def test_excerpt_preserves_example_scope_and_complete_condition(self):
+        from src.services.rag import RAGService
+        content = '# Настройка\n\nОбщие параметры.\n\n# Пример\n\n## Клавиатурная касса\n\nЕсли сумма больше 300, применяется скидка 15%.\n'
+        result = RAGService._context_excerpt(content, {12: 'сумма больше 300, применяется скидка'})
+        self.assertIn('Раздел документа: Пример → Клавиатурная касса', result)
+        self.assertIn('Если сумма больше 300, применяется скидка 15%.', result)
+        self.assertNotIn('Общие параметры', result)
+
+    def test_excerpt_does_not_guess_location_of_repeated_text(self):
+        from src.services.rag import RAGService
+        text = 'Повторяющаяся строка инструкции.'
+        content = '# Один\n' + text + '\n# Два\n' + text
+        self.assertEqual(RAGService._context_excerpt(content, {7: text}), text)
+
+    def test_excerpt_preserves_new_heading_inside_selected_range(self):
+        from src.services.rag import RAGService
+        content = '# Пример\nТест.\n# Решение\nВыполните проверку.\n'
+        result = RAGService._context_excerpt(content, {2: '# Решение\nВыполните проверку.'})
+        self.assertIn('# Решение', result)
+        self.assertIn('Выполните проверку.', result)
+        self.assertNotIn('Раздел документа: Пример', result)
+
     async def test_short_instruction_includes_solution_outside_retrieved_window(self):
         from types import SimpleNamespace
         from unittest.mock import AsyncMock, Mock

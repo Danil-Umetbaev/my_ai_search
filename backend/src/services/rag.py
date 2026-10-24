@@ -1,5 +1,6 @@
 from src.middleware.ai_capacity import run_model
 import logging
+import re
 from time import perf_counter
 
 from src.ai.llm.base import LLMProvider
@@ -239,6 +240,11 @@ class RAGService(BaseService):
         context_size = sum(map(len, context_chunks))
         for index, document_id in enumerate(context_documents):
             document = await self.db.documents.get_one(id=document_id)
+            if document.content:
+                title, chunks = context_documents[document_id]
+                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks)}"
+                context_size += len(scoped_text) - len(context_chunks[index])
+                context_chunks[index] = scoped_text
             if document.content and len(document.content) <= 3000:
                 full_text = f"Документ: {document.title}\n{document.content}"
                 size = context_size - len(context_chunks[index]) + len(full_text)
@@ -290,6 +296,46 @@ class RAGService(BaseService):
             confidence=confidence,
             used_chunks=used_chunks,
         )
+
+    @staticmethod
+    def _context_excerpt(content: str, chunks: dict[int, str]) -> str:
+        intervals = []
+        for text in chunks.values():
+            start = content.find(text)
+            if start < 0 or content.find(text, start + 1) >= 0:
+                return RAGService._join_chunks(chunks)
+            end = start + len(text)
+            line_start = content.rfind("\n", 0, start) + 1
+            line_end = content.find("\n", end)
+            if line_end < 0:
+                line_end = len(content)
+            if start - line_start <= 300:
+                start = line_start
+            if line_end - end <= 300:
+                end = line_end
+            intervals.append((start, end))
+        merged = []
+        for start, end in sorted(intervals):
+            if merged and start <= merged[-1][1] + 2:
+                merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+            else:
+                merged.append((start, end))
+        headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
+                    if content[:heading.start()].count("```") % 2 == 0]
+        excerpts = []
+        for start, end in merged:
+            parents = []
+            for heading in headings:
+                if heading.start() > start:
+                    break
+                level = len(heading[1])
+                while parents and parents[-1][0] >= level:
+                    parents.pop()
+                parents.append((level, heading[2]))
+            path = " → ".join(title for _, title in parents)
+            prefix = f"Раздел документа: {path}\n" if path else ""
+            excerpts.append(prefix + content[start:end].strip())
+        return "\n[… ]\n".join(excerpts)
 
     @staticmethod
     def _join_chunks(chunks: dict[int, str]) -> str:
