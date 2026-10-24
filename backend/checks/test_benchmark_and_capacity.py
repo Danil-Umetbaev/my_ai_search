@@ -19,7 +19,7 @@ class KnowledgeStructureTests(unittest.TestCase):
                 return {'offset_mapping': [(i, i + 1) for i in range(len(text))]}
         chunker = TokenChunker.__new__(TokenChunker)
         chunker.tokenizer = CharacterTokenizer()
-        chunker.chunk_size, chunker.chunk_overlap = 24, 4
+        chunker.chunk_size, chunker.chunk_overlap = 26, 4
         text = 'Сервер:\nТоваровед\nКасса:\nКонсультант КСО\n'
         chunks = chunker.split(text)
         self.assertEqual(chunks[0], 'Сервер:\nТоваровед\nКасса:\n')
