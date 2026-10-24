@@ -1669,7 +1669,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
     ],
     "required_facts": [
-      "Нет, при отказе от сканирования доступна только аннуляция чека."
+      "При отказе от сканирования доступна только аннуляция чека."
     ],
     "related_case_id": 165
   },
@@ -1825,7 +1825,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/5107580948"
     ],
     "required_facts": [
-      "Закреплённый инженер Сбербанка или линия поддержки, сообщить номера терминалов."
+      "Да, при обращении для точечного включения настройки необходимо сообщить номер или номера терминалов."
     ],
     "related_case_id": 177
   },
@@ -1851,7 +1851,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
     ],
     "required_facts": [
-      "Проверить адреса сервера в ServerRegisterModules-config.xml и products.properties; после исправления перезапустить службу сервера."
+      "ServerRegisterModules-config.xml и products.properties."
     ],
     "related_case_id": 179
   },
@@ -1864,7 +1864,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
     ],
     "required_facts": [
-      "Некорректные URL в ServerRegisterModules-config.xml и products.properties; использовать адрес своего сервера."
+      "Использовать IP-адрес своего сервера, не адрес из примера документации."
     ],
     "related_case_id": 180
   },
@@ -1877,7 +1877,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
     ],
     "required_facts": [
-      "Да, после изменений необходимо перезапустить службу сервера."
+      "После изменений необходимо перезапустить службу сервера."
     ],
     "related_case_id": 181
   },
@@ -1981,7 +1981,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
     ],
     "required_facts": [
-      "Отрицательный ответ банка или HTTP-статус вне 2xx."
+      "BANK_ERROR: отрицательный ответ банка или HTTP-статус вне 2xx."
     ],
     "related_case_id": 189
   },
@@ -2033,8 +2033,7 @@
       "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1111785890"
     ],
     "required_facts": [
-      "Обязательные поля: Логин и Пароль.",
-      "Аутентификация через Active Directory и персональные данные являются дополнительными полями, а не обязательными."
+      "Аутентификация через Active Directory является дополнительным, а не обязательным полем."
     ],
     "related_case_id": 14
   },
