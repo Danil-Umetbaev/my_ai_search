@@ -20,7 +20,7 @@ class BenchmarkTests(unittest.TestCase):
             path.write_text(json.dumps(row) + '\n', encoding='utf-8')
             summary = analyze([path])
             self.assertEqual(summary['processed'], 1)
-            self.assertEqual(len(summary['missing_ids']), 149)
+            self.assertEqual(len(summary['missing_ids']), len(load_cases()) - 1)
             self.assertEqual(summary['min_status_matched_answered'], 0.4)
             self.assertIsNone(summary['min_manually_approved_answered'])
             with self.assertRaises(ValueError):
@@ -28,8 +28,8 @@ class BenchmarkTests(unittest.TestCase):
 
     def test_stable_partial_run(self):
         cases = load_cases()
-        self.assertEqual(len(cases), 150)
-        self.assertEqual([c['id'] for c in cases], list(range(1, 151)))
+        self.assertGreaterEqual(len(cases), 200)
+        self.assertEqual([c['id'] for c in cases], list(range(1, len(cases) + 1)))
         partial = select_cases(cases, 39, 150)
         self.assertEqual(len(partial), 112)
         self.assertEqual(partial[0]['id'], 39)

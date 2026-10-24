@@ -23,7 +23,9 @@ def load_cases(path=CASES_PATH):
     return cases
 
 
-def select_cases(cases, start=1, end=150, release=False):
+def select_cases(cases, start=1, end=None, release=False):
+    if end is None:
+        end = max(c['id'] for c in cases)
     if start < 1 or end < start:
         raise ValueError('Use 1 <= start <= end')
     selected = [c for c in cases if start <= c['id'] <= end
@@ -78,7 +80,7 @@ async def run(args, cases):
                 output.write(json.dumps(record, ensure_ascii=False) + '\n')
                 output.flush()
                 mark = 'ERROR' if 'error' in record else 'OK' if record['status_correct'] else 'FAIL'
-                print(f"[{case['id']:03}/150] {mark} expected={case['expected']} "
+                print(f"[{case['id']:03}/{max(c['id'] for c in load_cases())}] {mark} expected={case['expected']} "
                       f"actual={record.get('actual', '-')} confidence={record.get('confidence')}", flush=True)
             summary = dict(type='summary', processed=len(cases), correct=correct,
                            failures=failures, errors=errors)
@@ -90,7 +92,7 @@ async def run(args, cases):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--start', type=int, default=1, help='First case ID, inclusive')
-    parser.add_argument('--end', type=int, default=150, help='Last case ID, inclusive')
+    parser.add_argument('--end', type=int, default=None, help='Last case ID, inclusive; default: all cases')
     parser.add_argument('--release', action='store_true', help='14 boundary/regression cases')
     parser.add_argument('--list', action='store_true', help='List cases without AI')
     parser.add_argument('--label', default='', help='Commit/configuration identifier')
