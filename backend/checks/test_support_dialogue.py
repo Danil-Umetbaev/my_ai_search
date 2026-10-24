@@ -17,20 +17,26 @@ class DialogueTests(unittest.TestCase):
         first = self.follow("У меня блять ничего не работает, помоги")
         self.assertEqual(first.action, "clarify")
         self.assertEqual(first.state["pending"], "subject")
-        final = self.follow("У меня блять ничего не работает, помоги", "касса", "чёрный экран", "да", "обычная касса")
+        final = self.follow("У меня блять ничего не работает, помоги", "касса", "чёрный экран")
         self.assertEqual(final.action, "search")
         self.assertIn("Чёрный экран", final.query)
-        self.assertIn("Горит", final.query)
         self.assertNotIn("неисправен", final.query)
 
-    def test_black_screen_is_not_an_unrelated_message(self):
+    def test_specific_symptom_searches_without_mandatory_questionnaire(self):
         result = self.follow("касса не работает", "Черный экран")
-        self.assertEqual(result.state["pending"], "indicator")
-
-    def test_unknown_is_not_an_invented_fact(self):
-        result = self.follow("касса не работает", "чёрный экран", "хз", "не знаю")
         self.assertEqual(result.action, "search")
-        self.assertEqual(result.state["facts"]["indicator"], "Неизвестно")
+        self.assertNotIn("device", result.state["facts"])
+        self.assertNotIn("indicator", result.state["facts"])
+
+    def test_error_requested_only_after_unsuccessful_search(self):
+        result = self.follow("Не печатает чек")
+        self.assertEqual(result.action, "search")
+        followup = self.service.missing_answer(result.state)
+        self.assertEqual(followup.state["pending"], "error_text")
+        result = self.service.route("Не могу прочитать", followup.state)
+        self.assertEqual(result.action, "search")
+        self.assertEqual(result.state["facts"]["error_text"], "Неизвестно")
+        self.assertEqual(self.service.missing_answer(result.state).action, "handoff")
 
     def test_regular_question_bypasses_intake(self):
         self.assertEqual(self.follow("Где находится раздел Карты?").action, "direct")
@@ -41,9 +47,11 @@ class DialogueTests(unittest.TestCase):
         self.assertEqual(result.state, {})
 
     def test_numeric_error_answer_keeps_context(self):
-        result = self.follow("не печатает чек", "123")
+        first = self.follow("не печатает чек")
+        pending = self.service.missing_answer(first.state)
+        result = self.service.route("123", pending.state)
         self.assertEqual(result.state["facts"]["error_text"], "123")
-        self.assertEqual(result.state["pending"], "device")
+        self.assertEqual(result.action, "search")
 
     def test_meaningless_reply_does_not_become_symptom(self):
         result = self.follow("касса сломалась", "фывапролдж")
@@ -84,16 +92,32 @@ class DialogueTests(unittest.TestCase):
         self.assertEqual(result.state["facts"]["subject"], "Печать ценников или этикеток")
 
     def test_changed_symptom_discards_old_observations(self):
-        state = self.follow("Касса сломалась", "Черный экран", "да").state
+        state = self.follow("Касса сломалась", "Черный экран").state
+        state.update(stage="collecting", pending="details")
+        state["facts"]["indicator"] = "Горит"
         result = self.service.route("Теперь ошибка 123", state)
         self.assertNotIn("indicator", result.state["facts"])
         self.assertEqual(result.state["facts"]["error_text"], "Теперь ошибка 123")
 
     def test_device_answer_preserves_printing_incident(self):
-        result = self.follow("Не печатает чек", "ошибки нет", "обычная касса")
+        state = self.follow("Не печатает чек").state
+        state.update(stage="collecting", pending="device")
+        result = self.service.route("обычная касса", state)
         self.assertEqual(result.action, "search")
         self.assertEqual(result.state["facts"]["subject"], "Печать чека")
         self.assertEqual(result.state["facts"]["symptom"], "Не печатает чек")
+
+    def test_reference_question_can_interrupt_intake(self):
+        result = self.follow("Касса сломалась", "Что находится в разделе Справочники?")
+        self.assertEqual(result.action, "direct")
+        self.assertEqual(result.state, {})
+
+    def test_question_from_documentation_preserves_original_request(self):
+        followup = self.service.ask_from_evidence({}, "На кассе или в интерфейсе сервера?", "Как поменять язык?")
+        self.assertEqual(followup.state["mode"], "question")
+        self.assertIn("язык", followup.state["initial"])
+        repeated = self.service.ask_from_evidence(followup.state, followup.answer, "на сервере")
+        self.assertEqual(repeated.action, "handoff")
 
     def test_table_heading_is_not_a_solution(self):
         self.assertFalse(support_evidence_allowed("Сообщения об ошибках на экране кассира при печати чековых документов", "Ошибка Причина Что делать?", "Не печатает чек"))
