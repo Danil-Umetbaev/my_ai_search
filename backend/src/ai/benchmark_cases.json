@@ -42,7 +42,14 @@
   {
     "id": 9,
     "question": "Какие товарные признаки могут использоваться для энергетических напитков и пиротехники?",
-    "expected": "answered"
+    "expected": "answered",
+    "required_facts": [
+      "Энергетические напитки и пиротехника относятся к штучным товарам с признаками energy и pyro, передаваемыми из ERP."
+    ],
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237844110/SetRetail10",
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/447709476"
+    ]
   },
   {
     "id": 10,
@@ -240,7 +247,16 @@
   {
     "id": 43,
     "question": "Как аннулировать текущий набранный чек?",
-    "expected": "answered"
+    "expected": "answered",
+    "required_facts": [
+      "Для клавиатурной кассы: АДМИНИСТРАТОР → Аннулирование, затем подтвердить операцию.",
+      "Не требовать добавления выплаты лотерейного билета для аннулирования обычного уже набранного чека; не смешивать клавиатурную и touch-кассу."
+    ],
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1095336348",
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2541191285",
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2525921411"
+    ]
   },
   {
     "id": 44,
@@ -307,7 +323,16 @@
   {
     "id": 55,
     "question": "Как отменить операцию оплаты банковской картой, если деньги списались, а чек не зарегистрировался?",
-    "expected": "answered"
+    "expected": "answered",
+    "required_facts": [
+      "Использовать функцию «Отмена по банку»; это отмена уже проведённой банковской транзакции.",
+      "Не предлагать повторное списание или воспроизведение сбоя как способ устранения проблемы.",
+      "Учитывать различия настройки клавиатурной кассы и SetTouch, если описываются шаги настройки."
+    ],
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/568524805",
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3581280312"
+    ]
   },
   {
     "id": 56,
