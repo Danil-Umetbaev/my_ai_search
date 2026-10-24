@@ -498,16 +498,17 @@ class RAGService(BaseService):
         evidence_parts = []
         remaining = 14000
         for part in context_parts:
-            cleaned = re.sub(r"<\?xml\b.*?</[\w-]+>\s*</[\w-]+>", "[XML-пример опущен]", part, flags=re.S)
-            cleaned = re.sub(r"<goods-catalog\b.*?</goods-catalog>", "[XML-пример опущен]", cleaned, flags=re.S)
+            cleaned = re.sub(r"(?:xml\s*)?(?:<\?xml[^>]*>\s*)?<goods-catalog\b.*?</goods-catalog>", "[XML-пример опущен]", part, flags=re.S)
             if remaining <= 0:
                 break
             excerpt = cleaned[:remaining]
             evidence_parts.append(excerpt)
             remaining -= len(excerpt)
         evidence = "\n\n---\n\n".join(evidence_parts)
-        evidence_sources = sources
-        evidence_chunk_ids = {chunk.chunk_id for chunk in used_chunks}
+        evidence_titles = {part.partition("\n")[0] for part in evidence_parts}
+        evidence_sources = [source for source in sources if "Документ: " + source.title in evidence_titles]
+        evidence_documents = {source.document_id for source in evidence_sources}
+        evidence_chunk_ids = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in evidence_documents}
 
         started = perf_counter()
         answer_llm = await run_model(

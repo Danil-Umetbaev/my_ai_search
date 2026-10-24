@@ -109,7 +109,7 @@ class DialogueService:
             return DialogueDecision("resolved", state, "Отлично, рад, что получилось. Если возникнет другая проблема — напишите.")
         active = state.get("stage") in {"collecting", "awaiting_result"}
         standalone = bool(re.match(r"(?:как|где|можно ли|какие|какой|что|чем|сколько|для чего|почему)\b", text))
-        if active and standalone and not self.is_incident(text):
+        if standalone:
             return DialogueDecision("direct", {}, query=message)
         if state.get("stage") == "awaiting_result" and re.search(r"не помог|не работает|не получилось|все так же", text):
             if state.get("searches", 0) >= 2:
