@@ -72,10 +72,12 @@ function mergeMessagesWithMeta(
   return messages.map(
     (message) => {
       const messageMeta =
-        meta?.[message.id];
+        meta?.[message.id] || message.response_meta;
 
       return {
         ...message,
+
+        choices: messageMeta?.choices || [],
 
         status:
           messageMeta?.status ||
@@ -559,6 +561,8 @@ export default function App() {
           new Date()
             .toISOString(),
 
+        choices: data.choices || [],
+
         status:
           data.status || null,
 
@@ -582,6 +586,7 @@ export default function App() {
         conversationId,
         data.message_id,
         {
+          choices: data.choices || [],
           status:
             data.status || null,
 

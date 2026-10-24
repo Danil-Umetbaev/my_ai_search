@@ -8,6 +8,8 @@ class ChatStatus(StrEnum):
     NOT_FOUND = 'not_found'
     ESCALATED = 'escalated'
     OFF_TOPIC = 'off_topic'
+    CLARIFICATION = 'clarification'
+    RESOLVED = 'resolved'
 
 class ChatRequest(BaseModel):
     conversation_id: UUID
@@ -20,6 +22,7 @@ class SourceResponse(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    choices: list[str] = Field(default_factory=list)
     message_id: UUID | None = None
     message: str | None = None
     status: ChatStatus

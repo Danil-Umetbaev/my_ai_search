@@ -1,5 +1,5 @@
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from src.models.enums import Role
 from datetime import datetime
 
@@ -11,6 +11,7 @@ class MessageAddRequestSchema(BaseModel):
 
 class MessageAddSchema(MessageAddRequestSchema):
     role: Role
+    response_meta: dict = Field(default_factory=dict)
 
 class MessageSchema(MessageAddSchema):
     id: UUID

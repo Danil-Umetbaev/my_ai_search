@@ -394,6 +394,14 @@ export default function ChatArea({
 
                         </div>
 
+                        {!error && messageIndex === messages.length - 1 && message.choices?.length > 0 && (
+                          <div className="reply-choices">
+                            {message.choices.map((choice) => (
+                              <button key={choice} type="button" disabled={sending} onClick={() => onSend(choice)}>{choice}</button>
+                            ))}
+                          </div>
+                        )}
+
                         {!error && (
                           <MessageSources
                             sources={message.sources}

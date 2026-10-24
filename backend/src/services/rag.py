@@ -69,10 +69,11 @@ class RAGService(BaseService):
         lexical_k: int = 20,
         top_k: int = 3,
         threshold: float = 0.30,
+        support_mode: bool = False,
     ) -> RAGResultSchema:
         started = perf_counter()
 
-        search_query = await run_model(
+        search_query = question if support_mode else await run_model(
             self.llm.rewrite_query,
             question,
         )
@@ -90,7 +91,7 @@ class RAGService(BaseService):
         if search_query.strip().upper() == "CLARIFY":
             logger.info("RAG decision | reason=clarification_required")
             return RAGResultSchema(
-                status=RAGStatus.OFF_TOPIC,
+                status=RAGStatus.CLARIFICATION,
                 answer="Не удалось понять вопрос. Уточните, пожалуйста, что вы хотите узнать о SetRetail10 или рабочих инструкциях.",
                 sources=[],
                 confidence=None,
@@ -559,6 +560,12 @@ class RAGService(BaseService):
         source_ids = {source.document_id for source in evidence_sources}
         evidence_chunk_ids = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in source_ids}
         logger.info("RAG evidence | passages=%s | selected=%s | duration=%.2fs", len(passages), len(selected), perf_counter() - started)
+
+        if support_mode:
+            from src.services.dialogue import support_evidence_allowed
+            if not support_evidence_allowed(selected_title, evidence):
+                logger.info("RAG decision | reason=unsupported_employee_instruction")
+                return RAGResultSchema(status=RAGStatus.NOT_FOUND, answer=None)
 
         started = perf_counter()
         answer_llm = await run_model(

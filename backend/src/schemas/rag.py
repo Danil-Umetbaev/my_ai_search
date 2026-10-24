@@ -7,6 +7,7 @@ class RAGStatus(StrEnum):
     ANSWERED = 'answered'
     NOT_FOUND = 'not_found'
     OFF_TOPIC = 'off_topic'
+    CLARIFICATION = 'clarification'
 
 class RAGChunkSourceSchema(BaseModel):
     chunk_id: UUID
