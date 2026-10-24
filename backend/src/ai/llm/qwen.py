@@ -3,7 +3,7 @@ import logging
 import re
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from src.ai.llm.base import LLMProvider
+from src.ai.llm.base import LLMProvider, is_arithmetic_question
 from src.schemas.llm import LLMAnswerSchema
 from src.core.logging import log_execution_time
 from src.utils.retry import load_with_retry
@@ -100,6 +100,8 @@ class QwenLLMProvider(LLMProvider):
 
     @log_execution_time("LLM query classification")
     def rewrite_query(self, question: str) -> str:
+        if is_arithmetic_question(question):
+            return "OFF_TOPIC"
         messages = [
             {"role": "system", "content": """Определи цель сообщения. Верни ровно одно слово: WORK или OFF_TOPIC.
 WORK — вопрос по работе: корпоративные процессы, сотрудники, программы, оборудование,

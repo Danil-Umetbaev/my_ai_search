@@ -114,6 +114,13 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
                          'Начало ' + overlap + ' конец')
         self.assertIn('[… ]', RAGService._join_chunks({1: overlap, 3: overlap}))
 
+    def test_arithmetic_does_not_reject_working_questions_with_numbers(self):
+        from src.ai.llm.base import is_arithmetic_question
+        for question in ['Сколько будет 27 умножить на 43?', 'Сколько будет два умножить на два?', '2 + 2']:
+            self.assertTrue(is_arithmetic_question(question))
+        for question in ['Как продать 2 товара по цене 100 рублей?', 'Сколько будет стоить касса?', 'Ошибка 2 на кассе 2', 'Как вернуть 2 товара?']:
+            self.assertFalse(is_arithmetic_question(question))
+
     def test_benchmark_includes_incidents_with_evidence_and_all_statuses(self):
         cases = load_cases()
         incidents = [c for c in cases if c.get('category') == 'incident']
