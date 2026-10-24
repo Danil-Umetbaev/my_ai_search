@@ -172,6 +172,19 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.status, RAGStatus.NOT_FOUND)
         llm.generate.assert_not_called()
 
+    async def test_unknown_local_fact_skips_unrelated_instructions(self):
+        from unittest.mock import AsyncMock, Mock
+        from src.services.rag import RAGService
+        from src.schemas.rag import RAGStatus
+        llm = Mock()
+        llm.rewrite_query.return_value = 'NOT_FOUND'
+        search = Mock(search=AsyncMock())
+        result = await RAGService(Mock(), search, llm, Mock()).answer('Какой пароль установлен у нас?')
+        self.assertEqual(result.status, RAGStatus.NOT_FOUND)
+        self.assertFalse(result.sources)
+        search.search.assert_not_awaited()
+        llm.generate.assert_not_called()
+
     def test_context_overlap_preserves_complete_text_and_gaps(self):
         from src.services.rag import RAGService
         overlap = 'совпадающий фрагмент исходного документа'
