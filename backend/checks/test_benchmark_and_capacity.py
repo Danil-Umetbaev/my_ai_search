@@ -135,6 +135,18 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    def test_context_selection_does_not_crowd_out_other_documents(self):
+        from types import SimpleNamespace
+        from src.services.rag import RAGService
+        ranked = [(SimpleNamespace(document_id=doc, chunk_id=i), score)
+                  for i, (doc, score) in enumerate([('emulator', .95), ('emulator', .94),
+                                                  ('emulator', .93), ('manual', .9), ('setup', .8)])]
+        selected = RAGService._select_chunks(ranked, 3)
+        self.assertEqual([chunk.document_id for chunk, _ in selected], ['emulator', 'manual', 'setup'])
+        selected = RAGService._select_chunks(ranked[:3], 3)
+        self.assertEqual(len(selected), 3)
+        self.assertEqual(len({chunk.chunk_id for chunk, _ in selected}), 3)
+
     async def test_off_topic_skips_search_and_generation(self):
         from unittest.mock import AsyncMock, Mock
         from src.services.rag import RAGService

@@ -189,7 +189,7 @@ class RAGService(BaseService):
             if score >= relative_threshold
         ]
 
-        best_chunks = strong_chunks[:top_k]
+        best_chunks = self._select_chunks(strong_chunks, top_k)
 
         if not best_chunks:
             best_chunks = [chunks_with_scores[0]]
@@ -296,6 +296,25 @@ class RAGService(BaseService):
             confidence=confidence,
             used_chunks=used_chunks,
         )
+
+    @staticmethod
+    def _select_chunks(ranked_chunks, limit):
+        selected = []
+        documents = set()
+        for chunk, score in ranked_chunks:
+            if chunk.document_id not in documents:
+                selected.append((chunk, score))
+                documents.add(chunk.document_id)
+                if len(selected) == limit:
+                    return selected
+        selected_ids = {chunk.chunk_id for chunk, _ in selected}
+        for chunk, score in ranked_chunks:
+            if chunk.chunk_id not in selected_ids:
+                selected.append((chunk, score))
+                selected_ids.add(chunk.chunk_id)
+                if len(selected) == limit:
+                    break
+        return selected
 
     @staticmethod
     def _context_excerpt(content: str, chunks: dict[int, str]) -> str:
