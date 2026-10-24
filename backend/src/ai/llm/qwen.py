@@ -21,7 +21,7 @@ class QwenLLMProvider(LLMProvider):
 
     def _load_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME)
-        model = AutoModelForCausalLM.from_pretrained(self.MODEL_NAME)
+        model = AutoModelForCausalLM.from_pretrained(self.MODEL_NAME, torch_dtype=torch.float16)
         model.to(self.device)
         model.eval()
         return tokenizer, model
