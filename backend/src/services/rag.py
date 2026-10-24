@@ -221,40 +221,21 @@ class RAGService(BaseService):
             )
 
         started = perf_counter()
-        context_chunks = []
-        seen_context_chunks = set()
-
+        context_documents = {}
         for best_chunk, _ in best_chunks:
             neighbors = await self.db.document_chunks.get_neigbors(
-                best_chunk.document_id,
-                best_chunk.chunk_index,
+                best_chunk.document_id, best_chunk.chunk_index,
             )
-
-            window = list(neighbors)
-
-            central_exists = any(
-                chunk.document_id == best_chunk.document_id
-                and chunk.chunk_index == best_chunk.chunk_index
-                for chunk in window
+            title, chunks = context_documents.setdefault(
+                best_chunk.document_id, (best_chunk.document_title, {}),
             )
+            for chunk in [best_chunk, *neighbors]:
+                chunks[chunk.chunk_index] = chunk.content
 
-            if not central_exists:
-                window.append(best_chunk)
-
-            window.sort(key=lambda chunk: chunk.chunk_index)
-
-            for chunk in window:
-                key = (chunk.document_id, chunk.chunk_index)
-
-                if key in seen_context_chunks:
-                    continue
-
-                seen_context_chunks.add(key)
-
-                context_chunks.append(
-                    f"Документ: {best_chunk.document_title}\n{chunk.content}"
-                )
-
+        context_chunks = [
+            f"Документ: {title}\n{self._join_chunks(chunks)}"
+            for title, chunks in context_documents.values()
+        ]
         context = "\n\n---\n\n".join(context_chunks)
 
         logger.info(
@@ -294,3 +275,21 @@ class RAGService(BaseService):
             confidence=confidence,
             used_chunks=used_chunks,
         )
+
+    @staticmethod
+    def _join_chunks(chunks: dict[int, str]) -> str:
+        parts = []
+        previous_index = None
+        for index, text in sorted(chunks.items()):
+            if parts and previous_index == index - 1:
+                previous = parts[-1]
+                overlap = next((size for size in range(min(len(previous), len(text)), 19, -1)
+                                if previous.endswith(text[:size])), 0)
+                if overlap:
+                    parts[-1] += text[overlap:]
+                else:
+                    parts.append(text)
+            else:
+                parts.append(text)
+            previous_index = index
+        return "\n[… ]\n".join(parts)
