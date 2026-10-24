@@ -11,6 +11,42 @@ from src.schemas.chat import ChatRequest
 from pydantic import ValidationError
 
 
+class KnowledgeStructureTests(unittest.TestCase):
+    def test_lists_keep_whole_names_and_group_boundaries(self):
+        from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
+        text = ConfluenceKnowledgeSource()._clear_html(
+            '<p>Сервер:</p><ul><li><p>Специалист отдела</p></li>'
+            '<li><p>Товаровед</p></li></ul><p>Касса:</p>'
+            '<ul><li><p>Консультант <strong>КСО</strong></p></li></ul>'
+        )
+        self.assertIn('- Специалист отдела\n- Товаровед', text)
+        self.assertIn('- Консультант КСО', text)
+        self.assertLess(text.index('Товаровед'), text.index('Касса:'))
+
+    def test_table_keeps_setting_separate_from_its_description(self):
+        from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
+        text = ConfluenceKnowledgeSource()._clear_html(
+            '<table><tr><th>Настройка</th><th>Описание</th></tr>'
+            '<tr><td>Запрет частичного возврата</td>'
+            '<td>Разрешён только полный возврат.</td></tr></table>'
+        )
+        self.assertIn('Настройка: Запрет частичного возврата | Описание:', text)
+
+    def test_code_and_link_labels_survive_without_macro_metadata(self):
+        from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
+        text = ConfluenceKnowledgeSource()._clear_html(
+            '<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">xml</ac:parameter>'
+            '<ac:plain-text-body><![CDATA[<URL>http://server:8090</URL>\n<Port>8090</Port>]]>'
+            '</ac:plain-text-body></ac:structured-macro>'
+            '<p><ac:link><ri:page ri:content-title="Длинное название"/>'
+            '<ac:link-body>профиль</ac:link-body></ac:link></p>'
+        )
+        self.assertIn('<URL>http://server:8090</URL>\n<Port>8090</Port>', text)
+        self.assertIn('профиль', text)
+        self.assertNotIn('Длинное название', text)
+        self.assertNotIn('xml', text)
+
+
 class BenchmarkTests(unittest.TestCase):
     def test_analysis_rejects_duplicates_and_separates_review(self):
         case = load_cases()[0]
