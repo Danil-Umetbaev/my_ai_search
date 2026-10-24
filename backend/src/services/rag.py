@@ -429,7 +429,7 @@ class RAGService(BaseService):
         primary_id = best_chunks[0][0].document_id
         primary_document = await self.db.documents.get_one(id=primary_id)
         for document_id, document in context_documents.items():
-            if document_id == primary_id and len(primary_document.content) <= 4500:
+            if document_id == primary_id and len(primary_document.content) <= 10000:
                 context_parts.append(f"Документ: {document['title']}\n{primary_document.content}")
                 context_chunk_count += len(document["chunks"])
                 continue
@@ -495,77 +495,19 @@ class RAGService(BaseService):
                     used_chunks=used_chunks,
                 )
 
-        started = perf_counter()
-        passages = []
-        passage_sections = []
-        for part_index, part in enumerate(context_parts):
-            title, _, body = part.partition("\n")
-            section = 0
-            for sentence in re.split(r"(?<=[.!?])\s+(?=[А-ЯЁA-Z])", body):
-                if sentence.strip():
-                    if re.match(r"^[А-ЯЁ][а-яё-]+(?: [а-яё-]+){0,5}\s+(?:[А-ЯЁ][а-яё]|\d+[.)])", sentence.strip()):
-                        section += 1
-                    passages.append((title, sentence.strip()))
-                    passage_sections.append((part_index, section))
-        if not passages:
-            return RAGResultSchema(
-                status=RAGStatus.NOT_FOUND, answer=None, sources=[],
-                confidence=confidence, used_chunks=[],
-            )
-        passage_scores = await run_model(
-            self.reranker.rerank,
-            search_query,
-            [title + "\n" + text for title, text in passages],
-        )
-        order = sorted(range(len(passages)), key=passage_scores.__getitem__, reverse=True)
-        best = order[0]
-        selected_title = passages[best][0]
-        procedure = bool(re.search(r"\bкак\b|\bкуда\b", question, re.IGNORECASE))
-        candidates = [
-            index for index in order
-            if passages[index][0] == selected_title
-            and passage_scores[index] >= passage_scores[best] * 0.75
-        ]
-        single_position = bool(
-            re.search(r"удал|убра|отмен|сторнир", question, re.IGNORECASE)
-            and re.search(r"позици|товар", question, re.IGNORECASE)
-        )
-        long_primary = selected_title == "Документ: " + primary_document.title and len(primary_document.content) > 4500
-        if procedure and (single_position or long_primary):
-            candidates = [index for index in candidates if passage_sections[index] == passage_sections[best]]
-        if procedure:
-            actions = [
-                index for index in candidates
-                if re.search(r"\b(?:нажмите|нажимает|нажимают|выберите|выбирает|выбирают|перейдите|переходит|введите|вводит|установите|устанавливает|создайте|создает|создаёт|добавьте|добавляет|отсканируйте|сканирует|перезагрузите|сохраните|кликните|восстановите)\b", passages[index][1], re.IGNORECASE)
-            ]
-            candidates = actions or candidates
-        selected = set(candidates[:4 if procedure else 1])
-        if procedure:
-            for index in list(selected):
-                added = 0
-                for neighbor in range(index + 1, min(index + 5, len(passages))):
-                    if passages[neighbor][0] != selected_title:
-                        break
-                    if passage_sections[neighbor] != passage_sections[index]:
-                        break
-                    if len(passages[neighbor][1]) >= 25 and passage_scores[neighbor] < passage_scores[best] * 0.15:
-                        break
-                    selected.add(neighbor)
-                    if len(passages[neighbor][1]) >= 25:
-                        added += 1
-                    if added == 2:
-                        break
-        evidence = selected_title + "\n" + "\n\n".join(passages[index][1] for index in sorted(selected))
-        evidence_sources = [source for source in sources if "Документ: " + source.title == selected_title]
-        source_ids = {source.document_id for source in evidence_sources}
-        evidence_chunk_ids = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in source_ids}
-        logger.info("RAG evidence | passages=%s | selected=%s | duration=%.2fs", len(passages), len(selected), perf_counter() - started)
-
-        if support_mode:
-            from src.services.dialogue import support_evidence_allowed
-            if not support_evidence_allowed(selected_title, evidence, question):
-                logger.info("RAG decision | reason=unsupported_employee_instruction")
-                return RAGResultSchema(status=RAGStatus.NOT_FOUND, answer=None)
+        evidence_parts = []
+        remaining = 14000
+        for part in context_parts:
+            cleaned = re.sub(r"<\?xml\b.*?</[\w-]+>\s*</[\w-]+>", "[XML-пример опущен]", part, flags=re.S)
+            cleaned = re.sub(r"<goods-catalog\b.*?</goods-catalog>", "[XML-пример опущен]", cleaned, flags=re.S)
+            if remaining <= 0:
+                break
+            excerpt = cleaned[:remaining]
+            evidence_parts.append(excerpt)
+            remaining -= len(excerpt)
+        evidence = "\n\n---\n\n".join(evidence_parts)
+        evidence_sources = sources
+        evidence_chunk_ids = {chunk.chunk_id for chunk in used_chunks}
 
         started = perf_counter()
         answer_llm = await run_model(
@@ -580,6 +522,12 @@ class RAGService(BaseService):
             perf_counter() - started,
         )
         logger.info("RAG output | answerable=%s", answer_llm.answerable)
+
+        if answer_llm.clarification:
+            return RAGResultSchema(
+                status=RAGStatus.CLARIFICATION, answer=answer_llm.answer,
+                sources=sources, confidence=confidence,
+            )
 
         if not answer_llm.answerable:
             logger.info("RAG decision | reason=llm_not_answerable")
