@@ -59,6 +59,8 @@ class ChatService(BaseService):
             raise NoConversationFoundException
         await self.db.messages.add(MessageAddSchema(conversation_id=data.conversation_id, content=data.message, role=Role.user))
         decision = self.dialogue.route(data.message, state)
+        if decision.action == "interpret":
+            decision = await self.dialogue.interpret(data.message, decision.state, self.rag_service.llm)
         state = decision.state
         if decision.action == "clarify":
             return await self._reply(data.conversation_id, state, ChatStatus.CLARIFICATION, decision.answer, choices=decision.choices)

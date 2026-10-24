@@ -29,7 +29,7 @@ class DialogueService:
     @classmethod
     def is_incident(cls, text):
         value = cls.normalize(text)
-        return bool(re.search(r"не (?:работает|работают|включается|запускается|печатает|проходит)|перестал[аио]? работ|сломал|завис|черн[ыо]й экран|ошибк[аиу]|фискализатор|помоги|ничего не", value))
+        return bool(re.search(r"не (?:работает|работают|включается|запускается|печатает|проходит)|перестал[аио]? работ|слом|завис|погас|потух|черн[ыо]й экран|ошибк[аиу]|фискализатор|помоги|ничего не", value))
 
     @staticmethod
     def summary(state):
@@ -84,7 +84,7 @@ class DialogueService:
             state.setdefault("facts", {})
             state["stage"] = "handoff"
             return DialogueDecision("handoff", state)
-        if text in {"спасибо", "спасибо помогло", "помогло", "заработало", "все работает", "решено"}:
+        if state and text in {"спасибо", "спасибо помогло", "помогло", "заработало", "все работает", "решено"}:
             state["stage"] = "resolved"
             state["pending"] = None
             return DialogueDecision("resolved", state, "Отлично, рад, что получилось. Если возникнет другая проблема — напишите.")
@@ -117,7 +117,7 @@ class DialogueService:
             facts["subject"] = "Печать чека"
         elif re.search(r"оплат.*карт|карт.*оплат|терминал", text):
             facts["subject"] = "Оплата картой"
-        if re.search(r"черн[ыо]й экран|экран черн", text):
+        if re.search(r"черн[ыо]й экран|экран черн|(?:экран|монитор).*?(?:погас|потух)|(?:погас|потух).*?(?:экран|монитор)", text):
             facts["symptom"] = "Чёрный экран"
         elif re.search(r"завис|не реагирует", text):
             facts["symptom"] = "Зависает или не реагирует"
@@ -141,14 +141,34 @@ class DialogueService:
             facts[pending] = "Неизвестно"
         elif pending == "error_text" and text in {"ошибки нет", "нет ошибки", "нет"}:
             facts[pending] = "Сообщения об ошибке нет"
-        elif pending in {"error_text", "details"} and len(text.split()) >= 2 and not re.search(r"просто.*не работает|помоги|ничего не работает", text):
+        elif pending == "error_text" and re.search(r"\d", text) and len(text) <= 150:
             facts[pending] = message[:500]
+        if before.get("subject") and facts.get("subject") != before["subject"]:
+            for key in ("symptom", "indicator", "error_text", "device", "details"):
+                if facts.get(key) == before.get(key):
+                    facts.pop(key, None)
         if active and before == facts:
             if state.get("turns", 0) >= 6:
                 state["stage"] = "handoff"
                 return DialogueDecision("handoff", state)
-            return self.ask(state, pending or "details", repeated=True)
+            return DialogueDecision("interpret", state)
         return self.advance(state)
+
+
+    async def interpret(self, message, state, llm):
+        from src.middleware.ai_capacity import run_model
+        pending = state.get("pending") or "details"
+        question, choices = self.QUESTIONS[pending]
+        result = await run_model(llm.interpret_reply, message, question, choices)
+        if result.get("kind") in {"question", "off_topic"}:
+            return DialogueDecision("direct", state, query=message)
+        if result.get("kind") == "answer":
+            value = result["value"]
+            if pending in {"subject", "device", "indicator"} and value not in choices:
+                return self.ask(state, pending, repeated=True)
+            state["facts"][pending] = value[:500]
+            return self.advance(state)
+        return self.ask(state, pending, repeated=True)
 
 
 def support_evidence_allowed(title, evidence):
