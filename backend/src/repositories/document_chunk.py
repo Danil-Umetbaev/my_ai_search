@@ -8,12 +8,14 @@ from sqlalchemy import (
     literal,
     or_,
     select,
+    update,
 )
 
 from src.models.documents import DocumentORM
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import DocumentChunkMapper
 from src.models.document_chunk import DocumentChunkORM
+from src.models.message_sources import MessageSourceORM
 from src.schemas.document_chunks import DocumentChunkSchema
 from src.schemas.vector_search import VectorSearchResultSchema
 
@@ -100,6 +102,7 @@ class DocumentChunkRepository(BaseRepository):
                 self.model.document_id
                 == DocumentORM.id,
             )
+            .where(self.model.is_active.is_(True))
             .order_by(distance)
             .limit(top_k)
         )
@@ -293,6 +296,7 @@ class DocumentChunkRepository(BaseRepository):
                 self.model.document_id
                 == DocumentORM.id,
             )
+            .where(self.model.is_active.is_(True))
             .where(
                 or_(*conditions)
             )
@@ -356,7 +360,7 @@ class DocumentChunkRepository(BaseRepository):
         query = (
             select(self.model)
             .filter_by(
-                document_id=document_id
+                document_id=document_id, is_active=True
             )
             .filter(
                 self.model.chunk_index.in_(
@@ -391,7 +395,7 @@ class DocumentChunkRepository(BaseRepository):
             indexes_by_document.setdefault(document_id, set()).update(
                 range(max(0, index - radius), index + radius + 1)
             )
-        query = select(self.model).where(or_(*[
+        query = select(self.model).where(self.model.is_active.is_(True)).where(or_(*[
             (self.model.document_id == document_id)
             & self.model.chunk_index.in_(indexes)
             for document_id, indexes in indexes_by_document.items()
@@ -414,7 +418,7 @@ class DocumentChunkRepository(BaseRepository):
         query = (
             select(self.model, DocumentORM.title, DocumentORM.source_url)
             .join(DocumentORM, self.model.document_id == DocumentORM.id)
-            .where(self.model.content.op("~")(pattern))
+            .where(self.model.is_active.is_(True), self.model.content.op("~")(pattern))
             .order_by(self.model.document_id, self.model.chunk_index)
             .limit(top_k)
         )
@@ -436,7 +440,7 @@ class DocumentChunkRepository(BaseRepository):
         query = (
             select(self.model)
             .filter_by(
-                document_id=document_id
+                document_id=document_id, is_active=True
             )
             .order_by(
                 self.model.chunk_index
@@ -454,16 +458,20 @@ class DocumentChunkRepository(BaseRepository):
             for obj in result_query
         ]
 
-    async def delete_by_document_id(
+    async def retire_by_document_id(
         self,
         document_id: UUID,
     ) -> None:
 
+        await self.session.execute(
+            update(self.model).where(self.model.document_id == document_id).values(is_active=False)
+        )
         query = (
             delete(self.model)
             .where(
                 self.model.document_id
-                == document_id
+                == document_id,
+                self.model.id.not_in(select(MessageSourceORM.chunk_id)),
             )
         )
 

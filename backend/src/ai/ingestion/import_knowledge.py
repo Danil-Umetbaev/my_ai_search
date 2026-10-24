@@ -31,7 +31,6 @@ async def run(path: Path, limit: int | None) -> int:
                     continue
                 if existing:
                     saved = await db.documents.update_by_id(document_id=existing.id, document=document)
-                    await db.document_chunks.delete_by_document_id(document_id=existing.id)
                 else:
                     saved = await db.documents.add(document)
                 await indexer.index_document(saved)
