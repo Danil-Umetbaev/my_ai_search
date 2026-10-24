@@ -563,7 +563,7 @@ class RAGService(BaseService):
 
         if support_mode:
             from src.services.dialogue import support_evidence_allowed
-            if not support_evidence_allowed(selected_title, evidence):
+            if not support_evidence_allowed(selected_title, evidence, question):
                 logger.info("RAG decision | reason=unsupported_employee_instruction")
                 return RAGResultSchema(status=RAGStatus.NOT_FOUND, answer=None)
 

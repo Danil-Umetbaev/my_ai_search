@@ -109,10 +109,10 @@ class DialogueService:
         pending = state.get("pending")
         before = dict(facts)
         if re.search(r"самообслуж|\bксо\b", text):
-            facts["subject"] = "Касса"
+            facts.setdefault("subject", "Касса")
             facts["device"] = "Касса самообслуживания"
         elif re.search(r"обычн.*касс|касс.*кассир", text):
-            facts["subject"] = "Касса"
+            facts.setdefault("subject", "Касса")
             facts["device"] = "Обычная касса"
         elif re.search(r"касс", text):
             facts.setdefault("subject", "Касса")
@@ -135,7 +135,7 @@ class DialogueService:
         unknown = text in {"не знаю", "хз", "не понимаю", "не могу прочитать", "без понятия"}
         if pending == "subject" and text == "другое":
             facts["subject"] = "Другое"
-        if pending == "indicator":
+        if pending == "indicator" or re.search(r"индикатор|лампочк", text):
             if unknown:
                 facts[pending] = "Неизвестно"
             elif re.search(r"не горит|не светит|^нет$", text):
@@ -184,8 +184,11 @@ class DialogueService:
         return self.ask(state, pending, repeated=True)
 
 
-def support_evidence_allowed(title, evidence):
+def support_evidence_allowed(title, evidence, question=""):
     employee_guide = bool(re.search(r"(?:касс.*руководство пользователя|сообщения об ошибках на экране кассира)", title, re.I))
     incomplete = bool(re.search(r"(?:нажмите|кликните|выберите|клавиш[ау])\s*(?:[.→]|$)", evidence, re.I))
     technical = bool(re.search(r"\b(?:sql|sudo|ssh|systemctl|postgres|root|select|update|delete)\b|баз[ауы] данных|конфигурационн|реестр|фискализац|замен.*накопител", evidence, re.I))
-    return employee_guide and not incomplete and not technical
+    actionable = bool(re.search(r"\b(?:позовите|вызовите|обратитесь|остановите|нажмите|выберите|проверьте|введите|откройте|закройте)\b", evidence, re.I))
+    if "печати чековых" in title.casefold() and not re.search(r"печат|чеков.*принтер|фискал", question, re.I):
+        return False
+    return employee_guide and actionable and not incomplete and not technical

@@ -89,6 +89,18 @@ class DialogueTests(unittest.TestCase):
         self.assertNotIn("indicator", result.state["facts"])
         self.assertEqual(result.state["facts"]["error_text"], "Теперь ошибка 123")
 
+    def test_device_answer_preserves_printing_incident(self):
+        result = self.follow("Не печатает чек", "ошибки нет", "обычная касса")
+        self.assertEqual(result.action, "search")
+        self.assertEqual(result.state["facts"]["subject"], "Печать чека")
+        self.assertEqual(result.state["facts"]["symptom"], "Не печатает чек")
+
+    def test_table_heading_is_not_a_solution(self):
+        self.assertFalse(support_evidence_allowed("Сообщения об ошибках на экране кассира при печати чековых документов", "Ошибка Причина Что делать?", "Не печатает чек"))
+
+    def test_printing_guide_does_not_solve_frozen_screen(self):
+        self.assertFalse(support_evidence_allowed("Сообщения об ошибках на экране кассира при печати чековых документов", "Позовите администратора.", "Касса зависла"))
+
     def test_source_gate_rejects_engineering_instructions(self):
         self.assertFalse(support_evidence_allowed("Настройка PostgreSQL", "Измените конфигурацию базы данных"))
         self.assertFalse(support_evidence_allowed("Касса Руководство пользователя", "Выберите → нажмите клавишу ВВОД"))
