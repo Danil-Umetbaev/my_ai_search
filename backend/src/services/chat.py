@@ -70,23 +70,33 @@ class ChatService(BaseService):
             return await self._reply(data.conversation_id, state, ChatStatus.RESOLVED, decision.answer)
         if decision.action == "handoff":
             return await self._handoff(data.conversation_id, state, "Запрошена помощь специалиста или исчерпаны уточнения.")
-        incident = decision.action == "search"
+        incident = decision.action == "search" and state.get("mode") != "question"
         try:
             rag_result = await self.rag_service.answer(decision.query, support_mode=incident)
         except Exception as ex:
             logger.exception("RAG processing failed | conversation_id=%s", data.conversation_id)
             raise RAGProcessingException from ex
         if rag_result.status == RAGStatus.CLARIFICATION:
-            return await self._reply(data.conversation_id, state, ChatStatus.CLARIFICATION, rag_result.answer)
+            followup = self.dialogue.ask_from_evidence(state, rag_result.answer, data.message)
+            if followup.action == "handoff":
+                return await self._handoff(data.conversation_id, followup.state, "Не удалось выбрать инструкцию после уточнений.")
+            return await self._reply(data.conversation_id, followup.state, ChatStatus.CLARIFICATION, followup.answer)
         if rag_result.status == RAGStatus.OFF_TOPIC:
             return await self._reply(data.conversation_id, state, ChatStatus.OFF_TOPIC, rag_result.answer)
         if rag_result.status == RAGStatus.NOT_FOUND:
+            if incident:
+                followup = self.dialogue.missing_answer(state)
+                if followup.action == "clarify":
+                    return await self._reply(data.conversation_id, followup.state, ChatStatus.CLARIFICATION,
+                                             followup.answer, choices=followup.choices)
             if not state:
                 state = {"initial": data.message, "facts": {}}
             return await self._handoff(data.conversation_id, state, "Не найдена подтверждённая инструкция для сотрудника.")
         sources = [SourceResponse(title=source.title, url=source.url, score=source.score) for source in rag_result.sources]
         choices = []
         answer = rag_result.answer
+        if state.get("mode") == "question":
+            state = {}
         if incident:
             state["stage"] = "awaiting_result"
             state["searches"] = state.get("searches", 0) + 1

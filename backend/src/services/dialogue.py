@@ -41,6 +41,7 @@ class DialogueService:
         return "\n".join(lines)
 
     def ask(self, state, field, repeated=False):
+        state.pop("question", None)
         state["pending"] = field
         state["stage"] = "collecting"
         state["turns"] = state.get("turns", 0) + 1
@@ -57,21 +58,36 @@ class DialogueService:
         if state.get("turns", 0) >= 6:
             state["stage"] = "handoff"
             return DialogueDecision("handoff", state)
-        if not facts.get("subject"):
+        if state.get("mode") == "question":
+            state["pending"] = None
+            state["stage"] = "searching"
+            return DialogueDecision("search", state, query=self.summary(state))
+        if not facts.get("subject") or facts.get("subject") == "Неизвестно":
             return self.ask(state, "subject")
-        if not facts.get("symptom"):
+        if not facts.get("symptom") and not facts.get("details"):
             return self.ask(state, "symptom")
-        if facts["symptom"] == "Чёрный экран" and not facts.get("indicator"):
-            return self.ask(state, "indicator")
-        if facts["symptom"] != "Чёрный экран" and not facts.get("error_text"):
-            return self.ask(state, "error_text")
-        if facts["subject"] in {"Касса", "Печать чека", "Оплата картой"} and not facts.get("device"):
-            return self.ask(state, "device")
-        if facts["subject"] == "Другое" and not facts.get("details"):
-            return self.ask(state, "details")
         state["pending"] = None
         state["stage"] = "searching"
         return DialogueDecision("search", state, query=self.summary(state))
+
+    def missing_answer(self, state):
+        state["misses"] = state.get("misses", 0) + 1
+        facts = state.get("facts", {})
+        if state["misses"] == 1 and state.get("turns", 0) < 6:
+            if facts.get("subject") in {"Печать чека", "Оплата картой"} and not facts.get("error_text"):
+                return self.ask(state, "error_text")
+            if not facts.get("details"):
+                return self.ask(state, "details")
+        return DialogueDecision("handoff", state)
+
+    def ask_from_evidence(self, state, question, initial):
+        if not state:
+            state = {"initial": initial, "facts": {}, "mode": "question", "turns": 0}
+        if state.get("turns", 0) >= 6 or question == state.get("question"):
+            return DialogueDecision("handoff", state)
+        state.update(stage="collecting", pending="details", question=question,
+                     turns=state.get("turns", 0) + 1)
+        return DialogueDecision("clarify", state, question)
 
     def route(self, message, previous):
         state = {**(previous or {}), "facts": dict((previous or {}).get("facts", {}))}
@@ -92,7 +108,7 @@ class DialogueService:
             state["pending"] = None
             return DialogueDecision("resolved", state, "Отлично, рад, что получилось. Если возникнет другая проблема — напишите.")
         active = state.get("stage") in {"collecting", "awaiting_result"}
-        standalone = bool(re.match(r"(?:как|где|можно ли|какие|чем|сколько)\b", text))
+        standalone = bool(re.match(r"(?:как|где|можно ли|какие|какой|что|чем|сколько|для чего|почему)\b", text))
         if active and standalone and not self.is_incident(text):
             return DialogueDecision("direct", {}, query=message)
         if state.get("stage") == "awaiting_result" and re.search(r"не помог|не работает|не получилось|все так же", text):
@@ -137,11 +153,11 @@ class DialogueService:
             facts["subject"] = "Другое"
         if pending == "indicator" or re.search(r"индикатор|лампочк", text):
             if unknown:
-                facts[pending] = "Неизвестно"
+                facts["indicator"] = "Неизвестно"
             elif re.search(r"не горит|не светит|^нет$", text):
-                facts[pending] = "Не горит"
+                facts["indicator"] = "Не горит"
             elif re.search(r"горит|светит|^да$", text):
-                facts[pending] = "Горит"
+                facts["indicator"] = "Горит"
         elif pending in {"device", "error_text", "details", "symptom", "subject"} and unknown:
             facts[pending] = "Неизвестно"
         elif pending == "error_text" and text in {"ошибки нет", "нет ошибки", "нет"}:
@@ -170,14 +186,19 @@ class DialogueService:
         from src.middleware.ai_capacity import run_model
         pending = state.get("pending") or "details"
         question, choices = self.QUESTIONS[pending]
+        if state.get("question"):
+            question, choices = state["question"], []
         result = await run_model(llm.interpret_reply, message, question, choices)
         if result.get("kind") == "off_topic":
             return DialogueDecision("off_topic", state, "Я помогу с рабочей проблемой. " + question, choices)
-        if result.get("kind") == "question" and re.match(r"(?:как|где|можно ли|какие|чем|сколько|почему)\b", self.normalize(message)):
+        if result.get("kind") == "question" and re.match(r"(?:как|где|можно ли|какие|что|чем|сколько|почему)\b", self.normalize(message)):
             return DialogueDecision("direct", {}, query=message)
         if result.get("kind") == "answer":
             state["facts"][pending] = message[:500]
             return self.advance(state)
+        if state.get("question"):
+            state["turns"] = state.get("turns", 0) + 1
+            return DialogueDecision("clarify", state, question, choices)
         return self.ask(state, pending, repeated=True)
 
 
