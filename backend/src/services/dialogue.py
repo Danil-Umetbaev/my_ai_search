@@ -45,6 +45,9 @@ class DialogueService:
         state["stage"] = "collecting"
         state["turns"] = state.get("turns", 0) + 1
         question, choices = self.QUESTIONS[field]
+        if field == "symptom" and state.get("facts", {}).get("subject") not in {"Касса", "Печать чека", "Оплата картой"}:
+            question = "Что именно происходит: есть сообщение об ошибке, устройство не реагирует или что-то другое?"
+            choices = ["Сообщение об ошибке", "Не реагирует", "Другое", "Не знаю"]
         if repeated:
             question = "Понял, проблема пока осталась. " + question
         return DialogueDecision("clarify", state, question, choices)
@@ -113,7 +116,9 @@ class DialogueService:
             facts["device"] = "Обычная касса"
         elif re.search(r"касс", text):
             facts.setdefault("subject", "Касса")
-        if re.search(r"печат|принтер|фискализатор|фискальн", text):
+        if re.search(r"ценник|этикетк", text):
+            facts["subject"] = "Печать ценников или этикеток"
+        elif re.search(r"печат|принтер|фискализатор|фискальн", text):
             facts["subject"] = "Печать чека"
         elif re.search(r"оплат.*карт|карт.*оплат|терминал", text):
             facts["subject"] = "Оплата картой"
@@ -147,10 +152,16 @@ class DialogueService:
             for key in ("symptom", "indicator", "error_text", "device", "details"):
                 if facts.get(key) == before.get(key):
                     facts.pop(key, None)
+        if before.get("symptom") and facts.get("symptom") != before["symptom"]:
+            for key in ("indicator", "error_text", "details"):
+                if facts.get(key) == before.get(key):
+                    facts.pop(key, None)
         if active and before == facts:
             if state.get("turns", 0) >= 6:
                 state["stage"] = "handoff"
                 return DialogueDecision("handoff", state)
+            if re.search(r"(?:просто|вообще|ничего|все|работать).*(?:не работает|перестал)|(?:не работает|перестал).*работ", text):
+                return self.ask(state, pending or "details", repeated=True)
             return DialogueDecision("interpret", state)
         return self.advance(state)
 
@@ -166,7 +177,7 @@ class DialogueService:
             return DialogueDecision("direct", {}, query=message)
         if result.get("kind") == "answer":
             value = result["value"]
-            if pending in {"subject", "device", "indicator"} and value not in choices:
+            if pending in {"device", "indicator"} and value not in choices:
                 return self.ask(state, pending, repeated=True)
             state["facts"][pending] = value[:500]
             return self.advance(state)

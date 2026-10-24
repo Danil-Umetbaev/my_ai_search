@@ -73,6 +73,22 @@ class DialogueTests(unittest.TestCase):
         state = {"stage": "awaiting_result", "facts": {}, "searches": 2}
         self.assertEqual(self.service.route("не помогло", state).action, "handoff")
 
+    def test_repeated_complaint_does_not_invent_symptoms(self):
+        result = self.follow("Не работает касса", "Да просто работать перестала!")
+        self.assertEqual(result.action, "clarify")
+        self.assertEqual(result.state["pending"], "symptom")
+        self.assertNotIn("symptom", result.state["facts"])
+
+    def test_label_printer_is_not_receipt_printer(self):
+        result = self.follow("Не печатает ценники")
+        self.assertEqual(result.state["facts"]["subject"], "Печать ценников или этикеток")
+
+    def test_changed_symptom_discards_old_observations(self):
+        state = self.follow("Касса сломалась", "Черный экран", "да").state
+        result = self.service.route("Теперь ошибка 123", state)
+        self.assertNotIn("indicator", result.state["facts"])
+        self.assertEqual(result.state["facts"]["error_text"], "Теперь ошибка 123")
+
     def test_source_gate_rejects_engineering_instructions(self):
         self.assertFalse(support_evidence_allowed("Настройка PostgreSQL", "Измените конфигурацию базы данных"))
         self.assertFalse(support_evidence_allowed("Касса Руководство пользователя", "Выберите → нажмите клавишу ВВОД"))
