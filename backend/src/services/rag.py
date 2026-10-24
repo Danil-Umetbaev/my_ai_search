@@ -236,6 +236,15 @@ class RAGService(BaseService):
             f"Документ: {title}\n{self._join_chunks(chunks)}"
             for title, chunks in context_documents.values()
         ]
+        context_size = sum(map(len, context_chunks))
+        for index, document_id in enumerate(context_documents):
+            document = await self.db.documents.get_one(id=document_id)
+            if document.content and len(document.content) <= 3000:
+                full_text = f"Документ: {document.title}\n{document.content}"
+                size = context_size - len(context_chunks[index]) + len(full_text)
+                if size <= 6000:
+                    context_chunks[index] = full_text
+                    context_size = size
         context = "\n\n---\n\n".join(context_chunks)
 
         logger.info(

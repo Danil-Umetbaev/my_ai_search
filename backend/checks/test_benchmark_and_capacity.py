@@ -114,6 +114,29 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
                          'Начало ' + overlap + ' конец')
         self.assertIn('[… ]', RAGService._join_chunks({1: overlap, 3: overlap}))
 
+    async def test_short_instruction_includes_solution_outside_retrieved_window(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, Mock
+        from uuid import uuid4
+        from src.services.rag import RAGService
+        from src.schemas.llm import LLMAnswerSchema
+        chunk = SimpleNamespace(document_id=uuid4(), chunk_id=uuid4(), chunk_index=0,
+                                document_title='Инструкция', document_url='https://example.test/instruction',
+                                content='Описание сбоя.')
+        full_text = 'Описание сбоя. Решение: обратиться к инженеру банка.'
+        db = Mock(document_chunks=Mock(search_lexical=AsyncMock(return_value=[]),
+                                       get_neigbors=AsyncMock(return_value=[chunk])),
+                  documents=Mock(get_one=AsyncMock(return_value=SimpleNamespace(title='Инструкция', content=full_text))))
+        llm = Mock()
+        llm.rewrite_query.return_value = 'Кто исправляет сбой?'
+        llm.generate.return_value = LLMAnswerSchema(answerable=True, answer='Инженер банка.', source_titles=['Инструкция'])
+        reranker = Mock()
+        reranker.rerank.return_value = [.9]
+        result = await RAGService(db, Mock(search=AsyncMock(return_value=[chunk])), llm, reranker).answer('Кто исправляет сбой?')
+        self.assertIn(full_text, llm.generate.call_args.args[2])
+        self.assertEqual([source.title for source in result.sources], ['Инструкция'])
+        self.assertEqual(result.used_chunks[0].chunk_id, chunk.chunk_id)
+
     def test_arithmetic_does_not_reject_working_questions_with_numbers(self):
         from src.ai.llm.base import is_arithmetic_question
         for question in ['Сколько будет 27 умножить на 43?', 'Сколько будет два умножить на два?', '2 + 2']:
