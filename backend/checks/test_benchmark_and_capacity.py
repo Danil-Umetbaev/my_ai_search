@@ -12,6 +12,23 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_chunking_keeps_original_unicode_and_prefers_line_endings(self):
+        from src.ai.chunking.token import TokenChunker
+        class CharacterTokenizer:
+            def __call__(self, text, **kwargs):
+                return {'offset_mapping': [(i, i + 1) for i in range(len(text))]}
+        chunker = TokenChunker.__new__(TokenChunker)
+        chunker.tokenizer = CharacterTokenizer()
+        chunker.chunk_size, chunker.chunk_overlap = 24, 4
+        text = 'Сервер:\nТоваровед\nКасса:\nКонсультант КСО\n'
+        chunks = chunker.split(text)
+        self.assertEqual(chunks[0], 'Сервер:\nТоваровед\nКасса:\n')
+        self.assertTrue(all(chunk in text for chunk in chunks))
+        from src.services.rag import RAGService
+        chunker.chunk_overlap = 20
+        chunks = chunker.split(text)
+        self.assertEqual(RAGService._join_chunks(dict(enumerate(chunks))), text)
+
     def test_lists_keep_whole_names_and_group_boundaries(self):
         from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
         text = ConfluenceKnowledgeSource()._clear_html(
