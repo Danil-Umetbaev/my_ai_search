@@ -25,10 +25,10 @@ class QwenLLMProvider(LLMProvider):
 
         model = AutoModelForCausalLM.from_pretrained(
             self.MODEL_NAME,
-            torch_dtype=torch.float16,
+            dtype=torch.float16,
+            device_map=self.device,
         )
 
-        model.to(self.device)
         model.eval()
 
         return tokenizer, model
