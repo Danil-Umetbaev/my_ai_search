@@ -1477,5 +1477,756 @@
     "question": "Привет, как настроение?",
     "expected": "off_topic",
     "category": "off_topic"
+  },
+  {
+    "id": 217,
+    "question": "После сбоя оплата картой прошла, но продажи в кассовом чеке нет. Как отменить именно банковскую транзакцию?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3581280312"
+    ],
+    "required_facts": [
+      "Функция «Отмена по банку» для отмены транзакции после сбоя; не предлагать повторно списывать оплату."
+    ],
+    "related_case_id": 151
+  },
+  {
+    "id": 218,
+    "question": "Поддерживает ли SetRetail10 отмену списания по банковской карте при неуспешной регистрации чека?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3581280312"
+    ],
+    "required_facts": [
+      "Да, функция «Отмена по банку»; доступна с 10.2.58.0."
+    ],
+    "related_case_id": 152
+  },
+  {
+    "id": 219,
+    "question": "Настраиваю доступ к отмене банковской операции после сбоя. Какое право нужно включить в роли кассира?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3581280312"
+    ],
+    "required_facts": [
+      "Привилегия «Аннулирование чека»."
+    ],
+    "related_case_id": 153
+  },
+  {
+    "id": 220,
+    "question": "В версии 10.2.58.0 уже доступна функция отмены банковской транзакции через кассу?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3581280312"
+    ],
+    "required_facts": [
+      "Начиная с 10.2.58.0."
+    ],
+    "related_case_id": 154
+  },
+  {
+    "id": 221,
+    "question": "Покупатель ещё не платил и отошёл за забытым товаром. Как сохранить набранный чек и обслужить следующего?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Отложить чек до начала оплаты, выдать нефискальный документ с номером/штрихкодом и обслужить следующего покупателя."
+    ],
+    "related_case_id": 155
+  },
+  {
+    "id": 222,
+    "question": "Скидки в чеке уже посчитаны, а покупатель хочет отойти. Как подготовить этот чек к откладыванию на клавиатурной кассе?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Отменить расчёт скидок клавишей «Отмена», затем отложить чек."
+    ],
+    "related_case_id": 156
+  },
+  {
+    "id": 223,
+    "question": "В чеке есть подарочная карта. Допускается ли отложить такой чек?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Чек с подарочной картой отложить нельзя."
+    ],
+    "related_case_id": 157
+  },
+  {
+    "id": 224,
+    "question": "Перед откладыванием чека надо отменять уже выполненный расчёт скидок?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Сначала отменить расчёт скидок, затем отложить чек."
+    ],
+    "related_case_id": 158
+  },
+  {
+    "id": 225,
+    "question": "Кассир перешёл к получению оплаты. Разрешено ли после этого отложить чек?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Нет, чек откладывают до начала получения оплаты."
+    ],
+    "related_case_id": 159
+  },
+  {
+    "id": 226,
+    "question": "На клавиатурной кассе нужно продолжить продажу по ранее отложенному чеку. Как его вызвать?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "«Поиск отложенного чека», ввести номер или сканировать штрихкод, нажать ВВОД."
+    ],
+    "related_case_id": 160
+  },
+  {
+    "id": 227,
+    "question": "У покупателя сохранился штрихкод отложенного чека. Можно использовать его при восстановлении чека?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Вызвать «Поиск отложенного чека», сканировать штрихкод и подтвердить ВВОД."
+    ],
+    "related_case_id": 161
+  },
+  {
+    "id": 228,
+    "question": "Известен номер отложенного чека. Как найти его через функцию поиска на клавиатурной кассе?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Функция «Поиск отложенного чека»: ввести номер и нажать ВВОД."
+    ],
+    "related_case_id": 162
+  },
+  {
+    "id": 229,
+    "question": "При восстановлении отложенного чека автоматическая проверка маркированных товаров в ОИСМ не прошла. Что потребуется от кассира?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "При неуспешной автоматической проверке в ОИСМ требуется ручное сканирование; есть исключения для автодобавления/привилегий."
+    ],
+    "related_case_id": 163
+  },
+  {
+    "id": 230,
+    "question": "Отложенный чек содержит крепкий алкоголь. Потребуется ли сканирование кодов при его восстановлении?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Да, для крепкого алкоголя запрашивается сканирование штрихкодов и кодов маркировки."
+    ],
+    "related_case_id": 164
+  },
+  {
+    "id": 231,
+    "question": "При восстановлении алкогольного чека кассир отказался повторно сканировать марки. Какая операция остаётся доступна?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/3347480615"
+    ],
+    "required_facts": [
+      "Нет, при отказе от сканирования доступна только аннуляция чека."
+    ],
+    "related_case_id": 165
+  },
+  {
+    "id": 232,
+    "question": "Пирит 2Ф сообщает об ошибке при приёме данных. Какие кабели проверить до дальнейшей диагностики?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Проверить надёжность подключения и целостность кабелей питания и передачи данных."
+    ],
+    "related_case_id": 166
+  },
+  {
+    "id": 233,
+    "question": "Что обычно означает сообщение Пирит «Ошибка при приеме данных» с точки зрения связи кассы и регистратора?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Основная причина — отсутствие связи с фискальным регистратором."
+    ],
+    "related_case_id": 167
+  },
+  {
+    "id": 234,
+    "question": "Проверяю подключение Пирит после ошибки при приёме данных. Достаточно проверить только питание или также кабель передачи данных?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Проверить кабель питания и кабель передачи данных, их целостность и надёжность соединений."
+    ],
+    "related_case_id": 168
+  },
+  {
+    "id": 235,
+    "question": "После перезапуска Пирит нет чека «ККТ готова к работе». Какая утилита нужна для следующего шага диагностики?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Удалённая проверка ошибок с помощью Fito."
+    ],
+    "related_case_id": 169
+  },
+  {
+    "id": 236,
+    "question": "Пирит после включения распечатал сообщение готовности. Нужно перезапустить ещё и системный блок кассы?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Перезагрузить системный блок кассы."
+    ],
+    "related_case_id": 170
+  },
+  {
+    "id": 237,
+    "question": "Инструкция проверки кабелей и перезапуска Пирит выполнена, ошибка осталась. Кому передать проблему?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Обратиться в техническую поддержку для восстановления работоспособности фискального регистратора."
+    ],
+    "related_case_id": 171
+  },
+  {
+    "id": 238,
+    "question": "На кассе появилось сообщение об окончании срока действия ФН. Как действовать кассиру?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1171193941"
+    ],
+    "required_facts": [
+      "Остановить продажи и вызвать специалиста ЦТО; не отключать и не заменять принтер самостоятельно."
+    ],
+    "related_case_id": 172
+  },
+  {
+    "id": 239,
+    "question": "Можно закончить обслуживание очереди после сообщения об истечении срока фискального накопителя?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1171193941"
+    ],
+    "required_facts": [
+      "Нет, остановить продажи до приезда ЦТО."
+    ],
+    "related_case_id": 173
+  },
+  {
+    "id": 240,
+    "question": "При истёкшем ФН можно самостоятельно заменить чековый принтер на запасной?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1171193941"
+    ],
+    "required_facts": [
+      "Нет, запрещена самостоятельная замена другим чековым принтером."
+    ],
+    "related_case_id": 174
+  },
+  {
+    "id": 241,
+    "question": "После сбоя на КСО нужна отмена по Сбербанку без предъявления карты. Кто может включить эту возможность?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/5107580948"
+    ],
+    "required_facts": [
+      "Только специалисты поддержки Сбербанка, настройка выполняется удалённо."
+    ],
+    "related_case_id": 175
+  },
+  {
+    "id": 242,
+    "question": "Поддержка Сбербанка изменила настройку отмены без карты. Что выполнить для её применения?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/5107580948"
+    ],
+    "required_facts": [
+      "После сверки итогов."
+    ],
+    "related_case_id": 176
+  },
+  {
+    "id": 243,
+    "question": "При обращении в Сбербанк для включения отмены без карты нужно сообщить номера терминалов?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/5107580948"
+    ],
+    "required_facts": [
+      "Закреплённый инженер Сбербанка или линия поддержки, сообщить номера терминалов."
+    ],
+    "related_case_id": 177
+  },
+  {
+    "id": 244,
+    "question": "Может ли администратор магазина самостоятельно активировать отмену без карты на терминале Сбербанка?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/5107580948"
+    ],
+    "required_facts": [
+      "Нет, только специалисты поддержки Сбербанка удалённо."
+    ],
+    "related_case_id": 178
+  },
+  {
+    "id": 245,
+    "question": "В goods.log есть no protocol, товары остаются в очереди загрузки. Какие два конфигурационных файла проверить?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
+    ],
+    "required_facts": [
+      "Проверить адреса сервера в ServerRegisterModules-config.xml и products.properties; после исправления перезапустить службу сервера."
+    ],
+    "related_case_id": 179
+  },
+  {
+    "id": 246,
+    "question": "При MalformedURLException: no protocol следует подставить IP из примера документации или адрес своего сервера?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
+    ],
+    "required_facts": [
+      "Некорректные URL в ServerRegisterModules-config.xml и products.properties; использовать адрес своего сервера."
+    ],
+    "related_case_id": 180
+  },
+  {
+    "id": 247,
+    "question": "URL сервера в конфигурационных файлах исправлены после ошибки no protocol. Как применить изменения?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468123839"
+    ],
+    "required_facts": [
+      "Да, после изменений необходимо перезапустить службу сервера."
+    ],
+    "related_case_id": 181
+  },
+  {
+    "id": 248,
+    "question": "Проверка сети подтвердила потери пингов при медленной загрузке товаров на кассу. Какую скорость и дуплекс рекомендует инструкция?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/434373239"
+    ],
+    "required_facts": [
+      "Принудительно согласовать скорость 10 Мбит/с, полный дуплекс; это решение для подтверждённых потерь связи."
+    ],
+    "related_case_id": 182
+  },
+  {
+    "id": 249,
+    "question": "Для проблемы с потерями пингов инструкция рекомендует 10 Мбит/с: полный или полудуплекс?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/434373239"
+    ],
+    "required_facts": [
+      "Полный дуплекс (full duplex)."
+    ],
+    "related_case_id": 183
+  },
+  {
+    "id": 250,
+    "question": "Нужно найти диагностические данные неуспешной оплаты СБП. В какой базе, таблице и поле их искать?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "attributes таблицы ch_payment_transaction базы cash."
+    ],
+    "related_case_id": 184
+  },
+  {
+    "id": 251,
+    "question": "Запись типов ошибок СБП появилась начиная с версии 10.4.8.0?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "Начиная с 10.4.8.0."
+    ],
+    "related_case_id": 185
+  },
+  {
+    "id": 252,
+    "question": "Дополнительная информация СБП хранится в attributes таблицы ch_payment_transaction. В каком формате записаны параметры?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "Поле attributes, параметры в JSON."
+    ],
+    "related_case_id": 186
+  },
+  {
+    "id": 253,
+    "question": "У платежа СБП указан тип EXPIRED. Это истечение срока действия QR-кода?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "Истёк срок жизни QR-кода."
+    ],
+    "related_case_id": 187
+  },
+  {
+    "id": 254,
+    "question": "Тип ошибки СБП CONNECTION_ERROR указывает на проблему соединения с банковским процессингом?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "Ошибка подключения к банковскому процессингу."
+    ],
+    "related_case_id": 188
+  },
+  {
+    "id": 255,
+    "question": "От банка получен HTTP-статус вне диапазона 2xx при СБП. К какому типу ошибки это относится?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4703977534"
+    ],
+    "required_facts": [
+      "Отрицательный ответ банка или HTTP-статус вне 2xx."
+    ],
+    "related_case_id": 189
+  },
+  {
+    "id": 256,
+    "question": "Для разбора неуспешной оплаты картой нужен обмен кассы с терминалом. Как называется соответствующий лог?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/450560362"
+    ],
+    "required_facts": [
+      "Журнал bank.log обмена с банковским терминалом."
+    ],
+    "related_case_id": 190
+  },
+  {
+    "id": 257,
+    "question": "Для диагностики банковских ошибок требуется TRACE. Какие настройки logger и appender в log4j.xml нужно проверить?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/450560362"
+    ],
+    "required_facts": [
+      "Уровень TRACE вместо ERROR; настройка logger и appender в log4j.xml."
+    ],
+    "related_case_id": 191
+  },
+  {
+    "id": 258,
+    "question": "Чек готовности Пирит не вышел после перезапуска. Нужно ли проверять ошибки через Fito?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/2420080964"
+    ],
+    "required_facts": [
+      "Удалённая проверка ошибок с помощью Fito."
+    ],
+    "related_case_id": 169
+  },
+  {
+    "id": 259,
+    "question": "При создании серверного пользователя Active Directory — обязательное или дополнительное поле?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1111785890"
+    ],
+    "required_facts": [
+      "Обязательные поля: Логин и Пароль.",
+      "Аутентификация через Active Directory и персональные данные являются дополнительными полями, а не обязательными."
+    ],
+    "related_case_id": 14
+  },
+  {
+    "id": 260,
+    "question": "После установки системы какие серверные роли уже существуют без ручного создания?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4513693878"
+    ],
+    "required_facts": [
+      "Полный список серверных ролей: Администратор; Администратор ЦО (SetCentrum); Директор; Маркетолог; Маркетолог ЦО (SetCentrum); Руководитель отдела; Сервисный инженер; Сервисный инженер ЦО (SetCentrum); Специалист отдела; Товаровед.",
+      "Не разделять составные названия ролей и не добавлять кассовые роли."
+    ],
+    "related_case_id": 16
+  },
+  {
+    "id": 261,
+    "question": "Назови все стандартные кассовые роли, включая роли для КСО.",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4513693878"
+    ],
+    "required_facts": [
+      "Полный список кассовых ролей: Администратор; Кассир; Консультант КСО; Покупатель КСО; Сервисный инженер; Старший кассир.",
+      "Консультант КСО и Покупатель КСО — целые названия, КСО не отдельная роль."
+    ],
+    "related_case_id": 17
+  },
+  {
+    "id": 262,
+    "question": "Сервер имеет версию 10.3.10.0. Допускается обновить кассу до версии выше 10.3.10.X?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1302528115"
+    ],
+    "required_facts": [
+      "С версии 10.3.10.0 повышение версии кассы выше версии сервера заблокировано.",
+      "Учитывать пример из документа: при сервере 10.3.10.0 допустимы кассы до 10.3.10.X."
+    ],
+    "related_case_id": 25
+  },
+  {
+    "id": 263,
+    "question": "Покупатель возвращает один товар из нескольких в чеке. Предусмотрен ли в SetRetail10 возврат отдельных позиций?",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/897646825"
+    ],
+    "required_facts": [
+      "Возврат по чеку допускает как полный возврат, так и отдельные позиции.",
+      "Ограничения отдельных платежных плагинов нельзя представлять как общий запрет частичного возврата."
+    ],
+    "related_case_id": 47
+  },
+  {
+    "id": 264,
+    "question": "У серверных пользователей и кассиров одинаковые стандартные роли? Перечисли отдельно обе группы.",
+    "expected": "answered",
+    "category": "operational_variant",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4513693878"
+    ],
+    "required_facts": [
+      "Серверные роли: Администратор; Администратор ЦО (SetCentrum); Директор; Маркетолог; Маркетолог ЦО (SetCentrum); Руководитель отдела; Сервисный инженер; Сервисный инженер ЦО (SetCentrum); Специалист отдела; Товаровед.",
+      "Кассовые роли: Администратор; Кассир; Консультант КСО; Покупатель КСО; Сервисный инженер; Старший кассир.",
+      "Перечислить обе группы полностью и отдельно."
+    ],
+    "related_case_id": 125
+  },
+  {
+    "id": 265,
+    "question": "Какой IP-адрес сейчас назначен кассе номер 17 в нашем магазине?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 266,
+    "question": "Какая версия SetRetail10 установлена сегодня на нашем рабочем сервере?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 267,
+    "question": "Назови пароль Wi-Fi для сотрудников нашего магазина.",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 268,
+    "question": "Сколько рублей было в денежном ящике нашей кассы номер 2 на открытии сегодняшней смены?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 269,
+    "question": "Какой серийный номер фискального накопителя установлен на нашей кассе номер 8?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 270,
+    "question": "Какой сотрудник изменил настройки нашего терминала вчера в 18:00?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 271,
+    "question": "Какой номер банковского терминала закреплён за нашей кассой номер 12?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 272,
+    "question": "Какой логин и пароль администратор установил на нашем сервере SetCentrum?",
+    "expected": "not_found",
+    "category": "unavailable_local_data",
+    "required_facts": [
+      "Не придумывать локальные данные магазина, отсутствующие в публичной документации."
+    ]
+  },
+  {
+    "id": 273,
+    "question": "Напиши поздравление кассиру в стихах.",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 274,
+    "question": "Придумай сказку о говорящем банковском терминале.",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 275,
+    "question": "Как приготовить борщ на ужин?",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 276,
+    "question": "Сколько будет 18 плюс 27?",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 277,
+    "question": "Объясни закон всемирного тяготения.",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 278,
+    "question": "Посоветуй фильм на выходные.",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 279,
+    "question": "Составь гороскоп для кассира.",
+    "expected": "off_topic",
+    "category": "off_topic"
+  },
+  {
+    "id": 280,
+    "question": "Переведи на английский фразу «сегодня прекрасная погода».",
+    "expected": "off_topic",
+    "category": "off_topic"
   }
 ]
