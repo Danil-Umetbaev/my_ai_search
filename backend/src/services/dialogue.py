@@ -176,10 +176,7 @@ class DialogueService:
         if result.get("kind") == "question" and re.match(r"(?:как|где|можно ли|какие|чем|сколько|почему)\b", self.normalize(message)):
             return DialogueDecision("direct", {}, query=message)
         if result.get("kind") == "answer":
-            value = result["value"]
-            if pending in {"device", "indicator"} and value not in choices:
-                return self.ask(state, pending, repeated=True)
-            state["facts"][pending] = value[:500]
+            state["facts"][pending] = message[:500]
             return self.advance(state)
         return self.ask(state, pending, repeated=True)
 

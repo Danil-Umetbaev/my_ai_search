@@ -107,5 +107,17 @@ class DialogueTests(unittest.TestCase):
         self.assertTrue(support_evidence_allowed("Касса Руководство пользователя", "Позовите администратора магазина."))
 
 
+class InterpretationTests(unittest.IsolatedAsyncioTestCase):
+    async def test_model_cannot_replace_observation_with_another_symptom(self):
+        class LLM:
+            def interpret_reply(self, message, question, choices):
+                return {"kind": "answer", "value": "Не печатает чек", "evidence": "всё встало"}
+        service = DialogueService()
+        state = service.route("Не работает касса", {}).state
+        result = await service.interpret("Там всё встало намертво", state, LLM())
+        self.assertEqual(result.state["facts"]["symptom"], "Там всё встало намертво")
+        self.assertNotIn("Не печатает чек", service.summary(result.state))
+
+
 if __name__ == "__main__":
     unittest.main()
