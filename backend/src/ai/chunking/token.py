@@ -30,7 +30,8 @@ class TokenChunker(Chunker):
                 boundary_index = bisect_right(boundaries, offsets[end - 1][1]) - 1
                 if boundary_index >= 0:
                     candidate = bisect_left(starts, boundaries[boundary_index])
-                    if start + self.chunk_size // 2 <= candidate <= end:
+                    minimum_end = start + max(self.chunk_size // 2, self.chunk_overlap + 1)
+                    if minimum_end <= candidate <= end:
                         end = candidate
             result.append(text[offsets[start][0]:offsets[end - 1][1]])
             if end == len(offsets):
