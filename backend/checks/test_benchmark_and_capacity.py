@@ -51,6 +51,7 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
             entered.set()
             await finish.wait()
         gate = AICapacityMiddleware(app)
+        gate.max_requests = 1
         scope = dict(type='http', method='POST', path='/api/v1/chat/messages')
         messages = []
         async def send(message):
@@ -64,11 +65,11 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
         first.cancel()
         with self.assertRaises(asyncio.CancelledError):
             await first
-        self.assertTrue(gate.busy)
+        self.assertTrue(gate.tasks)
         finish.set()
         await asyncio.gather(*gate.tasks)
         await asyncio.sleep(0)
-        self.assertFalse(gate.busy)
+        self.assertFalse(gate.tasks)
         await gate(scope, receive, send)
 
     async def test_failure_releases_slot(self):
@@ -77,7 +78,7 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
         gate = AICapacityMiddleware(app)
         with self.assertRaises(RuntimeError):
             await gate(dict(type='http', method='POST', path='/api/v1/chat/messages'), None, None)
-        self.assertFalse(gate.busy)
+        self.assertFalse(gate.tasks)
 
 
 if __name__ == '__main__':

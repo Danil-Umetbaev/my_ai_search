@@ -43,7 +43,7 @@ class EscalationService(BaseService):
             )
         )
 
-        await self.db.commit()
+        await self.db.session.flush()
 
         logger.info(
             "Escalation created | escalation_id=%s | conversation_id=%s",
@@ -66,7 +66,7 @@ class EscalationService(BaseService):
                 id=escalation.id
             )
 
-            await self.db.commit()
+            await self.db.session.flush()
 
             logger.info(
                 "Escalation sent | escalation_id=%s",
@@ -86,7 +86,7 @@ class EscalationService(BaseService):
                 id=escalation.id
             )
 
-            await self.db.commit()
+            await self.db.session.flush()
 
         return await self.db.escalations.get_one(
             id=escalation.id

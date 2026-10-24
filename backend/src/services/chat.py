@@ -64,6 +64,8 @@ class ChatService(BaseService):
         state = decision.state
         if decision.action == "clarify":
             return await self._reply(data.conversation_id, state, ChatStatus.CLARIFICATION, decision.answer, choices=decision.choices)
+        if decision.action == "off_topic":
+            return await self._reply(data.conversation_id, state, ChatStatus.OFF_TOPIC, decision.answer, choices=decision.choices)
         if decision.action == "resolved":
             return await self._reply(data.conversation_id, state, ChatStatus.RESOLVED, decision.answer)
         if decision.action == "handoff":

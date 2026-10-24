@@ -84,7 +84,7 @@ class DialogueService:
             state.setdefault("facts", {})
             state["stage"] = "handoff"
             return DialogueDecision("handoff", state)
-        if state and text in {"спасибо", "спасибо помогло", "помогло", "заработало", "все работает", "решено"}:
+        if state and text in {"спасибо помогло", "помогло", "заработало", "все работает", "решено"}:
             state["stage"] = "resolved"
             state["pending"] = None
             return DialogueDecision("resolved", state, "Отлично, рад, что получилось. Если возникнет другая проблема — напишите.")
@@ -160,8 +160,10 @@ class DialogueService:
         pending = state.get("pending") or "details"
         question, choices = self.QUESTIONS[pending]
         result = await run_model(llm.interpret_reply, message, question, choices)
-        if result.get("kind") in {"question", "off_topic"}:
-            return DialogueDecision("direct", state, query=message)
+        if result.get("kind") == "off_topic":
+            return DialogueDecision("off_topic", state, "Я помогу с рабочей проблемой. " + question, choices)
+        if result.get("kind") == "question" and re.match(r"(?:как|где|можно ли|какие|чем|сколько|почему)\b", self.normalize(message)):
+            return DialogueDecision("direct", {}, query=message)
         if result.get("kind") == "answer":
             value = result["value"]
             if pending in {"subject", "device", "indicator"} and value not in choices:
