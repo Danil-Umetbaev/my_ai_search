@@ -1,6 +1,5 @@
 from src.middleware.ai_capacity import run_model
 import logging
-import re
 from time import perf_counter
 
 from src.ai.llm.base import LLMProvider
@@ -33,34 +32,6 @@ class RAGService(BaseService):
         self.llm = llm
         self.reranker = reranker
 
-    @staticmethod
-    def _merge_contents(chunks) -> str:
-        result = ""
-
-        for chunk in chunks:
-            content = chunk.content
-
-            if not content:
-                continue
-
-            if not result:
-                result = content
-                continue
-
-            overlap = 0
-
-            for size in range(min(len(result), len(content)), 0, -1):
-                if result.endswith(content[:size]):
-                    overlap = size
-                    break
-
-            if overlap:
-                result += content[overlap:]
-            else:
-                result += "\n" + content
-
-        return result
-
     @log_execution_time("RAG")
     async def answer(
         self,
@@ -69,11 +40,10 @@ class RAGService(BaseService):
         lexical_k: int = 20,
         top_k: int = 3,
         threshold: float = 0.30,
-        support_mode: bool = False,
     ) -> RAGResultSchema:
         started = perf_counter()
 
-        search_query = question if support_mode else await run_model(
+        search_query = await run_model(
             self.llm.rewrite_query,
             question,
         )
@@ -82,24 +52,8 @@ class RAGService(BaseService):
             "RAG rewrite | duration=%.2fs",
             perf_counter() - started,
         )
-        logger.info(
-            "RAG input | question=%r | rewrite=%r",
-            question,
-            search_query,
-        )
-
-        if search_query.strip().upper() == "CLARIFY":
-            logger.info("RAG decision | reason=clarification_required")
-            return RAGResultSchema(
-                status=RAGStatus.CLARIFICATION,
-                answer="Не удалось понять вопрос. Уточните, пожалуйста, что вы хотите узнать о SetRetail10 или рабочих инструкциях.",
-                sources=[],
-                confidence=None,
-                used_chunks=[],
-            )
 
         if search_query.strip().upper() == "OFF_TOPIC":
-            logger.info("RAG decision | reason=off_topic")
             return RAGResultSchema(
                 status=RAGStatus.OFF_TOPIC,
                 answer=(
@@ -112,41 +66,11 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        def normalized_query(value: str) -> str:
-            return " ".join(
-                value.translate(str.maketrans("", "", '\"«»“”')).casefold().split()
-            ).strip(" ?.!")
-
-        comparison = re.fullmatch(
-            r"чем\s+(.+?)\s+отлича(?:ется|ются)\s+от\s+(.+)",
-            question.strip().rstrip("?.!"),
-            flags=re.IGNORECASE,
-        )
-        first_query = comparison[1] if comparison else question
-        second_query = comparison[2] if comparison else search_query
-        if comparison:
-            if len(second_query.split()) == 1 and len(first_query.split()) > 1:
-                second_query += " " + first_query.split()[-1]
-            first_query = "Что такое " + first_query
-            second_query = "Что такое " + second_query
-        heading_patterns = []
-        heading_candidates = []
-        if comparison:
-            for query in (first_query, second_query):
-                words = query.removeprefix("Что такое ").casefold().split()
-                roots = [re.sub(r"(?:ого|его|ый|ий|ой|ая|яя|ое|ее|ые|ие|ом|ым|им|ую|юю|а|я|ы|и|у|ю|е)$", "", word) for word in words]
-                if roots and all(re.fullmatch(r"[а-яё-]+", root) for root in roots):
-                    roots[0] = roots[0].capitalize()
-                    pattern = r"(^|\s)" + r"\s+".join(re.escape(root) + "[а-яё]*" for root in roots) + r"\s+[А-ЯЁ]"
-                    heading_patterns.append(pattern)
-                    heading_candidates.extend(await self.db.document_chunks.search_headings(pattern))
-                else:
-                    heading_patterns.append(None)
-        same_query = normalized_query(first_query) == normalized_query(second_query)
+        same_query = question == search_query
         started = perf_counter()
 
         original_vector = await self.vector_search.search(
-            first_query,
+            question,
             candidate_k,
         )
 
@@ -154,12 +78,12 @@ class RAGService(BaseService):
             rewritten_vector = original_vector
         else:
             rewritten_vector = await self.vector_search.search(
-                second_query,
+                search_query,
                 candidate_k,
             )
 
         original_lexical = await self.db.document_chunks.search_lexical(
-            first_query,
+            question,
             lexical_k,
         )
 
@@ -167,13 +91,12 @@ class RAGService(BaseService):
             rewritten_lexical = original_lexical
         else:
             rewritten_lexical = await self.db.document_chunks.search_lexical(
-                second_query,
+                search_query,
                 lexical_k,
             )
 
         all_candidates = (
-            heading_candidates
-            + original_vector
+            original_vector
             + rewritten_vector
             + original_lexical
             + rewritten_lexical
@@ -194,7 +117,6 @@ class RAGService(BaseService):
         )
 
         if not documents:
-            logger.info("RAG decision | reason=no_candidates")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -203,73 +125,16 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        started = perf_counter()
-        windows = {}
-        expanded_texts = {}
-        texts = []
-
-        neighbor_windows = await self.db.document_chunks.get_neighbors_bulk(
-            [(chunk.document_id, chunk.chunk_index) for chunk in documents]
-        )
-
-        for candidate in documents:
-            neighbors = neighbor_windows[(candidate.document_id, candidate.chunk_index)]
-
-            window_by_index = {
-                chunk.chunk_index: chunk
-                for chunk in neighbors
-                if chunk.document_id == candidate.document_id
-            }
-            window_by_index[candidate.chunk_index] = candidate
-
-            window = sorted(
-                window_by_index.values(),
-                key=lambda chunk: chunk.chunk_index,
-            )
-
-            windows[candidate.chunk_id] = window
-
-            content = self._merge_contents(window)
-            text = f"Документ: {candidate.document_title}\n{content}"
-
-            expanded_texts[candidate.chunk_id] = text
-            texts.append(text)
-
-        logger.info(
-            "RAG candidate expansion | candidates=%s | chars=%s | duration=%.2fs",
-            len(documents),
-            sum(len(text) for text in texts),
-            perf_counter() - started,
-        )
-
-        if comparison:
-            def subject_words(text: str) -> list[str]:
-                return [
-                    re.sub(r"(?:ого|его|ый|ий|ой|ая|яя|ое|ее|ые|ие|ом|ым|им|ую|юю|а|я|ы|и|у|ю|е)$", "", word)
-                    for word in text.casefold().split()
-                ]
-
-            def canonical_subject(query: str) -> str:
-                subject = query.removeprefix("Что такое ")
-                words = subject_words(subject)
-                for text in texts:
-                    for heading in re.findall(
-                        r"(?<![\w-])[А-ЯЁ][а-яё-]+(?: [а-яё-]+){0,3}(?= [А-ЯЁ])",
-                        text,
-                    ):
-                        if subject_words(heading) == words:
-                            return "Что такое " + heading
-                return query
-
-            first_query = canonical_subject(first_query)
-            second_query = canonical_subject(second_query)
-            logger.info("RAG comparison | first=%r | second=%r", first_query, second_query)
+        texts = [
+            f"Документ: {chunk.document_title}\n{chunk.content}"
+            for chunk in documents
+        ]
 
         started = perf_counter()
 
         original_scores = await run_model(
             self.reranker.rerank,
-            first_query,
+            question,
             texts,
         )
 
@@ -278,7 +143,7 @@ class RAGService(BaseService):
         else:
             rewritten_scores = await run_model(
                 self.reranker.rerank,
-                second_query,
+                search_query,
                 texts,
             )
 
@@ -306,29 +171,7 @@ class RAGService(BaseService):
             perf_counter() - started,
         )
 
-        for rank, (chunk, score) in enumerate(
-            chunks_with_scores[:5],
-            start=1,
-        ):
-            logger.debug(
-                "RAG candidate | rank=%s | score=%.4f | chunk_id=%s "
-                "| title=%r | expanded_content=%r",
-                rank,
-                score,
-                chunk.chunk_id,
-                chunk.document_title,
-                expanded_texts[chunk.chunk_id],
-            )
-
-        logger.info(
-            "RAG threshold | confidence=%.4f | threshold=%.4f | passed=%s",
-            confidence,
-            threshold,
-            confidence >= threshold,
-        )
-
         if confidence < threshold:
-            logger.info("RAG decision | reason=below_threshold")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -347,28 +190,6 @@ class RAGService(BaseService):
 
         best_chunks = strong_chunks[:top_k]
 
-        if comparison and not same_query:
-            comparison_chunks = {}
-            for side, side_scores in enumerate((original_scores, rewritten_scores)):
-                pattern = heading_patterns[side]
-                matching = [
-                    index for index, chunk in enumerate(documents)
-                    if pattern and re.search(pattern, expanded_texts[chunk.chunk_id])
-                ]
-                index = max(matching or range(len(documents)), key=side_scores.__getitem__)
-                if side_scores[index] < threshold:
-                    logger.info("RAG decision | reason=comparison_missing_evidence")
-                    return RAGResultSchema(
-                        status=RAGStatus.NOT_FOUND,
-                        answer=None,
-                        sources=[],
-                        confidence=confidence,
-                        used_chunks=[],
-                    )
-                chunk = documents[index]
-                comparison_chunks[chunk.chunk_id] = (chunk, scores[index])
-            best_chunks = list(comparison_chunks.values())
-
         if not best_chunks:
             best_chunks = [chunks_with_scores[0]]
 
@@ -377,13 +198,6 @@ class RAGService(BaseService):
         seen_documents = set()
 
         for chunk, score in best_chunks:
-            logger.info(
-                "RAG selected | chunk_id=%s | score=%.4f | title=%r",
-                chunk.chunk_id,
-                score,
-                chunk.document_title,
-            )
-
             used_chunks.append(
                 RAGChunkSourceSchema(
                     chunk_id=chunk.chunk_id,
@@ -407,131 +221,64 @@ class RAGService(BaseService):
             )
 
         started = perf_counter()
-        context_documents = {}
+        context_chunks = []
+        seen_context_chunks = set()
 
         for best_chunk, _ in best_chunks:
-            document_id = best_chunk.document_id
-
-            if document_id not in context_documents:
-                context_documents[document_id] = {
-                    "title": best_chunk.document_title,
-                    "chunks": {},
-                }
-
-            document_chunks = context_documents[document_id]["chunks"]
-
-            for chunk in windows[best_chunk.chunk_id]:
-                document_chunks[chunk.chunk_index] = chunk
-
-        context_parts = []
-        context_chunk_count = 0
-
-        primary_id = best_chunks[0][0].document_id
-        primary_document = await self.db.documents.get_one(id=primary_id)
-        for document_id, document in context_documents.items():
-            if document_id == primary_id and len(primary_document.content) <= 10000:
-                context_parts.append(f"Документ: {document['title']}\n{primary_document.content}")
-                context_chunk_count += len(document["chunks"])
-                continue
-            ordered_chunks = sorted(
-                document["chunks"].values(),
-                key=lambda chunk: chunk.chunk_index,
+            neighbors = await self.db.document_chunks.get_neigbors(
+                best_chunk.document_id,
+                best_chunk.chunk_index,
             )
 
-            context_chunk_count += len(ordered_chunks)
-            groups = []
-            current_group = []
+            window = list(neighbors)
 
-            for chunk in ordered_chunks:
-                if (
-                    current_group
-                    and chunk.chunk_index != current_group[-1].chunk_index + 1
-                ):
-                    groups.append(current_group)
-                    current_group = []
+            central_exists = any(
+                chunk.document_id == best_chunk.document_id
+                and chunk.chunk_index == best_chunk.chunk_index
+                for chunk in window
+            )
 
-                current_group.append(chunk)
+            if not central_exists:
+                window.append(best_chunk)
 
-            if current_group:
-                groups.append(current_group)
+            window.sort(key=lambda chunk: chunk.chunk_index)
 
-            for group in groups:
-                content = self._merge_contents(group)
-                context_parts.append(
-                    f"Документ: {document['title']}\n{content}"
+            for chunk in window:
+                key = (chunk.document_id, chunk.chunk_index)
+
+                if key in seen_context_chunks:
+                    continue
+
+                seen_context_chunks.add(key)
+
+                context_chunks.append(
+                    f"Документ: {best_chunk.document_title}\n{chunk.content}"
                 )
 
-        context = "\n\n---\n\n".join(context_parts)
+        context = "\n\n---\n\n".join(context_chunks)
 
         logger.info(
             "RAG context | chunks=%s | chars=%s | duration=%.2fs",
-            context_chunk_count,
+            len(context_chunks),
             len(context),
             perf_counter() - started,
         )
-        logger.debug("RAG full context | %r", context)
-
-        if comparison and len(best_chunks) == 2:
-            definitions = []
-            for query, (chunk, _) in zip((first_query, second_query), best_chunks, strict=True):
-                subject = query.removeprefix("Что такое ")
-                text = expanded_texts[chunk.chunk_id]
-                match = re.search(r"(?<![\w-])" + re.escape(subject) + r"\s+", text)
-                if not match:
-                    break
-                following = text[match.end():]
-                sentences = re.findall(r".+?[.!?](?=\s|$)", following)
-                if len(sentences) < 2 or not following.startswith(("Весь ", "Любой ", "Это ")):
-                    break
-                definition = ' '.join(s.strip() for s in sentences[:2])
-                definitions.append(f"{subject} — {re.sub(r'\s+([.,;:])', r'\1', definition)}")
-            if len(definitions) == 2:
-                logger.info("RAG decision | reason=explicit_definitions")
-                return RAGResultSchema(
-                    status=RAGStatus.ANSWERED,
-                    answer="\n\n".join(definitions),
-                    sources=sources,
-                    confidence=confidence,
-                    used_chunks=used_chunks,
-                )
-
-        evidence_parts = []
-        remaining = 14000
-        for part in context_parts:
-            cleaned = re.sub(r"(?:xml\s*)?(?:<\?xml[^>]*>\s*)?<goods-catalog\b.*?</goods-catalog>", "[XML-пример опущен]", part, flags=re.S)
-            if remaining <= 0:
-                break
-            excerpt = cleaned[:remaining]
-            evidence_parts.append(excerpt)
-            remaining -= len(excerpt)
-        evidence = "\n\n---\n\n".join(evidence_parts)
-        evidence_titles = {part.partition("\n")[0] for part in evidence_parts}
-        evidence_sources = [source for source in sources if "Документ: " + source.title in evidence_titles]
-        evidence_documents = {source.document_id for source in evidence_sources}
-        evidence_chunk_ids = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in evidence_documents}
 
         started = perf_counter()
+
         answer_llm = await run_model(
             self.llm.generate,
             question,
             search_query,
-            evidence,
+            context,
         )
 
         logger.info(
             "RAG generation | duration=%.2fs",
             perf_counter() - started,
         )
-        logger.info("RAG output | answerable=%s", answer_llm.answerable)
-
-        if answer_llm.clarification:
-            return RAGResultSchema(
-                status=RAGStatus.CLARIFICATION, answer=answer_llm.answer,
-                sources=sources, confidence=confidence,
-            )
 
         if not answer_llm.answerable:
-            logger.info("RAG decision | reason=llm_not_answerable")
             return RAGResultSchema(
                 status=RAGStatus.NOT_FOUND,
                 answer=None,
@@ -540,11 +287,10 @@ class RAGService(BaseService):
                 used_chunks=used_chunks,
             )
 
-        logger.info("RAG decision | reason=answered")
         return RAGResultSchema(
             status=RAGStatus.ANSWERED,
             answer=answer_llm.answer,
-            sources=evidence_sources,
+            sources=sources,
             confidence=confidence,
-            used_chunks=[chunk for chunk in used_chunks if chunk.chunk_id in evidence_chunk_ids],
+            used_chunks=used_chunks,
         )

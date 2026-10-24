@@ -2504,7 +2504,3 @@ span:not(.details-chevron) {
   }
 }
 
-.reply-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0 12px; }
-.reply-choices button { min-height: 44px; padding: 10px 14px; border: 1px solid #b8d9ca; border-radius: 12px; background: #eef8f4; color: #075c47; text-align: left; }
-.reply-choices button:hover:not(:disabled) { background: #dff2e9; }
-.reply-choices button:disabled { opacity: .5; }
