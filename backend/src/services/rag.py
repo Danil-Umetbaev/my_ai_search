@@ -67,12 +67,6 @@ class RAGService(BaseService):
                 used_chunks=[],
             )
 
-        if search_query.strip().upper() == "NOT_FOUND":
-            return RAGResultSchema(
-                status=RAGStatus.NOT_FOUND, answer=None, sources=[],
-                confidence=None, used_chunks=[],
-            )
-
         same_query = question == search_query
         started = perf_counter()
 
