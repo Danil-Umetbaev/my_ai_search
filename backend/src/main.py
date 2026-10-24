@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
         get_embedding_provider, get_llm_provider, get_reranker_provider,
     )
     logger.info("Preparing search models before accepting requests")
-    for load in (get_embedding_provider, get_llm_provider, get_reranker_provider):
+    for load in (get_llm_provider, get_reranker_provider, get_embedding_provider):
         await asyncio.to_thread(load)
     logger.info("Search models ready")
     yield

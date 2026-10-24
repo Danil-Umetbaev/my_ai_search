@@ -53,9 +53,10 @@ async def run(args, cases):
         output.write(json.dumps(metadata, ensure_ascii=False) + '\n')
         output.flush()
         async with DBManager(async_session_maker) as db:
+            llm = QwenLLMProvider()
+            reranker = CrossEncoderRerankerProvider()
             embedding = QwenEmbeddingProvider()
-            rag = RAGService(db, VectorSearchService(db, embedding),
-                             QwenLLMProvider(), CrossEncoderRerankerProvider())
+            rag = RAGService(db, VectorSearchService(db, embedding), llm, reranker)
             correct = failures = errors = 0
             for case in cases:
                 started = time.monotonic()

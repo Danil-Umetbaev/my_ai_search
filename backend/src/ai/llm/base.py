@@ -3,7 +3,7 @@ from src.schemas.llm import LLMAnswerSchema
 class LLMProvider(ABC):
 
     @abstractmethod
-    def generate(self, question: str, context: str) -> LLMAnswerSchema:
+    def generate(self, question: str, search_query: str, context: str) -> LLMAnswerSchema:
         pass
 
     @abstractmethod
