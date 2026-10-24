@@ -1,6 +1,8 @@
 """Merge disjoint JSONL runs; never silently count duplicate case IDs."""
 import argparse
 import json
+import math
+import statistics
 from pathlib import Path
 
 from src.ai.test_rag import load_cases
@@ -38,7 +40,24 @@ def analyze(paths):
                 if r.get('actual') == 'answered' and r.get('confidence') is not None
                 and all(r.get('review', {}).get(k) is True
                         for k in ('answer_correct', 'source_correct', 'complete'))]
-    return dict(processed=len(results), missing_ids=sorted(expected.keys() - results.keys()),
+    durations = sorted(r['duration_seconds'] for r in results.values()
+                       if 'error' not in r and isinstance(r.get('duration_seconds'), (int, float)))
+    confusion = {}
+    for row in results.values():
+        bucket = confusion.setdefault(row['expected'], {})
+        actual = row.get('actual', 'error')
+        bucket[actual] = bucket.get(actual, 0) + 1
+    reviewed_results = [r for r in results.values() if r.get('actual') == 'answered'
+                        and all(isinstance(r.get('review', {}).get(k), bool)
+                                for k in ('answer_correct', 'source_correct', 'complete'))]
+    quality_failures = [r['id'] for r in reviewed_results
+                        if not all(r['review'][k] for k in ('answer_correct', 'source_correct', 'complete'))]
+    return dict(confusion_matrix=confusion,
+                latency_seconds=dict(median=statistics.median(durations) if durations else None,
+                                     p95=durations[math.ceil(len(durations) * .95) - 1] if durations else None,
+                                     maximum=max(durations, default=None)),
+                reviewed_answers=len(reviewed_results), quality_failure_ids=quality_failures,
+                processed=len(results), missing_ids=sorted(expected.keys() - results.keys()),
                 status_correct=len(results)-len(errors)-len(failures),
                 failures=failures, error_ids=errors,
                 min_status_matched_answered=min(answered, default=None),

@@ -82,7 +82,10 @@ class QwenLLMProvider(LLMProvider):
             logging.getLogger(__name__).warning('Invalid evidence selection: %r', raw)
             return LLMAnswerSchema(answerable=False, answer=None)
         answer = "\n\n".join(passages[i - 1][1] for i in dict.fromkeys(selected))
-        return LLMAnswerSchema(answerable=bool(answer), answer=answer or None)
+        return LLMAnswerSchema(
+            answerable=bool(answer), answer=answer or None,
+            source_titles=list(dict.fromkeys(passages[i - 1][0].removeprefix("Документ: ") for i in selected)),
+        )
 
     @log_execution_time("LLM query rewrite")
     def rewrite_query(self, question: str) -> str:

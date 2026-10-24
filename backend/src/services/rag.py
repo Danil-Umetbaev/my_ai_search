@@ -268,6 +268,12 @@ class RAGService(BaseService):
                 used_chunks=used_chunks,
             )
 
+        if getattr(answer_llm, "source_titles", None):
+            sources = [source for source in sources if source.title in answer_llm.source_titles]
+            selected_documents = {source.document_id for source in sources}
+            selected_chunks = {chunk.chunk_id for chunk, _ in best_chunks if chunk.document_id in selected_documents}
+            used_chunks = [chunk for chunk in used_chunks if chunk.chunk_id in selected_chunks]
+
         return RAGResultSchema(
             status=RAGStatus.ANSWERED,
             answer=answer_llm.answer,
