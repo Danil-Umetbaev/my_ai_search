@@ -314,6 +314,13 @@ class RAGService(BaseService):
             if line_end - end <= 300:
                 end = line_end
             intervals.append((start, end))
+        introduction_end = content.rfind("\n\n", 0, 800) if len(content) > 800 else -1
+        if introduction_end > 0:
+            introduction = content[:introduction_end]
+            if introduction.count("```") % 2:
+                introduction_end = introduction.find("```")
+            if introduction_end > 0:
+                intervals.append((0, introduction_end))
         merged = []
         for start, end in sorted(intervals):
             if merged and start <= merged[-1][1] + 2:

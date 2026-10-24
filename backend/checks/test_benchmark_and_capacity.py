@@ -187,7 +187,15 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
         result = RAGService._context_excerpt(content, {2: '# Решение\nВыполните проверку.'})
         self.assertIn('# Решение', result)
         self.assertIn('Выполните проверку.', result)
-        self.assertNotIn('Раздел документа: Пример', result)
+        self.assertNotIn('Раздел документа: Пример\n# Решение', result)
+
+    def test_long_excerpt_keeps_bounded_introduction_before_example(self):
+        from src.services.rag import RAGService
+        content = '# Описание\n\nРазмер скидки задаётся настройками акции.\n\n# Настройка\n\n' + 'Детали. ' * 200 + '\n\n# Пример\n\nВ примере скидка 15%.\n'
+        result = RAGService._context_excerpt(content, {20: 'В примере скидка 15%.'})
+        self.assertIn('Размер скидки задаётся настройками акции.', result)
+        self.assertIn('Раздел документа: Пример', result)
+        self.assertLess(len(result), 400)
 
     async def test_short_instruction_includes_solution_outside_retrieved_window(self):
         from types import SimpleNamespace
