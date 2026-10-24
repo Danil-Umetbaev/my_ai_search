@@ -81,5 +81,46 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(gate.tasks)
 
 
+class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    async def test_off_topic_skips_search_and_generation(self):
+        from unittest.mock import AsyncMock, Mock
+        from src.services.rag import RAGService
+        from src.schemas.rag import RAGStatus
+        llm = Mock()
+        llm.rewrite_query.return_value = 'OFF_TOPIC'
+        search = Mock(search=AsyncMock())
+        result = await RAGService(Mock(), search, llm, Mock()).answer('Расскажи анекдот')
+        self.assertEqual(result.status, RAGStatus.OFF_TOPIC)
+        search.search.assert_not_awaited()
+        llm.generate.assert_not_called()
+
+    async def test_empty_search_returns_not_found_without_generation(self):
+        from unittest.mock import AsyncMock, Mock
+        from src.services.rag import RAGService
+        from src.schemas.rag import RAGStatus
+        question = 'Как оформить отпуск?'
+        llm = Mock()
+        llm.rewrite_query.return_value = question
+        db = Mock(document_chunks=Mock(search_lexical=AsyncMock(return_value=[])))
+        search = Mock(search=AsyncMock(return_value=[]))
+        result = await RAGService(db, search, llm, Mock()).answer(question)
+        self.assertEqual(result.status, RAGStatus.NOT_FOUND)
+        llm.generate.assert_not_called()
+
+    def test_context_overlap_preserves_complete_text_and_gaps(self):
+        from src.services.rag import RAGService
+        overlap = 'совпадающий фрагмент исходного документа'
+        self.assertEqual(RAGService._join_chunks({1: 'Начало ' + overlap, 2: overlap + ' конец'}),
+                         'Начало ' + overlap + ' конец')
+        self.assertIn('[… ]', RAGService._join_chunks({1: overlap, 3: overlap}))
+
+    def test_benchmark_includes_incidents_with_evidence_and_all_statuses(self):
+        cases = load_cases()
+        incidents = [c for c in cases if c.get('category') == 'incident']
+        self.assertGreaterEqual(len(incidents), 40)
+        self.assertTrue(all(c.get('required_facts') and c.get('reference_sources') for c in incidents))
+        self.assertEqual({c['expected'] for c in cases}, {'answered', 'off_topic', 'not_found'})
+
+
 if __name__ == '__main__':
     unittest.main()
