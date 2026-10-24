@@ -1,3 +1,4 @@
+import re
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from src.ai.llm.base import LLMProvider
@@ -71,33 +72,30 @@ class QwenLLMProvider(LLMProvider):
         ]
 
         prompt = self.tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
-            enable_thinking=False,
+            messages, tokenize=False, add_generation_prompt=True, enable_thinking=True,
         )
-
-        tokens = self.tokenizer(
-            prompt,
-            return_tensors="pt",
-        ).to(self.device)
-
+        tokens = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+        prompt_length = tokens["input_ids"].shape[-1]
         with torch.inference_mode():
-
-            answer_llm = self.model.generate(
-                **tokens,
-                max_new_tokens=320,
-                do_sample=False,
-            )
-
-        tokens_prompt_len = (
-            tokens["input_ids"].shape[-1]
-        )
-
-        result = self.tokenizer.decode(
-            answer_llm[0][tokens_prompt_len:],
-            skip_special_tokens=True,
-        ).strip()
+            output = self.model.generate(**tokens, max_new_tokens=256, do_sample=False)
+            result = self.tokenizer.decode(output[0][prompt_length:], skip_special_tokens=True)
+            if "</think>" not in result:
+                closing = self.tokenizer("\n</think>\n\n", add_special_tokens=False, return_tensors="pt")["input_ids"].to(self.device)
+                continuation = torch.cat((output, closing), dim=-1)
+                output = self.model.generate(
+                    input_ids=continuation, attention_mask=torch.ones_like(continuation),
+                    max_new_tokens=320, do_sample=False,
+                )
+                result = self.tokenizer.decode(output[0][continuation.shape[-1]:], skip_special_tokens=True)
+            else:
+                if output[0, -1].item() != self.tokenizer.eos_token_id:
+                    output = self.model.generate(
+                        input_ids=output, attention_mask=torch.ones_like(output),
+                        max_new_tokens=320, do_sample=False,
+                    )
+                    result = self.tokenizer.decode(output[0][prompt_length:], skip_special_tokens=True)
+                result = result.split("</think>", 1)[1]
+        result = result.strip()
 
         if not result:
             return LLMAnswerSchema(
