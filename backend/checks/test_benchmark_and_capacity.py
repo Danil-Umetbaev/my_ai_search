@@ -174,19 +174,63 @@ class EvidenceTests(unittest.TestCase):
         self.assertTrue(compatible_title('SetRetail10 ◾️ VirtualScales', 'Как настроить VirtualScales?'))
         self.assertTrue(compatible_title('SetRetail10 ◾️ bank.log', 'Какой лог нужен?'))
 
-    def test_answer_is_selected_source_text_and_keeps_code(self):
+    def test_answer_keeps_code_and_cites_only_verified_fragments(self):
         from unittest.mock import Mock
         from src.ai.evidence import EvidencePassage, serialize_evidence
         from src.ai.llm.qwen import QwenLLMProvider
         llm = QwenLLMProvider.__new__(QwenLLMProvider)
-        llm._complete = Mock(side_effect=['NO', 'YES'])
         text = 'Настройте интерфейс:\n```\nethtool -s eth0 speed 10 duplex full\n```'
+        llm._generate_text = Mock(return_value=json.dumps({'answer': text, 'fragments': [2]}))
+        llm._complete = Mock(return_value='VALID')
         answer = llm.generate('Как настроить интерфейс?', '', serialize_evidence([
             EvidencePassage('Другой документ', '', 'Не та операция.'),
             EvidencePassage('Нужная инструкция', '', text),
         ]))
         self.assertEqual(answer.answer, text)
         self.assertEqual(answer.source_titles, ['Нужная инструкция'])
+
+    def test_unverified_answer_is_repaired_before_publication(self):
+        from unittest.mock import Mock
+        from src.ai.evidence import EvidencePassage, serialize_evidence
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._generate_text = Mock(side_effect=[
+            json.dumps({'answer': 'Закройте смену.', 'fragments': [1]}),
+            json.dumps({'answer': 'Введите сумму наличных.', 'fragments': [2]}),
+        ])
+        llm._complete = Mock(side_effect=['INVALID', 'VALID'])
+        result = llm.generate('Как оплатить покупку?', '', serialize_evidence([
+            EvidencePassage('Смена', '', 'Закройте смену.'),
+            EvidencePassage('Оплата', '', 'Введите сумму наличных.'),
+        ]))
+        self.assertEqual(result.answer, 'Введите сумму наличных.')
+        self.assertEqual(result.source_titles, ['Оплата'])
+
+    def test_invalid_source_ids_and_rejected_drafts_are_not_published(self):
+        from unittest.mock import Mock
+        from src.ai.evidence import EvidencePassage, serialize_evidence
+        from src.ai.llm.qwen import QwenLLMProvider
+        passages = [EvidencePassage('Инструкция', '', 'Проверьте настройку.')]
+        for indices in [[True], [0], [2], [], '1']:
+            self.assertIsNone(QwenLLMProvider._parse_answer(
+                json.dumps({'answer': 'Ответ', 'fragments': indices}), passages,
+            ))
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._generate_text = Mock(return_value=json.dumps({'answer': 'Выдуманный шаг.', 'fragments': [1]}))
+        llm._complete = Mock(return_value='INVALID')
+        result = llm.generate('Что делать?', '', serialize_evidence(passages))
+        self.assertFalse(result.answerable)
+        self.assertIsNone(result.answer)
+
+    def test_local_fact_classification_requires_confirmation(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._complete = Mock(side_effect=['LOCAL_FACT', 'DOCUMENTATION'])
+        question = 'Какой журнал содержит обмен с терминалом?'
+        self.assertEqual(llm.rewrite_query(question), question)
+        llm._complete = Mock(side_effect=['LOCAL_FACT', 'OBSERVED'])
+        self.assertEqual(llm.rewrite_query('Какой пароль установлен на нашей кассе?'), 'NOT_FOUND')
 
 
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
