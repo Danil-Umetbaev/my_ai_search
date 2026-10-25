@@ -198,3 +198,13 @@ def select_requested_groups(blocks, question):
     return [block for index, block in enumerate(blocks)
             if index not in labels or block.title not in allowed
             or labels[index] in allowed[block.title]]
+
+
+def exclude_reproduction_blocks(blocks, question):
+    incident = re.search(r'\b(?:сбо[йя]\w*|ошибк\w*|завис\w*|списал\w*|не (?:работает|печатает|зарегистрир\w*|прош\w*))\b',
+                         question, re.I)
+    example_request = re.search(r'\b(?:воспроизв\w*|пример\w*|тестирован\w*)\b', question, re.I)
+    if not incident or example_request:
+        return blocks
+    return [block for block in blocks
+            if not re.search(r'\b(?:пример(?:ы)? работы|проблемный кейс|воспроизведение)\b', block.section, re.I)]

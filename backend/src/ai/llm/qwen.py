@@ -6,7 +6,7 @@ from time import perf_counter
 import torch
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
-from src.ai.evidence import deserialize_evidence, split_evidence_blocks, render_evidence_blocks, select_requested_groups
+from src.ai.evidence import deserialize_evidence, split_evidence_blocks, render_evidence_blocks, select_requested_groups, exclude_reproduction_blocks
 from src.ai.llm.base import LLMProvider, is_arithmetic_question
 from src.core.logging import log_execution_time
 from src.schemas.llm import LLMAnswerSchema
@@ -228,6 +228,7 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
                 ranked = exact
         passages = self._distinct_passages(ranked, limit=5)
         blocks = select_requested_groups(split_evidence_blocks(passages), question)
+        blocks = exclude_reproduction_blocks(blocks, question)
         if not blocks:
             return LLMAnswerSchema(answerable=False, answer=None)
         excerpts = '\n\n'.join(f'Block {index}:\n{block.ranking_text}'

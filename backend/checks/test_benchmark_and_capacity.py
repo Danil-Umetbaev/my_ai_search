@@ -12,6 +12,16 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_incident_answers_exclude_examples_but_keep_usage_and_error_descriptions(self):
+        from src.ai.evidence import EvidencePassage, exclude_reproduction_blocks
+        sample = EvidencePassage('Отмена', 'Пример работы', 'Выполните оплату и дождитесь сбоя.')
+        usage = EvidencePassage('Отмена', 'Использование', 'Выберите отмену по банку.')
+        error = EvidencePassage('Отмена', 'Пример ошибки', 'Код ошибки 123.')
+        blocks = [sample, usage, error]
+        self.assertEqual(exclude_reproduction_blocks(blocks, 'После сбоя деньги списались. Что делать?'), [usage, error])
+        self.assertEqual(exclude_reproduction_blocks(blocks, 'Как воспроизвести сбой для тестирования?'), blocks)
+        self.assertEqual(exclude_reproduction_blocks(blocks, 'Как работает отмена по банку?'), blocks)
+
     def test_numbered_scenario_steps_can_be_selected_without_reproducing_failure(self):
         from src.ai.evidence import EvidencePassage, split_evidence_blocks, render_evidence_blocks
         blocks = split_evidence_blocks([EvidencePassage('Отмена', 'Пример работы',
