@@ -148,10 +148,11 @@ def split_evidence_blocks(passages):
             overlap = next((size for size in range(min(len(parent), len(child)), 0, -1)
                             if parent[-size:] == child[:size]), 0)
             section = ' → '.join(parent + child[overlap:])
-            identity = (passage.title, section, text)
-            if identity not in seen:
-                blocks.append(EvidencePassage(passage.title, section, text))
-                seen.add(identity)
+            for item in re.split(r'\n(?=\d+[.)]\s)', text):
+                identity = (passage.title, section, item)
+                if identity not in seen:
+                    blocks.append(EvidencePassage(passage.title, section, item))
+                    seen.add(identity)
     return blocks
 
 

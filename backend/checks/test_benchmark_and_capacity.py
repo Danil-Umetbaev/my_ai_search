@@ -12,6 +12,15 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_numbered_scenario_steps_can_be_selected_without_reproducing_failure(self):
+        from src.ai.evidence import EvidencePassage, split_evidence_blocks, render_evidence_blocks
+        blocks = split_evidence_blocks([EvidencePassage('Отмена', 'Пример работы',
+                    '1. Выполните оплату.\n2. Дождитесь сбоя.\n3. Выберите отмену операции.')])
+        self.assertEqual(len(blocks), 3)
+        answer = render_evidence_blocks([blocks[2]])
+        self.assertIn('3. Выберите отмену операции.', answer)
+        self.assertNotIn('Выполните оплату', answer)
+
     def test_local_values_are_checked_even_when_initial_classifier_says_work(self):
         from unittest.mock import Mock
         from src.ai.llm.qwen import QwenLLMProvider
