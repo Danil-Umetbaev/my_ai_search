@@ -194,6 +194,17 @@ class KnowledgeStructureTests(unittest.TestCase):
 
 
 class BenchmarkTests(unittest.TestCase):
+    def test_analysis_does_not_merge_different_inference_profiles(self):
+        for field in ('answer_mode', 'quantization', 'model_revision', 'pipeline_sha256'):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                paths = []
+                for index, value in enumerate(('first', 'second')):
+                    path = Path(directory) / f'{index}.jsonl'
+                    path.write_text(json.dumps({'type': 'run', 'model': 'same-model', field: value}) + '\n', encoding='utf-8')
+                    paths.append(path)
+                with self.assertRaises(ValueError):
+                    analyze(paths)
+
     def test_analysis_does_not_merge_different_models(self):
         with tempfile.TemporaryDirectory() as directory:
             paths = []
