@@ -109,10 +109,26 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         normalize = lambda text: re.sub(r'\s+', ' ', text).casefold().replace('ё', 'е')
         source = normalize(cited)
         labels = re.findall(
-            r'(?:кнопк[а-я]*|пункт[а-я]*|вкладк[а-я]*|флаж[а-я]*|меню)\s*[«"]([^»"\n]+)[»"]',
+            r'''(?:кнопк[а-я]*|клавиш[а-я]*|пункт[а-я]*|вкладк[а-я]*|флаж[а-я]*|меню)\s*[«"']([^»"'\n]+)[»"']''',
             answer, flags=re.IGNORECASE,
         )
-        return [label for label in labels if normalize(label) not in source]
+        return [label for label in labels
+                if not re.search(r'(?<!\w)' + re.escape(normalize(label)) + r'(?!\w)', source)]
+
+    @staticmethod
+    def _distinct_passages(passages, limit=3):
+        selected, vocabularies = [], []
+        for passage in passages:
+            words = set(re.findall(r'\w+', passage.text.casefold()))
+            if any(passage.title == other.title
+                   and len(words & vocabulary) / max(1, min(len(words), len(vocabulary))) > .85
+                   for other, vocabulary in zip(selected, vocabularies)):
+                continue
+            selected.append(passage)
+            vocabularies.append(words)
+            if len(selected) == limit:
+                break
+        return selected
 
     @staticmethod
     def _parse_answer(raw, passages):
@@ -131,14 +147,14 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
 
     @log_execution_time('LLM grounded answer')
     def generate(self, question, search_query, context):
-        passages = deserialize_evidence(context)[:3]
+        passages = self._distinct_passages(deserialize_evidence(context))
         if not passages:
             return LLMAnswerSchema(answerable=False, answer=None)
         excerpts = '\n\n'.join(
             f'Фрагмент {index}:\n{passage.ranking_text}'
             for index, passage in enumerate(passages, 1)
         )
-        request = 'Вопрос: ' + question + '\n\n' + excerpts
+        request = excerpts + '\n\nВопрос пользователя: ' + question
         started = perf_counter()
         for attempt in range(2):
             repair_hint = ''
@@ -151,7 +167,7 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
                 if missing_labels:
                     repair_hint = ('В источнике не найдены названия элементов интерфейса: '
                                    + ', '.join(missing_labels)
-                                   + '. Не придумывай их; обозначения кнопок доступны на иллюстрациях источника. ')
+                                   + '. Опиши остальные подтверждённые шаги, а обозначения кнопок предложи посмотреть на иллюстрациях источника. ')
                 verdict = 'INVALID' if missing_labels else self._complete(
                     self.VERIFICATION_PROMPT,
                     'Question: ' + question + '\nDraft answer: ' + answer
@@ -164,13 +180,11 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
                     )
             if attempt or perf_counter() - started >= 12:
                 break
-            request += (
-                '\n\nПредыдущий черновик не прошёл проверку: ' + raw
-                + '\nПерепроверь вопрос и источники. Исправь выбор операции, условия и факты; '
-                'не считай предыдущий черновик источником. Запрет тоже является ответом. '
+            request = excerpts + '\n\nВопрос пользователя: ' + question + (
+                '\nПерепроверь соответствие ответа вопросу. Используй только относящиеся к нему '
+                'факты и условия. Отсутствие информации не означает запрет. '
                 + repair_hint
-                +
-                'Если сведений действительно нет, верни null. Верни JSON заново.'
+                + 'Если сведений действительно нет, верни null. Верни JSON.'
             )
         return LLMAnswerSchema(answerable=False, answer=None)
 

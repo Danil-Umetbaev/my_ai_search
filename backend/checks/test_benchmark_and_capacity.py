@@ -151,6 +151,16 @@ class EvidenceTests(unittest.TestCase):
             'Нажмите кнопку «Сохранить».', 'Заполните поля и нажмите .'), ['Сохранить'])
         self.assertEqual(QwenLLMProvider._unsupported_ui_labels(
             'Откройте вкладку «Настройки».', 'Перейдите на вкладку НАСТРОЙКИ.'), [])
+        self.assertEqual(QwenLLMProvider._unsupported_ui_labels(
+            "Нажмите клавишу 'ОК'.", 'Откройте окно.'), ['ОК'])
+
+    def test_overlapping_passages_leave_room_for_another_operation(self):
+        from src.ai.evidence import EvidencePassage
+        from src.ai.llm.qwen import QwenLLMProvider
+        first = EvidencePassage('Инструкция', 'Смена', 'Закройте смену и распечатайте отчёт.')
+        duplicate = EvidencePassage('Инструкция', 'Смена', 'Закройте смену и распечатайте отчёт. Подтвердите.')
+        payment = EvidencePassage('Инструкция', 'Оплата', 'Введите сумму наличных.')
+        self.assertEqual(QwenLLMProvider._distinct_passages([first, duplicate, payment]), [first, payment])
 
     def test_table_rows_keep_their_own_condition_and_action(self):
         from src.ai.evidence import collect_evidence
