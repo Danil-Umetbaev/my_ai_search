@@ -242,7 +242,9 @@ class RAGService(BaseService):
             document = await self.db.documents.get_one(id=document_id)
             if document.content:
                 title, chunks = context_documents[document_id]
-                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks)}"
+                anchors = [chunk.content for chunk, _ in best_chunks
+                           if chunk.document_id == document_id]
+                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors)}"
                 context_size += len(scoped_text) - len(context_chunks[index])
                 context_chunks[index] = scoped_text
             if document.content and len(document.content) <= 3000:
@@ -317,7 +319,9 @@ class RAGService(BaseService):
         return selected
 
     @staticmethod
-    def _context_excerpt(content: str, chunks: dict[int, str]) -> str:
+    def _context_excerpt(content: str, chunks: dict[int, str], anchors: list[str] | None = None) -> str:
+        headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
+                    if content[:heading.start()].count("```") % 2 == 0]
         intervals = []
         for text in chunks.values():
             start = content.find(text)
@@ -333,6 +337,19 @@ class RAGService(BaseService):
             if line_end - end <= 300:
                 end = line_end
             intervals.append((start, end))
+        for anchor in anchors or []:
+            anchor_start = content.find(anchor)
+            if anchor_start < 0 or content.find(anchor, anchor_start + 1) >= 0:
+                continue
+            midpoint = anchor_start + len(anchor) // 2
+            for index, heading in enumerate(headings):
+                if heading.start() > midpoint:
+                    break
+                section_end = next((following.start() for following in headings[index + 1:]
+                                    if len(following[1]) <= len(heading[1])), len(content))
+                if midpoint < section_end and section_end - heading.start() <= 4000:
+                    intervals.append((heading.start(), section_end))
+                    break
         introduction_end = content.rfind("\n\n", 0, 800) if len(content) > 800 else -1
         if introduction_end > 0:
             introduction = content[:introduction_end]
@@ -346,8 +363,6 @@ class RAGService(BaseService):
                 merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
             else:
                 merged.append((start, end))
-        headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
-                    if content[:heading.start()].count("```") % 2 == 0]
         excerpts = []
         for start, end in merged:
             parents = []
