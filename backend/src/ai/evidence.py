@@ -127,3 +127,38 @@ def render_answer(passage):
     if re.search(r'(?:нажмите|кликните|клавиш[ау]|кнопк[ау])\s*[.→)]', answer, re.I):
         answer += '\n\nВ текстовой выгрузке пропущены обозначения некоторых кнопок; они доступны в исходной инструкции.'
     return answer
+
+
+def split_evidence_blocks(passages):
+    blocks = []
+    seen = set()
+    for passage in passages:
+        parent = passage.section.split(' → ') if passage.section else []
+        for scope, text, _ in _units(passage.text):
+            child = scope.split(' → ') if scope else []
+            overlap = next((size for size in range(min(len(parent), len(child)), 0, -1)
+                            if parent[-size:] == child[:size]), 0)
+            section = ' → '.join(parent + child[overlap:])
+            identity = (passage.title, section, text)
+            if identity not in seen:
+                blocks.append(EvidencePassage(passage.title, section, text))
+                seen.add(identity)
+    return blocks
+
+
+def render_evidence_blocks(passages):
+    parts, previous, seen = [], None, set()
+    for passage in passages:
+        identity = (passage.title, passage.section, passage.text)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        scope = (passage.title, passage.section)
+        if scope != previous and passage.section:
+            parts.append(passage.section)
+        parts.append(passage.text)
+        previous = scope
+    answer = '\n\n'.join(parts)
+    if re.search(r'(?:нажмите|кликните|клавиш[ау]|кнопк[ау])\s*[.→)]', answer, re.I):
+        answer += '\n\nВ текстовой выгрузке пропущены обозначения некоторых кнопок; они доступны в исходной инструкции.'
+    return answer

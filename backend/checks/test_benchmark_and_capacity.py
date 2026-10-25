@@ -12,6 +12,19 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_selected_blocks_keep_groups_and_render_missing_icons_once(self):
+        from src.ai.evidence import EvidencePassage, split_evidence_blocks, render_evidence_blocks
+        passages = [EvidencePassage('Инструкция', 'Персонал → Пользователи',
+                    '### Пользователи\n\nОбязательные поля:\n\n- Логин\n- Пароль\n\n'
+                    '### Пользователи\n\nНажмите .\n\nКликните .')]
+        blocks = split_evidence_blocks(passages)
+        self.assertEqual(blocks[0].section, 'Персонал → Пользователи → Обязательные поля')
+        self.assertIn('- Логин\n- Пароль', blocks[0].text)
+        answer = render_evidence_blocks(blocks + [blocks[-1]])
+        self.assertEqual(answer.count('Кликните .'), 1)
+        self.assertEqual(answer.count('В текстовой выгрузке'), 1)
+        self.assertNotIn('Пользователи → Пользователи', answer)
+
     def test_chunking_keeps_original_unicode_and_prefers_line_endings(self):
         from src.ai.chunking.token import TokenChunker
         class CharacterTokenizer:
