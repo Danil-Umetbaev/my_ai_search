@@ -65,6 +65,16 @@ class KnowledgeStructureTests(unittest.TestCase):
 
 
 class BenchmarkTests(unittest.TestCase):
+    def test_analysis_does_not_merge_different_models(self):
+        with tempfile.TemporaryDirectory() as directory:
+            paths = []
+            for index, model in enumerate(('small', 'large')):
+                path = Path(directory) / f'{index}.jsonl'
+                path.write_text(json.dumps(dict(type='run', model=model)) + '\n', encoding='utf-8')
+                paths.append(path)
+            with self.assertRaises(ValueError):
+                analyze(paths)
+
     def test_analysis_rejects_duplicates_and_separates_review(self):
         case = load_cases()[0]
         row = dict(type='result', **case, actual='answered', confidence=0.4)

@@ -26,10 +26,10 @@ def analyze(paths):
                                               for k in ('question', 'expected')):
                 raise ValueError(f'Dataset mismatch for case {case_id}')
             results[case_id] = row
-    signatures = {tuple(r.get(k) for k in ('dataset_sha256', 'label', 'threshold',
+    signatures = {tuple(r.get(k) for k in ('dataset_sha256', 'label', 'model', 'threshold',
                                            'candidate_k', 'lexical_k', 'top_k')) for r in runs}
     if len(signatures) > 1:
-        raise ValueError('Mixed dataset/configuration/labels; analyze runs separately')
+        raise ValueError('Mixed dataset/model/configuration/labels; analyze runs separately')
     errors = [r['id'] for r in results.values() if 'error' in r]
     failures = [dict(id=r['id'], question=r['question'], expected=r['expected'],
                      actual=r.get('actual'), confidence=r.get('confidence'))
