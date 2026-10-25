@@ -145,6 +145,16 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_answer_parser_accepts_one_extra_closing_brace_but_not_truncated_or_multiple_objects(self):
+        from src.ai.evidence import EvidencePassage
+        from src.ai.llm.qwen import QwenLLMProvider
+        passages = [EvidencePassage('Инструкция', '', 'Подтверждённый ответ.')]
+        valid = '{"answer":"Подтверждённый ответ.","fragments":[1]}'
+        self.assertEqual(QwenLLMProvider._parse_answer(valid + '}', passages),
+                         ('Подтверждённый ответ.', [1]))
+        self.assertIsNone(QwenLLMProvider._parse_answer(valid[:-1], passages))
+        self.assertIsNone(QwenLLMProvider._parse_answer(valid + valid, passages))
+
     def test_classifier_accepts_label_before_explanation_without_prefix_confusion(self):
         from unittest.mock import Mock
         from src.ai.llm.qwen import QwenLLMProvider

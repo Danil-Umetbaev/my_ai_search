@@ -135,7 +135,10 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
     @staticmethod
     def _parse_answer(raw, passages):
         try:
-            data = json.loads(re.sub(r'^```(?:json)?\s*|\s*```$', '', raw).strip())
+            text = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw).strip()
+            data, end = json.JSONDecoder().raw_decode(text)
+            if text[end:].strip() not in ('', '}'):
+                return None
             answer, indices = data['answer'], data['fragments']
             if (not isinstance(answer, str) or not answer.strip()
                     or not isinstance(indices, list) or not indices
