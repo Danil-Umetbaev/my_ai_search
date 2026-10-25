@@ -280,6 +280,15 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
         content = '# Один\n' + text + '\n# Два\n' + text
         self.assertEqual(RAGService._context_excerpt(content, {7: text}), text)
 
+    def test_repeated_boilerplate_does_not_discard_unique_section_scope(self):
+        from src.services.rag import RAGService
+        repeated = 'Нажмите кнопку подтверждения.'
+        content = '# Продажа\n\n' + repeated + '\n\n# Возврат\n\nВозвращается часть веса.\n\n' + repeated
+        result = RAGService._context_excerpt(content, {7: 'Возвращается часть веса.', 8: repeated})
+        self.assertIn('Раздел документа: Возврат', result)
+        self.assertIn('Возвращается часть веса.', result)
+        self.assertNotIn('Раздел документа: Продажа', result)
+
     def test_excerpt_preserves_new_heading_inside_selected_range(self):
         from src.services.rag import RAGService
         content = '# Пример\nТест.\n# Решение\nВыполните проверку.\n'

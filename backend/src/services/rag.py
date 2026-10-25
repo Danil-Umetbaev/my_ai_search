@@ -375,7 +375,7 @@ class RAGService(BaseService):
         for text in chunks.values():
             start = content.find(text)
             if start < 0 or content.find(text, start + 1) >= 0:
-                return RAGService._join_chunks(chunks)
+                continue
             end = start + len(text)
             line_start = content.rfind("\n", 0, start) + 1
             line_end = content.find("\n", end)
@@ -386,6 +386,8 @@ class RAGService(BaseService):
             if line_end - end <= 300:
                 end = line_end
             intervals.append((start, end))
+        if not intervals:
+            return RAGService._join_chunks(chunks)
         for anchor in anchors or []:
             anchor_start = content.find(anchor)
             if anchor_start < 0 or content.find(anchor, anchor_start + 1) >= 0:
