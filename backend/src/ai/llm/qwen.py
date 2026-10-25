@@ -39,6 +39,9 @@ If the question requests a list, omitting members of the requested group is INVA
     LOCAL_FACT_PROMPT = """Does the user request an actual observed value from their own installation, or general documented information? Return OBSERVED or DOCUMENTATION only.
 OBSERVED: current password or assigned IP, actual stock/cash balance, installed version, serial number, actual culprit or technician arrival time. These require access to the specific store/system.
 DOCUMENTATION: definitions, defaults, version when a feature was introduced, instructions, which log/file contains certain records, how to inspect or change a value. Do not confuse an instruction to inspect data with a request to report the actual data."""
+    DIAGNOSTIC_FACT_PROMPT = """Classify the question as OBSERVED or DOCUMENTATION. Return one label only.
+OBSERVED requests an actual private/current value at the user's installation, or a definitive diagnosis of which component actually failed without diagnostic evidence. Examples: what exactly broke with no error details; what password our administrator set; who changed our price yesterday.
+DOCUMENTATION requests general definitions, defaults, instructions, documented known error causes, diagnostic steps, or how to inspect a value. An explicit error code or named error condition can be answered from documentation. A vague symptom followed by a demand for the exact failed part cannot. Asking which component to replace from only a black screen, freezing or failure to print is OBSERVED: the failed component is not identified. Asking how to diagnose those symptoms is DOCUMENTATION. Do not answer the question."""
     FALLBACK_PROMPT = """Определи цель сообщения. Верни ровно одно слово: WORK или OFF_TOPIC.
 WORK — вопрос по работе: корпоративные процессы, сотрудники, программы, оборудование,
 кассы, платежи, товары, документация, настройка или неисправность. Неважно, есть ли ответ в базе.
@@ -251,6 +254,10 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         label = self._complete(self.INTENT_PROMPT, question)
         if label == 'OFF_TOPIC':
             return 'OFF_TOPIC'
+        if (not re.match(r'^(?:как|где|каким)\b', question.strip(), re.I)
+                and re.search(r'\b(?:точн\w*|именно|уверенн\w*|какой компонент|какую деталь)\b', question, re.I)
+                and self._complete(self.DIAGNOSTIC_FACT_PROMPT, question, max_new_tokens=12) == 'OBSERVED'):
+            return 'NOT_FOUND'
         if label == 'LOCAL_FACT':
             if self._complete(self.LOCAL_FACT_PROMPT, question) == 'OBSERVED':
                 return 'NOT_FOUND'

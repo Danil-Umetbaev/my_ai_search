@@ -12,6 +12,18 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_exact_diagnosis_requires_observation_but_documented_error_does_not(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._complete = Mock(side_effect=['WORK', 'OBSERVED'])
+        self.assertEqual(llm.rewrite_query('Чёрный экран. Какой компонент заменить?'), 'NOT_FOUND')
+        for question in ['Истёк срок ФН. Можно продолжать продажи?',
+                         'Как точно определить причину сбоя по журналам?']:
+            llm._complete = Mock(return_value='WORK')
+            self.assertEqual(llm.rewrite_query(question), question)
+            self.assertEqual(llm._complete.call_count, 1)
+
     def test_office_network_does_not_use_cash_register_network_instructions(self):
         from src.ai.evidence import collect_evidence
         context = 'Документ: Настройка Wi-Fi кассы\n# Подключение\n\nВыполните cash wifi connect.'
