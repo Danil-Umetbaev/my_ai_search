@@ -251,7 +251,8 @@ class RAGService(BaseService):
                 anchors = [chunk.content for chunk, _ in best_chunks if chunk.document_id == document_id]
                 overview = bool(re.match(r'^(?:какие|какой список|перечисли|что (?:находится|входит|доступно))\b',
                                          question.strip(), re.IGNORECASE))
-                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors, overview=overview)}"
+                names = re.findall(r'\b[A-Z][A-Za-z0-9-]*(?:[ \t]+[A-Z][A-Za-z0-9-]*){1,2}\b', question)
+                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors, overview=overview, names=names)}"
                 context_size += len(scoped_text) - len(context_chunks[index])
                 context_chunks[index] = scoped_text
             if document.content and len(document.content) <= 3000:
@@ -375,7 +376,7 @@ class RAGService(BaseService):
 
     @staticmethod
     def _context_excerpt(content: str, chunks: dict[int, str], anchors: list[str] | None = None,
-                         overview: bool = False) -> str:
+                         overview: bool = False, names: list[str] | None = None) -> str:
         headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
                     if content[:heading.start()].count("```") % 2 == 0]
         intervals = []
@@ -395,6 +396,20 @@ class RAGService(BaseService):
             intervals.append((start, end))
         if not intervals:
             return RAGService._join_chunks(chunks)
+        for name in dict.fromkeys(names or []):
+            for match in list(re.finditer(re.escape(name), content, re.IGNORECASE))[:8]:
+                if content[:match.start()].count('```') % 2:
+                    continue
+                start = content.rfind('\n\n', 0, match.start()) + 2
+                start = max(0, start if start > 1 else 0)
+                end = content.find('\n\n', match.end())
+                end = len(content) if end < 0 else end
+                previous = content.rfind('\n\n', 0, max(0, start - 2)) + 2
+                label = content[max(0, previous):max(0, start - 2)].strip()
+                if label.endswith(':') and len(label) < 150:
+                    start = max(0, previous)
+                if end - start <= 1200:
+                    intervals.append((start, end))
         outlines = {}
         for anchor in anchors or []:
             anchor_start = content.find(anchor)

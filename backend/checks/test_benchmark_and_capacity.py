@@ -12,6 +12,16 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_named_feature_context_keeps_field_category_outside_top_chunk(self):
+        from src.services.rag import RAGService
+        text = ('# Создание пользователя\n\nДополнительные поля:\n\n- Active Directory — аутентификация.\n\n'
+                '# Другая информация\n\n' + 'Заполнитель. ' * 400 +
+                '\n\n# Авторизация\n\nДля Active Directory используется LDAP.\n\n')
+        result = RAGService._context_excerpt(text, {9: 'Для Active Directory используется LDAP.'},
+                                            names=['Active Directory'])
+        self.assertIn('Дополнительные поля:\n\n- Active Directory', result)
+        self.assertIn('Создание пользователя', result)
+
     def test_off_topic_requires_confirmation_instead_of_rejecting_unknown_work(self):
         from unittest.mock import Mock
         from src.ai.llm.qwen import QwenLLMProvider
