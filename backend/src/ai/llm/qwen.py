@@ -1,8 +1,7 @@
-import logging
 import os
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 from src.ai.evidence import deserialize_evidence, render_answer
 from src.ai.llm.base import LLMProvider, is_arithmetic_question
@@ -45,15 +44,32 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         )
 
     def _load_model(self):
-        tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME)
+        revision = os.getenv('LLM_MODEL_REVISION') or None
+        if self.MODEL_NAME == 'Qwen/Qwen3.5-4B' and revision is None:
+            revision = '851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a'
+        config = AutoConfig.from_pretrained(self.MODEL_NAME, revision=revision)
+        tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME, revision=revision)
+        is_hybrid = config.model_type == 'qwen3_5'
+        model_class = AutoModelForCausalLM
         options = {}
-        if os.getenv('LLM_LOAD_IN_4BIT', 'false').lower() == 'true':
+        if is_hybrid:
+            from transformers import Qwen3_5ForCausalLM
+            model_class = Qwen3_5ForCausalLM
+            config = config.text_config
+            options.update(config=config, use_kernels=False)
+        if os.getenv('LLM_LOAD_IN_4BIT', 'true' if is_hybrid else 'false').lower() == 'true':
+            skipped = ['lm_head']
+            if is_hybrid:
+                skipped += [f'model.layers.{index}.linear_attn.in_proj_{gate}'
+                            for index in range(config.num_hidden_layers) for gate in ('a', 'b')]
             options['quantization_config'] = BitsAndBytesConfig(
                 load_in_4bit=True, bnb_4bit_quant_type='nf4',
                 bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=torch.bfloat16,
+                llm_int8_skip_modules=skipped,
             )
-        model = AutoModelForCausalLM.from_pretrained(
-            self.MODEL_NAME, dtype=torch.bfloat16, device_map=self.device, **options,
+        model = model_class.from_pretrained(
+            self.MODEL_NAME, revision=revision, dtype=torch.bfloat16,
+            device_map=self.device, **options,
         )
         model.eval()
         return tokenizer, model
