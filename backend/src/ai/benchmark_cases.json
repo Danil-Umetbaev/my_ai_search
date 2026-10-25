@@ -2252,5 +2252,245 @@
     "question": "Переведи на английский фразу «сегодня прекрасная погода».",
     "expected": "off_topic",
     "category": "off_topic"
+  },
+  {
+    "id": 281,
+    "question": "Обязательно ли включать аутентификацию через Active Directory при добавлении серверного пользователя?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 282,
+    "question": "Можно ли настройкой типа товара запретить его возврат на кассе?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 283,
+    "question": "В каких случаях штучный товар не сворачивается в одну позицию, даже если сворачивание разрешено?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 284,
+    "question": "Какое ограничение есть у весовых товаров при частичном возврате чека?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 285,
+    "question": "Покупатель КСО — это кассовая или серверная роль из списка ролей по умолчанию?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 286,
+    "question": "Сколько чеков максимум отображается в результате расширенного поиска по фильтрам?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 287,
+    "question": "Позволяет ли расширенный поиск чеков выбрать период больше четырнадцати дней?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 288,
+    "question": "Можно ли вызвать поиск чеков, пока открыт чек продажи с добавленными товарами?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 289,
+    "question": "Разрешается ли отложить чек после начала его оплаты?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 290,
+    "question": "Нужно ли отменять уже рассчитанные скидки, прежде чем отложить чек?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 291,
+    "question": "Какими способами на клавиатурной кассе можно найти отложенный чек для восстановления?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 292,
+    "question": "При восстановлении отложенного чека с крепким алкоголем нужно снова считывать коды?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 293,
+    "question": "Что делать с маркированным товаром при восстановлении отложенного чека, если проверка через ОИСМ не удалась?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 294,
+    "question": "При оплате СБП получен статус EXPIRED. Что произошло с QR-кодом?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 295,
+    "question": "Что означает статус BANK_ERROR в диагностике платежа СБП?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 296,
+    "question": "В каком поле таблицы ch_payment_transaction сохраняются диагностические атрибуты оплаты СБП?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 297,
+    "question": "Какой лог содержит обмен данными кассы с банковским терминалом?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 298,
+    "question": "При включении TRACE в log4j достаточно поменять только logger или нужно изменить и appender?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 299,
+    "question": "Пирит при ошибке приёма данных после включения напечатал чек готовности. Требуется ли перезапуск системного блока кассы?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 300,
+    "question": "Администратор магазина может сам включить отмену без карты на терминале Сбербанка или нужно обращаться в банк?",
+    "expected": "answered",
+    "category": "holdout_answered"
+  },
+  {
+    "id": 301,
+    "question": "Сколько продаж сегодня совершила наша касса номер 7?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 302,
+    "question": "Какой остаток товара с кодом 54321 сейчас в нашем магазине?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 303,
+    "question": "Назови номер банковского терминала, подключённого к нашей третьей кассе.",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 304,
+    "question": "Какой действующий пароль администратора Windows на нашем кассовом компьютере?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 305,
+    "question": "Какой сотрудник вчера в 19:30 выполнил возврат на нашей кассе?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 306,
+    "question": "Касса зависла. Назови точную неисправную деталь без диагностики.",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 307,
+    "question": "Какая цена сейчас установлена у нас на товар с артикулом 765432?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 308,
+    "question": "Во сколько сегодня придёт инженер по нашей заявке?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 309,
+    "question": "Какой номер у обращения, которое наш магазин вчера отправил в поддержку?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 310,
+    "question": "Какой IP выдал DHCP нашему кассовому компьютеру сегодня утром?",
+    "expected": "not_found",
+    "category": "holdout_not_found"
+  },
+  {
+    "id": 311,
+    "question": "Напиши хокку про склад и кассира.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 312,
+    "question": "Дай рецепт омлета с помидорами.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 313,
+    "question": "Объясни школьнику второй закон Ньютона.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 314,
+    "question": "Как найти алмазы в Minecraft?",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 315,
+    "question": "Переведи на французский фразу «я люблю смотреть на звёзды».",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 316,
+    "question": "Посоветуй музыку для вечерней прогулки.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 317,
+    "question": "Составь гороскоп для программиста на завтра.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 318,
+    "question": "Расскажи, какая погода завтра в Париже.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 319,
+    "question": "Посчитай 13 умножить на 17.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
+  },
+  {
+    "id": 320,
+    "question": "Расскажи анекдот про принтер.",
+    "expected": "off_topic",
+    "category": "holdout_off_topic"
   }
 ]
