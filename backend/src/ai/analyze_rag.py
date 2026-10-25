@@ -26,7 +26,8 @@ def analyze(paths):
                                               for k in ('question', 'expected')):
                 raise ValueError(f'Dataset mismatch for case {case_id}')
             results[case_id] = row
-    signatures = {tuple(r.get(k) for k in ('dataset_sha256', 'label', 'model', 'threshold',
+    signatures = {tuple(r.get(k) for k in ('dataset_sha256', 'label', 'model', 'pipeline_sha256',
+                                           'answer_mode', 'quantization', 'model_revision', 'threshold',
                                            'candidate_k', 'lexical_k', 'top_k')) for r in runs}
     if len(signatures) > 1:
         raise ValueError('Mixed dataset/model/configuration/labels; analyze runs separately')

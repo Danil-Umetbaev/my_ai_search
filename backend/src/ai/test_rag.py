@@ -1,5 +1,6 @@
 """Stable benchmark: python -m src.ai.test_rag --help."""
 import argparse
+import os
 import asyncio
 import hashlib
 import inspect
@@ -49,6 +50,17 @@ async def run(args, cases):
     parameters = inspect.signature(RAGService.answer).parameters
     configuration = {name: parameters[name].default
                      for name in ('threshold', 'candidate_k', 'lexical_k', 'top_k')}
+    root = Path(__file__).resolve().parents[1]
+    pipeline = hashlib.sha256()
+    for name in ('ai/llm/qwen.py', 'ai/evidence.py', 'services/rag.py',
+                 'services/vector_search.py', 'repositories/document_chunk.py',
+                 'ai/reranking/cross_encoder.py', 'ai/embeddings/qwen.py'):
+        pipeline.update(name.encode())
+        pipeline.update((root / name).read_bytes())
+    configuration.update(pipeline_sha256=pipeline.hexdigest(),
+                         answer_mode=os.getenv('LLM_ANSWER_MODE', 'grounded'),
+                         quantization=os.getenv('LLM_LOAD_IN_4BIT', 'auto'),
+                         model_revision=os.getenv('LLM_MODEL_REVISION', 'default'))
     with args.output.open('x', encoding='utf-8') as output:
         metadata = dict(type='run', started_at=datetime.now(timezone.utc).isoformat(),
                         label=args.label, selected_ids=[c['id'] for c in cases],
