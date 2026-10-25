@@ -278,6 +278,14 @@ class DocumentChunkRepository(BaseRepository):
 
             phrase_bonus = 10.0
 
+        for negative_phrase in list(dict.fromkeys(re.findall(
+            r"\bне\s+[а-яёa-z][а-яёa-z-]{2,}\b", query_text.lower(),
+        )))[:5]:
+            negative_match = content_text.contains(negative_phrase)
+            conditions.append(negative_match)
+            score_expression += case((negative_match, 4.0), else_=0.0)
+            phrase_bonus += 4.0
+
         lexical_score = (
             score_expression.label(
                 "lexical_score"
