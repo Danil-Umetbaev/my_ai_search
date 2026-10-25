@@ -135,6 +135,15 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    def test_definition_lookup_extracts_and_escapes_term_only(self):
+        from src.services.rag import RAGService
+        import re
+        self.assertIn(re.escape('мягкий чек'), RAGService._definition_pattern('Что такое мягкий чек?'))
+        pattern = RAGService._definition_pattern('Что означает термин «A+B»?')
+        self.assertIn(re.escape('A+B'), pattern)
+        self.assertNotIn('SetRetail10', RAGService._definition_pattern('Что такое PLU в SetRetail10?'))
+        self.assertIsNone(RAGService._definition_pattern('Как оплатить чек?'))
+
     def test_context_keeps_other_relevant_passages_in_selected_manual(self):
         from types import SimpleNamespace
         from src.services.rag import RAGService

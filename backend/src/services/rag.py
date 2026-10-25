@@ -96,8 +96,15 @@ class RAGService(BaseService):
                 lexical_k,
             )
 
+        definition_pattern = self._definition_pattern(question)
+        definition_candidates = (
+            await self.db.document_chunks.search_headings(definition_pattern, top_k=10)
+            if definition_pattern else []
+        )
+
         all_candidates = (
-            original_vector
+            definition_candidates
+            + original_vector
             + rewritten_vector
             + original_lexical
             + rewritten_lexical
@@ -298,6 +305,20 @@ class RAGService(BaseService):
             confidence=confidence,
             used_chunks=used_chunks,
         )
+
+    @staticmethod
+    def _definition_pattern(question):
+        match = re.fullmatch(
+            r"(?:что такое|что означает термин|дай определение(?: термина)?)\s+(.+?)[?!.]*",
+            question.strip(), re.IGNORECASE,
+        )
+        if not match:
+            return None
+        term = re.sub(r"\s+в\s+(?:SetRetail10|SetRetail|Set10)$", "", match[1], flags=re.IGNORECASE)
+        term = term.strip(' \t«»\"')
+        if not 2 <= len(term) <= 160:
+            return None
+        return rf"(?i)(^|\n)[ \t]*(?:#{{1,6}}[ \t]+|[-*][ \t]+)?{re.escape(term)}([[:space:][:punct:]]|$)"
 
     @staticmethod
     def _extend_context_chunks(selected, ranked_chunks, per_document=3):
