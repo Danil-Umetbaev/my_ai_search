@@ -61,6 +61,17 @@ class KnowledgeStructureTests(unittest.TestCase):
         question = 'Какие роли доступны нашим кассирам по умолчанию?'
         self.assertEqual(llm.rewrite_query(question), question)
 
+    def test_private_addresses_are_not_inferred_from_documentation_examples(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._complete = Mock(return_value='WORK')
+        self.assertEqual(llm.rewrite_query('Какой IP у кассы в нашем магазине на Ленина?'), 'NOT_FOUND')
+        self.assertEqual(llm.rewrite_query('Какой пароль установлен на нашем сервере?'), 'NOT_FOUND')
+        question = 'Какой стандартный пароль у нашей кассы по умолчанию?'
+        llm._complete = Mock(side_effect=['WORK', 'DOCUMENTATION'])
+        self.assertEqual(llm.rewrite_query(question), question)
+
     def test_named_list_groups_are_not_mixed_but_comparisons_keep_both(self):
         from src.ai.evidence import EvidencePassage, select_requested_groups
         cashier = EvidencePassage('Роли', 'Касса', 'Касса:\n- Кассир\n- Сервисный инженер')
