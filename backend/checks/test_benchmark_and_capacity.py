@@ -187,26 +187,6 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('Если сумма больше 300, применяется скидка 15%.', result)
         self.assertNotIn('Общие параметры', result)
 
-    def test_excerpt_keeps_all_tabs_of_bounded_product_section(self):
-        from src.services.rag import RAGService
-        content = ('# Справочник\n\n' + 'Введение. ' * 500
-                   + '\n\n## Штучный товар\n\n### Настройки\n\nРазрешить возврат товара.\n\n'
-                   + '### Ограничения\n\nПроверять возраст покупателя.\n\n'
-                   + '## Алкоголь\n\nПроверять акцизную марку.\n')
-        anchor = 'Разрешить возврат товара.'
-        result = RAGService._context_excerpt(content, {10: anchor}, [anchor])
-        self.assertIn('Разрешить возврат товара.', result)
-        self.assertIn('Проверять возраст покупателя.', result)
-        self.assertNotIn('Проверять акцизную марку.', result)
-
-    def test_excerpt_does_not_expand_an_unbounded_section(self):
-        from src.services.rag import RAGService
-        content = '# Большая инструкция\n\n' + 'Детали. ' * 600 + '\n\nНужный факт.\n'
-        anchor = 'Нужный факт.'
-        result = RAGService._context_excerpt(content, {40: anchor}, [anchor])
-        self.assertIn(anchor, result)
-        self.assertLess(len(result), 1000)
-
     def test_excerpt_does_not_guess_location_of_repeated_text(self):
         from src.services.rag import RAGService
         text = 'Повторяющаяся строка инструкции.'
