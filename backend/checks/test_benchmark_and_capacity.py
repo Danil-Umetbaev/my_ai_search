@@ -12,6 +12,30 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_named_list_groups_are_not_mixed_but_comparisons_keep_both(self):
+        from src.ai.evidence import EvidencePassage, select_requested_groups
+        cashier = EvidencePassage('Роли', 'Касса', 'Касса:\n- Кассир\n- Сервисный инженер')
+        server = EvidencePassage('Роли', 'Сервер', 'Сервер:\n- Товаровед\n- Администратор')
+        self.assertEqual(select_requested_groups([cashier, server], 'Какие роли кассовых пользователей?'), [cashier])
+        self.assertEqual(select_requested_groups([cashier, server], 'Роли кассира и серверного пользователя?'), [cashier, server])
+        self.assertEqual(select_requested_groups([cashier, server], 'Какие роли существуют?'), [cashier, server])
+        required = EvidencePassage('Поля', '', 'Обязательные поля:\n- Логин\n- Пароль')
+        optional = EvidencePassage('Поля', '', 'Дополнительные поля:\n- Телефон')
+        self.assertEqual(select_requested_groups([required, optional], 'Какие обязательные поля?'), [required])
+
+    def test_exact_operation_section_excludes_a_specialized_neighbor(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        from src.ai.evidence import EvidencePassage, serialize_evidence
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._generate_text = Mock(return_value='{"sections":[1]}')
+        result = llm.generate_extractive('Как выполнить произвольный возврат?', serialize_evidence([
+            EvidencePassage('Карты', 'Возврат подарочной карты', 'Измените настройки подарочной карты.'),
+            EvidencePassage('Руководство', 'Возврат → Произвольный возврат', 'Введите код товара.'),
+        ]))
+        self.assertEqual(result.source_titles, ['Руководство'])
+        self.assertNotIn('подарочной', llm._generate_text.call_args.args[1])
+
     def test_exact_diagnosis_requires_observation_but_documented_error_does_not(self):
         from unittest.mock import Mock
         from src.ai.llm.qwen import QwenLLMProvider

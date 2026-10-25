@@ -6,7 +6,7 @@ from time import perf_counter
 import torch
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
-from src.ai.evidence import deserialize_evidence, split_evidence_blocks, render_evidence_blocks
+from src.ai.evidence import deserialize_evidence, split_evidence_blocks, render_evidence_blocks, select_requested_groups
 from src.ai.llm.base import LLMProvider, is_arithmetic_question
 from src.core.logging import log_execution_time
 from src.schemas.llm import LLMAnswerSchema
@@ -217,8 +217,17 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         return LLMAnswerSchema(answerable=False, answer=None)
 
     def generate_extractive(self, question, context):
-        passages = self._distinct_passages(deserialize_evidence(context), limit=5)
-        blocks = split_evidence_blocks(passages)
+        ranked = deserialize_evidence(context)
+        operation = re.fullmatch(r'как (?:выполнить|сделать|провести|настроить|включить|отключить) (.+?)[?!.]*',
+                                 question.strip(), re.I)
+        if operation:
+            target = operation[1].casefold().strip(' «»"')
+            exact = [passage for passage in ranked
+                     if passage.section.split(' → ')[-1].casefold().strip(' «»"') == target]
+            if exact:
+                ranked = exact
+        passages = self._distinct_passages(ranked, limit=5)
+        blocks = select_requested_groups(split_evidence_blocks(passages), question)
         if not blocks:
             return LLMAnswerSchema(answerable=False, answer=None)
         excerpts = '\n\n'.join(f'Block {index}:\n{block.ranking_text}'

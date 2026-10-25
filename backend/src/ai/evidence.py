@@ -171,3 +171,29 @@ def render_evidence_blocks(passages):
     if re.search(r'(?:нажмите|кликните|клавиш[ау]|кнопк[ау])\s*[.→)]', answer, re.I):
         answer += '\n\nВ текстовой выгрузке пропущены обозначения некоторых кнопок; они доступны в исходной инструкции.'
     return answer
+
+
+def select_requested_groups(blocks, question):
+    def words(text):
+        return {word[:4] for word in re.findall(r'[а-яёa-z]{4,}', text.casefold())}
+
+    labels, groups = {}, {}
+    for index, block in enumerate(blocks):
+        lines = block.text.strip().splitlines()
+        if (len(lines) > 1 and lines[0].endswith(':')
+                and all(line.lstrip().startswith('- ') for line in lines[1:] if line.strip())):
+            label = lines[0].rstrip(':')
+            labels[index] = label
+            groups.setdefault(block.title, {})[label] = words(label)
+    allowed, query_words = {}, words(question)
+    for title, categories in groups.items():
+        if len(categories) < 2:
+            continue
+        common = set.intersection(*categories.values())
+        requested = {label for label, terms in categories.items()
+                     if (terms - common) & query_words}
+        if requested:
+            allowed[title] = requested
+    return [block for index, block in enumerate(blocks)
+            if index not in labels or block.title not in allowed
+            or labels[index] in allowed[block.title]]
