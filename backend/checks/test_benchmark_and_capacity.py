@@ -12,6 +12,28 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_extractive_answer_uses_source_text_and_only_selected_sources(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        from src.ai.evidence import EvidencePassage, serialize_evidence
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._generate_text = Mock(return_value='{"sections":[2]}')
+        result = llm.generate_extractive('Какие поля обязательны?', serialize_evidence([
+            EvidencePassage('Неподходящая статья', 'Контакты', 'Телефон и имя.'),
+            EvidencePassage('Создание пользователя', 'Обязательные поля', '- Логин\n- Пароль'),
+        ]))
+        self.assertTrue(result.answerable)
+        self.assertEqual(result.answer, 'Обязательные поля\n\n- Логин\n- Пароль')
+        self.assertEqual(result.source_titles, ['Создание пользователя'])
+
+    def test_extractive_selection_rejects_invented_ids_and_incomplete_json(self):
+        from src.ai.llm.qwen import QwenLLMProvider
+        for raw in ['{"sections":[true]}', '{"sections":[0]}', '{"sections":[4]}',
+                    '{"sections":[1]', '{"sections":[1]}{"sections":[2]}',
+                    '{"sections":["1"]}', '{"answer":"invented"}']:
+            self.assertEqual(QwenLLMProvider._parse_selection(raw, 3), [])
+        self.assertEqual(QwenLLMProvider._parse_selection('{"sections":[2,2,1]}', 3), [2, 1])
+
     def test_selected_blocks_keep_groups_and_render_missing_icons_once(self):
         from src.ai.evidence import EvidencePassage, split_evidence_blocks, render_evidence_blocks
         passages = [EvidencePassage('Инструкция', 'Персонал → Пользователи',
