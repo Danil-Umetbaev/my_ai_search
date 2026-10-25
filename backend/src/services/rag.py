@@ -4,6 +4,7 @@ import re
 from time import perf_counter
 
 from src.ai.llm.base import LLMProvider
+from src.ai.evidence import collect_evidence, serialize_evidence
 from src.ai.reranking.base import RerankerProvider
 from src.core.logging import log_execution_time
 from src.schemas.rag import (
@@ -39,8 +40,8 @@ class RAGService(BaseService):
         question: str,
         candidate_k: int = 40,
         lexical_k: int = 20,
-        top_k: int = 3,
-        threshold: float = 0.30,
+        top_k: int = 8,
+        threshold: float = 0.03,
     ) -> RAGResultSchema:
         started = perf_counter()
 
@@ -66,6 +67,10 @@ class RAGService(BaseService):
                 confidence=None,
                 used_chunks=[],
             )
+
+        if search_query.strip().upper() == "NOT_FOUND":
+            return RAGResultSchema(status=RAGStatus.NOT_FOUND, answer=None,
+                                   sources=[], confidence=None, used_chunks=[])
 
         same_query = question == search_query
         started = perf_counter()
@@ -125,13 +130,7 @@ class RAGService(BaseService):
         )
 
         if not documents:
-            return RAGResultSchema(
-                status=RAGStatus.NOT_FOUND,
-                answer=None,
-                sources=[],
-                confidence=None,
-                used_chunks=[],
-            )
+            return await self._unanswered(question)
 
         texts = [
             f"Документ: {chunk.document_title}\n{chunk.content}"
@@ -180,15 +179,9 @@ class RAGService(BaseService):
         )
 
         if confidence < threshold:
-            return RAGResultSchema(
-                status=RAGStatus.NOT_FOUND,
-                answer=None,
-                sources=[],
-                confidence=confidence,
-                used_chunks=[],
-            )
+            return await self._unanswered(question, confidence=confidence)
 
-        relative_threshold = confidence * 0.70
+        relative_threshold = confidence * 0.20
 
         strong_chunks = [
             (chunk, score)
@@ -251,16 +244,22 @@ class RAGService(BaseService):
             document = await self.db.documents.get_one(id=document_id)
             if document.content:
                 title, chunks = context_documents[document_id]
-                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks)}"
+                anchors = [chunk.content for chunk, _ in best_chunks if chunk.document_id == document_id]
+                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors)}"
                 context_size += len(scoped_text) - len(context_chunks[index])
                 context_chunks[index] = scoped_text
             if document.content and len(document.content) <= 3000:
                 full_text = f"Документ: {document.title}\n{document.content}"
                 size = context_size - len(context_chunks[index]) + len(full_text)
-                if size <= 6000:
-                    context_chunks[index] = full_text
-                    context_size = size
-        context = "\n\n---\n\n".join(context_chunks)
+                context_chunks[index] = full_text
+                context_size = size
+        bounded_chunks, size = [], 0
+        for text in context_chunks:
+            if bounded_chunks and size + len(text) > 18000:
+                continue
+            bounded_chunks.append(text)
+            size += len(text)
+        context = "\n\n---\n\n".join(bounded_chunks)
 
         logger.info(
             "RAG context | chunks=%s | chars=%s | duration=%.2fs",
@@ -270,6 +269,16 @@ class RAGService(BaseService):
         )
 
         started = perf_counter()
+
+        passages = collect_evidence(context, question)
+        if not passages:
+            return await self._unanswered(question, confidence=confidence)
+        passage_scores = await run_model(
+            self.reranker.rerank, question, [p.ranking_text for p in passages],
+        )
+        ranked_passages = sorted(zip(passages, passage_scores, strict=True),
+                                 key=lambda item: item[1], reverse=True)
+        context = serialize_evidence([p for p, _ in ranked_passages[:8]])
 
         answer_llm = await run_model(
             self.llm.generate,
@@ -284,13 +293,7 @@ class RAGService(BaseService):
         )
 
         if not answer_llm.answerable:
-            return RAGResultSchema(
-                status=RAGStatus.NOT_FOUND,
-                answer=None,
-                sources=sources,
-                confidence=confidence,
-                used_chunks=used_chunks,
-            )
+            return await self._unanswered(question, confidence=confidence)
 
         if getattr(answer_llm, "source_titles", None):
             sources = [source for source in sources if source.title in answer_llm.source_titles]
@@ -304,6 +307,15 @@ class RAGService(BaseService):
             sources=sources,
             confidence=confidence,
             used_chunks=used_chunks,
+        )
+
+    async def _unanswered(self, question, confidence=None):
+        classify = getattr(self.llm, 'classify_unanswered', None)
+        off_topic = callable(classify) and await run_model(classify, question) == 'OFF_TOPIC'
+        return RAGResultSchema(
+            status=RAGStatus.OFF_TOPIC if off_topic else RAGStatus.NOT_FOUND,
+            answer='Я могу помочь с вопросами по базе знаний компании.' if off_topic else None,
+            sources=[], confidence=confidence, used_chunks=[],
         )
 
     @staticmethod
@@ -356,7 +368,9 @@ class RAGService(BaseService):
         return selected
 
     @staticmethod
-    def _context_excerpt(content: str, chunks: dict[int, str]) -> str:
+    def _context_excerpt(content: str, chunks: dict[int, str], anchors: list[str] | None = None) -> str:
+        headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
+                    if content[:heading.start()].count("```") % 2 == 0]
         intervals = []
         for text in chunks.values():
             start = content.find(text)
@@ -372,6 +386,19 @@ class RAGService(BaseService):
             if line_end - end <= 300:
                 end = line_end
             intervals.append((start, end))
+        for anchor in anchors or []:
+            anchor_start = content.find(anchor)
+            if anchor_start < 0 or content.find(anchor, anchor_start + 1) >= 0:
+                continue
+            midpoint = anchor_start + len(anchor) // 2
+            for index, heading in enumerate(headings):
+                if heading.start() > midpoint:
+                    break
+                section_end = next((following.start() for following in headings[index + 1:]
+                                    if len(following[1]) <= len(heading[1])), len(content))
+                if midpoint < section_end and section_end - heading.start() <= 4000:
+                    intervals.append((heading.start(), section_end))
+                    break
         introduction_end = content.rfind("\n\n", 0, 800) if len(content) > 800 else -1
         if introduction_end > 0:
             introduction = content[:introduction_end]
@@ -385,8 +412,6 @@ class RAGService(BaseService):
                 merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
             else:
                 merged.append((start, end))
-        headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
-                    if content[:heading.start()].count("```") % 2 == 0]
         excerpts = []
         for start, end in merged:
             parents = []

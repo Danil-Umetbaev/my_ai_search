@@ -134,7 +134,61 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(gate.tasks)
 
 
+class EvidenceTests(unittest.TestCase):
+    def test_table_rows_keep_their_own_condition_and_action(self):
+        from src.ai.evidence import collect_evidence
+        passages = collect_evidence(
+            'Документ: Ошибки печати\nПричина: Истёк срок ФН | Действие: Остановить продажи.\n'
+            'Причина: Нет бумаги | Действие: Заменить рулон.', 'Что делать при истечении срока ФН?',
+        )
+        self.assertEqual(len(passages), 2)
+        self.assertIn('Остановить продажи', passages[0].text)
+        self.assertNotIn('Заменить рулон', passages[0].text)
+
+    def test_parent_section_keeps_steps_but_not_an_unrelated_operation(self):
+        from src.ai.evidence import collect_evidence
+        passages = collect_evidence(
+            'Документ: Инструкция\n# Возврат\n\nПроверьте условия.\n\n'
+            '## Действия\n\n1. Выберите товар.\n2. Подтвердите.\n\n'
+            '# Закрытие смены\n\nРаспечатайте отчёт.', 'Как выполнить возврат?',
+        )
+        passage = next(p for p in passages if p.section == 'Возврат')
+        self.assertIn('2. Подтвердите.', passage.text)
+        self.assertNotIn('Распечатайте отчёт', passage.text)
+
+    def test_product_scope_accepts_family_but_not_an_unmentioned_emulator(self):
+        from src.ai.evidence import compatible_title
+        self.assertTrue(compatible_title('Пирит 2Ф ◾️ Ошибка приёма данных', 'Ошибка на Пирит'))
+        self.assertFalse(compatible_title('SetRetail10 ◾️ VirtualScales', 'Как настроить весы?'))
+        self.assertTrue(compatible_title('SetRetail10 ◾️ VirtualScales', 'Как настроить VirtualScales?'))
+        self.assertTrue(compatible_title('SetRetail10 ◾️ bank.log', 'Какой лог нужен?'))
+
+    def test_answer_is_selected_source_text_and_keeps_code(self):
+        from unittest.mock import Mock
+        from src.ai.evidence import EvidencePassage, serialize_evidence
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._complete = Mock(side_effect=['NO', 'YES'])
+        text = 'Настройте интерфейс:\n```\nethtool -s eth0 speed 10 duplex full\n```'
+        answer = llm.generate('Как настроить интерфейс?', '', serialize_evidence([
+            EvidencePassage('Другой документ', '', 'Не та операция.'),
+            EvidencePassage('Нужная инструкция', '', text),
+        ]))
+        self.assertEqual(answer.answer, text)
+        self.assertEqual(answer.source_titles, ['Нужная инструкция'])
+
+
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    async def test_live_unknown_value_is_not_searched_as_a_literal_marker(self):
+        from unittest.mock import AsyncMock, Mock
+        from src.services.rag import RAGService
+        from src.schemas.rag import RAGStatus
+        llm = Mock(rewrite_query=Mock(return_value='NOT_FOUND'))
+        search = Mock(search=AsyncMock())
+        result = await RAGService(Mock(), search, llm, Mock()).answer('Какой IP назначен нашей кассе?')
+        self.assertEqual(result.status, RAGStatus.NOT_FOUND)
+        search.search.assert_not_awaited()
+
     def test_definition_lookup_extracts_and_escapes_term_only(self):
         from src.services.rag import RAGService
         import re
