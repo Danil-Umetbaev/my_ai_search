@@ -135,6 +135,23 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_named_lists_keep_their_members_in_separate_groups(self):
+        from src.ai.evidence import collect_evidence
+        passages = collect_evidence(
+            'Документ: Стандартные роли\nСервер:\n\n- Директор\n- Товаровед\n\n'
+            'Касса:\n\n- Кассир\n- Старший кассир', 'Какие кассовые роли существуют?',
+        )
+        cash = next(p for p in passages if p.section == 'Касса')
+        self.assertIn('Старший кассир', cash.text)
+        self.assertNotIn('Товаровед', cash.text)
+
+    def test_ui_labels_missing_from_cited_text_are_rejected(self):
+        from src.ai.llm.qwen import QwenLLMProvider
+        self.assertEqual(QwenLLMProvider._unsupported_ui_labels(
+            'Нажмите кнопку «Сохранить».', 'Заполните поля и нажмите .'), ['Сохранить'])
+        self.assertEqual(QwenLLMProvider._unsupported_ui_labels(
+            'Откройте вкладку «Настройки».', 'Перейдите на вкладку НАСТРОЙКИ.'), [])
+
     def test_table_rows_keep_their_own_condition_and_action(self):
         from src.ai.evidence import collect_evidence
         passages = collect_evidence(
