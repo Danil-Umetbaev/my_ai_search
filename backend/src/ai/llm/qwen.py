@@ -144,10 +144,16 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
     def _parse_answer(raw, passages):
         try:
             text = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw).strip()
+            if not text.startswith('{') and '{' in text:
+                text = text[text.index('{'):]
             data, end = json.JSONDecoder().raw_decode(text)
             if text[end:].strip() not in ('', '}'):
                 return None
             answer, indices = data['answer'], data['fragments']
+            if isinstance(indices, list):
+                indices = [int(match[1]) if isinstance(index, str)
+                           and (match := re.fullmatch(r'(?:Фрагмент\s+)?([1-9]\d*)', index.strip(), re.I))
+                           else index for index in indices]
             if (not isinstance(answer, str) or not answer.strip()
                     or not isinstance(indices, list) or not indices
                     or not all(type(i) is int and 1 <= i <= len(passages) for i in indices)):

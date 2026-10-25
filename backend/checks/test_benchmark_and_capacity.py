@@ -154,6 +154,13 @@ class EvidenceTests(unittest.TestCase):
                          ('Подтверждённый ответ.', [1]))
         self.assertIsNone(QwenLLMProvider._parse_answer(valid[:-1], passages))
         self.assertIsNone(QwenLLMProvider._parse_answer(valid + valid, passages))
+        labelled = json.dumps({'answer': 'Подтверждённый ответ.', 'fragments': ['Фрагмент 1', '1']},
+                              ensure_ascii=False)
+        self.assertEqual(QwenLLMProvider._parse_answer('Ответ:\n' + labelled, passages),
+                         ('Подтверждённый ответ.', [1]))
+        for invalid in (['Фрагмент 2'], ['источник1'], ['1 или 2']):
+            self.assertIsNone(QwenLLMProvider._parse_answer(
+                json.dumps({'answer': 'Ответ', 'fragments': invalid}), passages))
 
     def test_classifier_accepts_label_before_explanation_without_prefix_confusion(self):
         from unittest.mock import Mock
