@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import hashlib
+import inspect
 import json
 import sys
 import time
@@ -45,11 +46,14 @@ async def run(args, cases):
     from src.utils.db import DBManager
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    parameters = inspect.signature(RAGService.answer).parameters
+    configuration = {name: parameters[name].default
+                     for name in ('threshold', 'candidate_k', 'lexical_k', 'top_k')}
     with args.output.open('x', encoding='utf-8') as output:
         metadata = dict(type='run', started_at=datetime.now(timezone.utc).isoformat(),
                         label=args.label, selected_ids=[c['id'] for c in cases],
                         dataset_sha256=hashlib.sha256(CASES_PATH.read_bytes()).hexdigest(),
-                        threshold=0.30, candidate_k=40, lexical_k=20, top_k=3)
+                        model=QwenLLMProvider.MODEL_NAME, **configuration)
         output.write(json.dumps(metadata, ensure_ascii=False) + '\n')
         output.flush()
         async with DBManager(async_session_maker) as db:
@@ -62,8 +66,7 @@ async def run(args, cases):
                 started = time.monotonic()
                 record = dict(type='result', **case)
                 try:
-                    result = await rag.answer(case['question'], threshold=0.30,
-                                              candidate_k=40, lexical_k=20, top_k=3)
+                    result = await rag.answer(case['question'])
                     record.update(result.model_dump(mode='json'))
                     record['actual'] = result.status.value
                     record['status_correct'] = record['actual'] == case['expected']
