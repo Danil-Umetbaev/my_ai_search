@@ -11,7 +11,7 @@ class EvidencePassage:
 
     @property
     def ranking_text(self):
-        return f"Документ: {self.title}\nРаздел: {self.section}\n{self.text}"
+        return f"{self.title}\n{self.section}\n{self.text}"
 
 
 def compatible_title(title, question):
@@ -37,13 +37,15 @@ def compatible_title(title, question):
 
 def _units(body):
     path, label, result = [], '', []
+    body = body.replace('\n[… ]\n', '\n\n')
     for paragraph in re.split(r'\n\s*\n', body):
         text = paragraph.strip()
         if not text or re.fullmatch(r'[#*\-\s]+', text):
             continue
         if text.startswith('Раздел документа: '):
             first, _, text = text.partition('\n')
-            path = [(1, first.removeprefix('Раздел документа: '))]
+            path = list(enumerate(first.removeprefix('Раздел документа: ').split(' → '), 1))
+            label = ''
             text = text.strip()
             if not text:
                 continue
@@ -80,14 +82,22 @@ def collect_evidence(context, question, max_section_chars=4500):
         for index, (section, text, table) in enumerate(units):
             groups.setdefault((section, index if table else None), []).append(text)
         for (section, row), texts in groups.items():
-            if section and row is None:
-                descendants = [text for scope, text, _ in units
-                               if scope == section or scope.startswith(section + ' → ')]
-                if sum(map(len, descendants)) <= max_section_chars:
-                    texts = descendants
             joined = '\n\n'.join(texts)
             bodies = [joined] if len(joined) <= max_section_chars else texts
             passages.extend(EvidencePassage(title, section, text) for text in bodies)
+            if section and row is None:
+                descendants = [(scope, text) for scope, text, _ in units
+                               if scope == section or scope.startswith(section + ' → ')]
+                if any(scope != section for scope, _ in descendants):
+                    parts, previous = [], section
+                    for scope, text in descendants:
+                        if scope != previous:
+                            parts.append('### ' + scope.removeprefix(section + ' → '))
+                            previous = scope
+                        parts.append(text)
+                    combined = '\n\n'.join(parts)
+                    if len(combined) <= max_section_chars:
+                        passages.append(EvidencePassage(title, section, combined))
     return list(dict.fromkeys(passages))
 
 

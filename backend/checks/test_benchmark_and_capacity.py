@@ -152,9 +152,20 @@ class EvidenceTests(unittest.TestCase):
             '## Действия\n\n1. Выберите товар.\n2. Подтвердите.\n\n'
             '# Закрытие смены\n\nРаспечатайте отчёт.', 'Как выполнить возврат?',
         )
-        passage = next(p for p in passages if p.section == 'Возврат')
-        self.assertIn('2. Подтвердите.', passage.text)
-        self.assertNotIn('Распечатайте отчёт', passage.text)
+        parent_passages = [p for p in passages if p.section == 'Возврат']
+        self.assertTrue(any('2. Подтвердите.' in p.text for p in parent_passages))
+        self.assertTrue(all('Распечатайте отчёт' not in p.text for p in parent_passages))
+
+    def test_excerpt_gap_resets_section_without_leaking_marker_into_answer(self):
+        from src.ai.evidence import collect_evidence
+        passages = collect_evidence(
+            'Документ: Инструкция\n# Оплата\n\nПервая часть.\n[… ]\n'
+            'Раздел документа: Возврат → По чеку\n## По чеку\n\nНайдите чек.',
+            'Как найти чек?',
+        )
+        matching = [p for p in passages if 'Найдите чек.' in p.text]
+        self.assertEqual(matching[0].section, 'Возврат → По чеку')
+        self.assertNotIn('Раздел документа:', matching[0].text)
 
     def test_product_scope_accepts_family_but_not_an_unmentioned_emulator(self):
         from src.ai.evidence import compatible_title
