@@ -78,6 +78,9 @@ def collect_evidence(context, question, max_section_chars=4500):
         if not compatible_title(title, question):
             continue
         units = _units(body)
+        if (len(body) <= 3500 and '[… ]' not in body and 'Раздел документа:' not in body
+                and re.search(r'(?m)^#{1,6} ', body)):
+            passages.append(EvidencePassage(title, '', body.strip()))
         groups = {}
         for index, (section, text, table) in enumerate(units):
             groups.setdefault((section, index if table else None), []).append(text)
