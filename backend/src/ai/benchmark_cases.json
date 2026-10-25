@@ -2492,5 +2492,305 @@
     "question": "Расскажи анекдот про принтер.",
     "expected": "off_topic",
     "category": "holdout_off_topic"
+  },
+  {
+    "id": 321,
+    "question": "После обновления PostgreSQL до 15 установка SetRetail завершается ошибкой «нет доступа к схеме public». Какое право нужно выдать пользователю установки?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4939055427"
+    ],
+    "required_facts": [
+      "Выдать CREATE на схему public: GRANT CREATE ON SCHEMA public TO ИМЯ_ПОЛЬЗОВАТЕЛЯ."
+    ]
+  },
+  {
+    "id": 322,
+    "question": "От имени какого пользователя запускать GRANT CREATE для исправления доступа к public в PostgreSQL 15?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4939055427"
+    ],
+    "required_facts": [
+      "От пользователя с правами добавления привилегий; по умолчанию postgres."
+    ]
+  },
+  {
+    "id": 323,
+    "question": "Как SQL-запросом проверить наличие CREATE на схему public после исправления ошибки PostgreSQL 15?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4939055427"
+    ],
+    "required_facts": [
+      "SELECT has_schema_privilege('ИМЯ_ПОЛЬЗОВАТЕЛЯ', 'public', 'CREATE') AS has_create_privilege; ожидается true."
+    ]
+  },
+  {
+    "id": 324,
+    "question": "Пользователь установки PostgreSQL 15 не является суперпользователем. Какое разрешение требуется ему для создания объектов в public?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/4939055427"
+    ],
+    "required_facts": [
+      "Право CREATE на схему public; не требовать назначения суперпользователем."
+    ]
+  },
+  {
+    "id": 325,
+    "question": "XML товаров после импорта переместился из /product/success в /product/error. Какие причины невалидности файла описаны в инструкции?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "Нарушены теги XML или присутствуют неиспользуемые символы; не выдавать конкретную строку примера за диагноз файла пользователя."
+    ]
+  },
+  {
+    "id": 326,
+    "question": "Какой уровень логирования вместо ERROR поставить для подробного разбора ошибки импорта товаров?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "TRACE в настройках событий, связанных с продуктами."
+    ]
+  },
+  {
+    "id": 327,
+    "question": "Расширили логирование импорта товаров до TRACE. Что нужно сделать дальше, чтобы увидеть причину ошибки XML?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "Повторно импортировать товар, затем посмотреть сообщения в server.log."
+    ]
+  },
+  {
+    "id": 328,
+    "question": "В каком конфигурационном файле SetRetail версии 10.2 расширяется логирование импорта товаров?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "SetRetail10/standalone/configuration/standalone.xml."
+    ]
+  },
+  {
+    "id": 329,
+    "question": "Где находится server.log для разбора ошибки импорта товаров в SetRetail версии 10.2?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "SetRetail10/standalone/logs/server.log."
+    ]
+  },
+  {
+    "id": 330,
+    "question": "При разборе XML выяснилось, что id в parent-group указан без кавычек. Как исправить эту ошибку импорта?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/468058356"
+    ],
+    "required_facts": [
+      "Поместить значение id в кавычки."
+    ]
+  },
+  {
+    "id": 331,
+    "question": "Можно ли изменить цену товара прямо в его карточке в разделе «Продукты»?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Нет; изменения цены загружаются из ERP-системы."
+    ]
+  },
+  {
+    "id": 332,
+    "question": "Можно ли удалить товар из справочника через карточку товара в «Продуктах»?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Нет; удаление выполняется через загрузку данных из ERP."
+    ]
+  },
+  {
+    "id": 333,
+    "question": "Где нужно изменять наименование товара, если карточка в «Продуктах» не даёт его редактировать?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Изменения наименования передаются из ERP-системы."
+    ]
+  },
+  {
+    "id": 334,
+    "question": "Добавление короткого кода относится к доступным действиям в карточке товара?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Да, добавление короткого кода указано среди дополнительных действий."
+    ]
+  },
+  {
+    "id": 335,
+    "question": "По каким реквизитам можно найти товар в разделе «Продукты»?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Код/артикул, название или штрихкод товара; поддерживается часть значения."
+    ]
+  },
+  {
+    "id": 336,
+    "question": "Можно ли восстановить штрихкод после удаления из карточки товара?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Нет, удалённый штрихкод восстановить невозможно согласно предупреждению инструкции."
+    ]
+  },
+  {
+    "id": 337,
+    "question": "Что произойдёт с продажей через сканирование штрихкода, если этот штрихкод удалить из карточки товара?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1237877014"
+    ],
+    "required_facts": [
+      "Продажа через сканирование удалённого штрихкода будет невозможна."
+    ]
+  },
+  {
+    "id": 338,
+    "question": "Пользователя сервера в разделе «Персонал» можно удалить или только заблокировать?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1111785890"
+    ],
+    "required_facts": [
+      "Пользователя сервера можно только заблокировать."
+    ]
+  },
+  {
+    "id": 339,
+    "question": "Есть ли у заблокированного серверного пользователя доступ к серверной части?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1111785890"
+    ],
+    "required_facts": [
+      "Нет, заблокированные пользователи не имеют доступа к серверной части."
+    ]
+  },
+  {
+    "id": 340,
+    "question": "Можно ли управлять привилегиями из списка «Права для плагинов на сервере» в зависимости от положения ключа кассовой клавиатуры?",
+    "expected": "answered",
+    "category": "validation_answered",
+    "reference_sources": [
+      "https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/1111785890"
+    ],
+    "required_facts": [
+      "Нет, управление этими привилегиями по положению ключа не реализовано."
+    ]
+  },
+  {
+    "id": 341,
+    "question": "Укажи точную испорченную строку в моём XML товаров. Сам файл я не прикладывал.",
+    "expected": "not_found",
+    "category": "validation_not_found"
+  },
+  {
+    "id": 342,
+    "question": "Есть ли сейчас право CREATE у пользователя installer в нашей базе PostgreSQL?",
+    "expected": "not_found",
+    "category": "validation_not_found"
+  },
+  {
+    "id": 343,
+    "question": "Как подключить к SetRetail автоматическую систему полива теплицы по протоколу GardenLink?",
+    "expected": "not_found",
+    "category": "validation_not_found"
+  },
+  {
+    "id": 344,
+    "question": "Какой сотрудник вчера изменил цену товара с кодом 98765 в нашем магазине?",
+    "expected": "not_found",
+    "category": "validation_not_found"
+  },
+  {
+    "id": 345,
+    "question": "Назови действующий пароль подключения нашей кассы к ERP-системе.",
+    "expected": "not_found",
+    "category": "validation_not_found"
+  },
+  {
+    "id": 346,
+    "question": "Сочини рэп про PostgreSQL и кассира.",
+    "expected": "off_topic",
+    "category": "validation_off_topic"
+  },
+  {
+    "id": 347,
+    "question": "Реши школьный пример: сколько будет 81 разделить на 9?",
+    "expected": "off_topic",
+    "category": "validation_off_topic"
+  },
+  {
+    "id": 348,
+    "question": "Подскажи, как победить босса в компьютерной игре.",
+    "expected": "off_topic",
+    "category": "validation_off_topic"
+  },
+  {
+    "id": 349,
+    "question": "Напиши рецепт сырников и назови его «Кассовая смена».",
+    "expected": "off_topic",
+    "category": "validation_off_topic"
+  },
+  {
+    "id": 350,
+    "question": "ывапрлджжж фываывлрп ъъъ",
+    "expected": "off_topic",
+    "category": "validation_off_topic"
   }
 ]
