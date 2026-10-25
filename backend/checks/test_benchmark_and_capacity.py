@@ -191,7 +191,16 @@ class EvidenceTests(unittest.TestCase):
         first = EvidencePassage('Инструкция', 'Смена', 'Закройте смену и распечатайте отчёт.')
         duplicate = EvidencePassage('Инструкция', 'Смена', 'Закройте смену и распечатайте отчёт. Подтвердите.')
         payment = EvidencePassage('Инструкция', 'Оплата', 'Введите сумму наличных.')
-        self.assertEqual(QwenLLMProvider._distinct_passages([first, duplicate, payment]), [first, payment])
+        self.assertEqual(QwenLLMProvider._distinct_passages([first, duplicate, payment]), [duplicate, payment])
+
+    def test_deduplication_preserves_different_operations_and_broader_parent_scope(self):
+        from src.ai.evidence import EvidencePassage
+        from src.ai.llm.qwen import QwenLLMProvider
+        child = EvidencePassage('Руководство', 'Возврат → По номеру', 'Найдите чек. Подтвердите возврат.')
+        sibling = EvidencePassage('Руководство', 'Возврат → По дате', 'Найдите чек. Подтвердите возврат.')
+        parent = EvidencePassage('Руководство', 'Возврат', 'Найдите чек. Подтвердите возврат. Возможен произвольный возврат.')
+        self.assertEqual(QwenLLMProvider._distinct_passages([child, sibling, parent]),
+                         [child, sibling, parent])
 
     def test_table_rows_keep_their_own_condition_and_action(self):
         from src.ai.evidence import collect_evidence

@@ -119,18 +119,26 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
 
     @staticmethod
     def _distinct_passages(passages, limit=3):
-        selected, vocabularies = [], []
+        def covers(larger, smaller):
+            normalize = lambda text: re.sub(r'\s+', ' ', text).strip()
+            text = normalize(re.sub(r'(?m)^#{1,6}[^\n]*$', '', larger.text))
+            parts = [normalize(part) for part in re.split(r'\n\s*\n', smaller.text)
+                     if part.strip() and not re.match(r'^#{1,6} ', part.strip())]
+            return bool(parts) and all(part in text for part in parts)
+
+        selected = []
         for passage in passages:
-            words = set(re.findall(r'\w+', passage.text.casefold()))
-            if any(passage.title == other.title
-                   and len(words & vocabulary) / max(1, min(len(words), len(vocabulary))) > .85
-                   for other, vocabulary in zip(selected, vocabularies)):
-                continue
-            selected.append(passage)
-            vocabularies.append(words)
-            if len(selected) == limit:
-                break
-        return selected
+            for index, other in enumerate(selected):
+                if (passage.title, passage.section) != (other.title, other.section):
+                    continue
+                if covers(other, passage):
+                    break
+                if covers(passage, other):
+                    selected[index] = passage
+                    break
+            else:
+                selected.append(passage)
+        return selected[:limit]
 
     @staticmethod
     def _parse_answer(raw, passages):
