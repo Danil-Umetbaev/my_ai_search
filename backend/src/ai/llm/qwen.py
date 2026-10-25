@@ -263,7 +263,9 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
             return 'OFF_TOPIC'
         label = self._complete(self.INTENT_PROMPT, question)
         if label == 'OFF_TOPIC':
-            return 'OFF_TOPIC'
+            if self.classify_unanswered(question) == 'OFF_TOPIC':
+                return 'OFF_TOPIC'
+            label = 'WORK'
         if (not re.match(r'^(?:как|где|каким)\b', question.strip(), re.I)
                 and re.search(r'\b(?:точн\w*|именно|уверенн\w*|какой компонент|какую деталь)\b', question, re.I)
                 and self._complete(self.DIAGNOSTIC_FACT_PROMPT, question, max_new_tokens=12) == 'OBSERVED'):

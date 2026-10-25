@@ -12,6 +12,16 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_off_topic_requires_confirmation_instead_of_rejecting_unknown_work(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        question = 'Укажи точную испорченную строку в моём XML. Файл не приложен.'
+        llm._complete = Mock(side_effect=['OFF_TOPIC', 'WORK', 'OBSERVED'])
+        self.assertEqual(llm.rewrite_query(question), 'NOT_FOUND')
+        llm._complete = Mock(side_effect=['OFF_TOPIC', 'OFF_TOPIC'])
+        self.assertEqual(llm.rewrite_query('Сочини рэп про PostgreSQL.'), 'OFF_TOPIC')
+
     def test_incident_answers_exclude_examples_but_keep_usage_and_error_descriptions(self):
         from src.ai.evidence import EvidencePassage, exclude_reproduction_blocks
         sample = EvidencePassage('Отмена', 'Пример работы', 'Выполните оплату и дождитесь сбоя.')
