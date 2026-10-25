@@ -145,6 +145,17 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class EvidenceTests(unittest.TestCase):
+    def test_classifier_accepts_label_before_explanation_without_prefix_confusion(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        for raw, expected in [('VALID\n\nОбоснование: ответ подтверждён.', 'VALID'),
+                              ('INVALID\nWrong operation', 'INVALID'),
+                              ('OFF_TOPIC.\nCreative request', 'OFF_TOPIC'),
+                              ('VALIDATION', 'VALIDATION')]:
+            llm._generate_text = Mock(return_value=raw)
+            self.assertEqual(llm._complete('Classify', 'Question'), expected)
+
     def test_named_lists_keep_their_members_in_separate_groups(self):
         from src.ai.evidence import collect_evidence
         passages = collect_evidence(

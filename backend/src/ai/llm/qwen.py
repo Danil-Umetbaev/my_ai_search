@@ -102,7 +102,9 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         ).strip()
 
     def _complete(self, system, question, max_new_tokens=8):
-        return self._generate_text(system, question, max_new_tokens).upper().strip(' .!"\'')
+        text = self._generate_text(system, question, max_new_tokens).upper().strip(' .!"\'')
+        label = re.match(r'^(WORK|LOCAL_FACT|OFF_TOPIC|OBSERVED|DOCUMENTATION|VALID|INVALID)\b', text)
+        return label[1] if label else text
 
     @staticmethod
     def _unsupported_ui_labels(answer, cited):
