@@ -135,6 +135,19 @@ class CapacityTests(unittest.IsolatedAsyncioTestCase):
 
 
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    def test_context_keeps_other_relevant_passages_in_selected_manual(self):
+        from types import SimpleNamespace
+        from src.services.rag import RAGService
+        ranked = [(SimpleNamespace(document_id=doc, chunk_id=i), score)
+                  for i, (doc, score) in enumerate([
+                      ('manual', .95), ('manual', .9), ('other', .85),
+                      ('manual', .8), ('manual', .75), ('unselected', .7)])]
+        selected = RAGService._select_chunks(ranked, 2)
+        expanded = RAGService._extend_context_chunks(selected, ranked)
+        self.assertEqual({chunk.chunk_id for chunk, _ in expanded}, {0, 1, 2, 3})
+        self.assertEqual(len(expanded), 4)
+        self.assertEqual(expanded[:2], selected)
+
     def test_context_selection_does_not_crowd_out_other_documents(self):
         from types import SimpleNamespace
         from src.services.rag import RAGService

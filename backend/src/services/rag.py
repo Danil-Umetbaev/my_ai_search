@@ -194,6 +194,8 @@ class RAGService(BaseService):
         if not best_chunks:
             best_chunks = [chunks_with_scores[0]]
 
+        best_chunks = self._extend_context_chunks(best_chunks, strong_chunks)
+
         used_chunks = []
         sources = []
         seen_documents = set()
@@ -296,6 +298,22 @@ class RAGService(BaseService):
             confidence=confidence,
             used_chunks=used_chunks,
         )
+
+    @staticmethod
+    def _extend_context_chunks(selected, ranked_chunks, per_document=3):
+        result = list(selected)
+        selected_ids = {chunk.chunk_id for chunk, _ in selected}
+        counts = {}
+        for chunk, _ in selected:
+            counts[chunk.document_id] = counts.get(chunk.document_id, 0) + 1
+        for chunk, score in ranked_chunks:
+            if (chunk.document_id not in counts or chunk.chunk_id in selected_ids
+                    or counts[chunk.document_id] >= per_document):
+                continue
+            result.append((chunk, score))
+            selected_ids.add(chunk.chunk_id)
+            counts[chunk.document_id] += 1
+        return result
 
     @staticmethod
     def _select_chunks(ranked_chunks, limit):
