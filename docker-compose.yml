@@ -23,6 +23,7 @@ services:
         max-file: '3'
 
   app:
+    init: true
     build:
       context: ./backend
       dockerfile: dockerfile
