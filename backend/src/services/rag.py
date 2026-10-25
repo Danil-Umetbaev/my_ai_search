@@ -400,12 +400,13 @@ class RAGService(BaseService):
             for match in list(re.finditer(re.escape(name), content, re.IGNORECASE))[:8]:
                 if content[:match.start()].count('```') % 2:
                     continue
-                start = content.rfind('\n\n', 0, match.start()) + 2
-                start = max(0, start if start > 1 else 0)
+                boundary = content.rfind('\n\n', 0, match.start())
+                start = boundary + 2 if boundary >= 0 else 0
                 end = content.find('\n\n', match.end())
                 end = len(content) if end < 0 else end
-                previous = content.rfind('\n\n', 0, max(0, start - 2)) + 2
-                label = content[max(0, previous):max(0, start - 2)].strip()
+                boundary = content.rfind('\n\n', 0, max(0, start - 2))
+                previous = boundary + 2 if boundary >= 0 else 0
+                label = content[previous:max(0, start - 2)].strip()
                 if label.endswith(':') and len(label) < 150:
                     start = max(0, previous)
                 if end - start <= 1200:
