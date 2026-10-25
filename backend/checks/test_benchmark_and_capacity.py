@@ -261,6 +261,33 @@ class EvidenceTests(unittest.TestCase):
 
 
 class RAGContractTests(unittest.IsolatedAsyncioTestCase):
+    async def test_unrelated_plugin_does_not_raise_relative_cutoff_for_manual(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, Mock
+        from uuid import uuid4
+        from src.services.rag import RAGService
+        from src.schemas.llm import LLMAnswerSchema
+        def chunk(title):
+            return SimpleNamespace(document_id=uuid4(), chunk_id=uuid4(), chunk_index=0,
+                                   document_title=title, document_url='https://example.test/manual',
+                                   content='Откройте меню возврата.')
+        plugin = chunk('Беларусь ◾️ eBridge')
+        manual = chunk('SetRetail10 ◾️ Руководство пользователя')
+        db = Mock(document_chunks=Mock(search_lexical=AsyncMock(return_value=[]),
+                                       get_neigbors=AsyncMock(return_value=[])),
+                  documents=Mock(get_one=AsyncMock(return_value=SimpleNamespace(
+                      title=manual.document_title, content=manual.content))))
+        llm = Mock()
+        llm.rewrite_query.return_value = 'Как оформить возврат?'
+        llm.generate.return_value = LLMAnswerSchema(answerable=True, answer=manual.content,
+                                                    source_titles=[manual.document_title])
+        reranker = Mock(rerank=Mock(side_effect=[[.99, .1], [.1]]))
+        result = await RAGService(db, Mock(search=AsyncMock(return_value=[plugin, manual])),
+                                  llm, reranker).answer('Как оформить возврат?')
+        self.assertEqual(result.confidence, .1)
+        self.assertEqual([source.document_id for source in result.sources], [manual.document_id])
+        self.assertNotIn('eBridge', llm.generate.call_args.args[2])
+
     async def test_live_unknown_value_is_not_searched_as_a_literal_marker(self):
         from unittest.mock import AsyncMock, Mock
         from src.services.rag import RAGService

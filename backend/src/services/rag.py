@@ -4,7 +4,7 @@ import re
 from time import perf_counter
 
 from src.ai.llm.base import LLMProvider
-from src.ai.evidence import collect_evidence, serialize_evidence
+from src.ai.evidence import collect_evidence, compatible_title, serialize_evidence
 from src.ai.reranking.base import RerankerProvider
 from src.core.logging import log_execution_time
 from src.schemas.rag import (
@@ -164,10 +164,14 @@ class RAGService(BaseService):
             ]
 
         chunks_with_scores = sorted(
-            zip(documents, scores, strict=True),
+            ((chunk, score) for chunk, score in zip(documents, scores, strict=True)
+             if compatible_title(chunk.document_title, question)),
             key=lambda item: item[1],
             reverse=True,
         )
+
+        if not chunks_with_scores:
+            return await self._unanswered(question)
 
         confidence = chunks_with_scores[0][1]
 
