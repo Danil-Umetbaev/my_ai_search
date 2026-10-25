@@ -43,7 +43,6 @@ class AICapacityMiddleware:
         def complete(done):
             self.tasks.discard(done)
             if not done.cancelled():
-                done.exception()  # Retrieve exceptions even after HTTP cancellation.
-
+                done.exception()
         task.add_done_callback(complete)
         await asyncio.shield(task)
