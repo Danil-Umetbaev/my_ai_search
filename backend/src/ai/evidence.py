@@ -35,6 +35,14 @@ def compatible_title(title, question):
     return True
 
 
+def compatible_workplace_scope(passage, question):
+    office = r'\b(?:офис\w*|переговорн\w*)\b'
+    product = r'\b(?:касс[ауеы]|кассой|кассах|кассами|ксо|setretail\w*|settouch\w*|setcentrum\w*)\b'
+    if re.search(office, question, re.I) and not re.search(product, question, re.I):
+        return bool(re.search(office, passage.ranking_text, re.I))
+    return True
+
+
 def _units(body):
     path, label, result = [], '', []
     body = body.replace('\n[… ]\n', '\n\n')
@@ -102,7 +110,8 @@ def collect_evidence(context, question, max_section_chars=4500):
                     combined = '\n\n'.join(parts)
                     if len(combined) <= max_section_chars:
                         passages.append(EvidencePassage(title, section, combined))
-    return list(dict.fromkeys(passages))
+    return [passage for passage in dict.fromkeys(passages)
+            if compatible_workplace_scope(passage, question)]
 
 
 def serialize_evidence(passages):

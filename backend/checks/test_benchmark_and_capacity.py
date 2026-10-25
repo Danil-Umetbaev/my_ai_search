@@ -12,6 +12,15 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_office_network_does_not_use_cash_register_network_instructions(self):
+        from src.ai.evidence import collect_evidence
+        context = 'Документ: Настройка Wi-Fi кассы\n# Подключение\n\nВыполните cash wifi connect.'
+        self.assertEqual(collect_evidence(context, 'Как подключиться к Wi-Fi нашего офиса?'), [])
+        self.assertEqual(collect_evidence(context, 'Как подключить ноутбук в переговорной к Wi-Fi?'), [])
+        self.assertTrue(collect_evidence(context, 'Как подключить кассу к Wi-Fi в офисе?'))
+        office = 'Документ: Офисная сеть\n# Подключение\n\nДля офисных компьютеров используйте сеть Staff.'
+        self.assertTrue(collect_evidence(office, 'Как подключиться к Wi-Fi нашего офиса?'))
+
     def test_extractive_answer_uses_source_text_and_only_selected_sources(self):
         from unittest.mock import Mock
         from src.ai.llm.qwen import QwenLLMProvider
