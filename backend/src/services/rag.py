@@ -249,7 +249,9 @@ class RAGService(BaseService):
             if document.content:
                 title, chunks = context_documents[document_id]
                 anchors = [chunk.content for chunk, _ in best_chunks if chunk.document_id == document_id]
-                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors)}"
+                overview = bool(re.match(r'^(?:какие|какой список|перечисли|что (?:находится|входит|доступно))\b',
+                                         question.strip(), re.IGNORECASE))
+                scoped_text = f"Документ: {title}\n{self._context_excerpt(document.content, chunks, anchors, overview=overview)}"
                 context_size += len(scoped_text) - len(context_chunks[index])
                 context_chunks[index] = scoped_text
             if document.content and len(document.content) <= 3000:
@@ -372,7 +374,8 @@ class RAGService(BaseService):
         return selected
 
     @staticmethod
-    def _context_excerpt(content: str, chunks: dict[int, str], anchors: list[str] | None = None) -> str:
+    def _context_excerpt(content: str, chunks: dict[int, str], anchors: list[str] | None = None,
+                         overview: bool = False) -> str:
         headings = [heading for heading in re.finditer(r"(?m)^(#{1,6})\s+([^\n]+)$", content)
                     if content[:heading.start()].count("```") % 2 == 0]
         intervals = []
@@ -392,11 +395,34 @@ class RAGService(BaseService):
             intervals.append((start, end))
         if not intervals:
             return RAGService._join_chunks(chunks)
+        outlines = {}
         for anchor in anchors or []:
             anchor_start = content.find(anchor)
             if anchor_start < 0 or content.find(anchor, anchor_start + 1) >= 0:
                 continue
             midpoint = anchor_start + len(anchor) // 2
+            if overview:
+                ancestors = []
+                for index, heading in enumerate(headings):
+                    if heading.start() > midpoint:
+                        break
+                    section_end = next((following.start() for following in headings[index + 1:]
+                                        if len(following[1]) <= len(heading[1])), len(content))
+                    if midpoint < section_end and section_end - heading.start() > 4000:
+                        ancestors.append((heading, section_end))
+                if ancestors:
+                    parent, section_end = ancestors[-1]
+                    children = [h for h in headings if parent.end() < h.start() < section_end]
+                    if children:
+                        first_level = min(len(h[1]) for h in children)
+                        for depth in (first_level + 1, first_level):
+                            labels = [h[2] for h in children if len(h[1]) <= depth]
+                            outline = '\n'.join('- ' + label for label in labels)
+                            if 1 < len(labels) <= 50 and len(outline) <= 2500:
+                                outlines[parent.start()] = (
+                                    f'# {parent[2]}\n\nПодразделы документации:\n{outline}'
+                                )
+                                break
             for index, heading in enumerate(headings):
                 if heading.start() > midpoint:
                     break
@@ -431,7 +457,7 @@ class RAGService(BaseService):
             path = " → ".join(title for _, title in parents)
             prefix = f"Раздел документа: {path}\n" if path else ""
             excerpts.append(prefix + content[start:end].strip())
-        return "\n[… ]\n".join(excerpts)
+        return "\n[… ]\n".join([*excerpts, *outlines.values()])
 
     @staticmethod
     def _join_chunks(chunks: dict[int, str]) -> str:

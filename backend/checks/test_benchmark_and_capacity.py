@@ -424,6 +424,22 @@ class RAGContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('Раздел документа: Пример', result)
         self.assertLess(len(result), 400)
 
+    def test_overview_keeps_complete_heading_catalog_without_unrelated_sections(self):
+        from src.services.rag import RAGService
+        anchor = 'Настройте время действия.'
+        content = ('# Условия\n\n' + 'Описание условий. ' * 300
+                   + '\n\n## По времени\n\n' + anchor
+                   + '\n\n## По клиенту\n\nПроверьте карту.'
+                   + '\n\n## По товару\n\nВыберите товары.'
+                   + '\n\n# Другая операция\n\n## Закрытие смены\n\nЗакройте смену.')
+        excerpt = RAGService._context_excerpt(content, {4: anchor}, [anchor], overview=True)
+        self.assertIn('Подразделы документации:', excerpt)
+        for label in ('По времени', 'По клиенту', 'По товару'):
+            self.assertIn('- ' + label, excerpt)
+        self.assertNotIn('Закрытие смены', excerpt)
+        ordinary = RAGService._context_excerpt(content, {4: anchor}, [anchor])
+        self.assertNotIn('Подразделы документации:', ordinary)
+
     async def test_short_instruction_includes_solution_outside_retrieved_window(self):
         from types import SimpleNamespace
         from unittest.mock import AsyncMock, Mock
