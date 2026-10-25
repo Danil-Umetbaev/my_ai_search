@@ -12,6 +12,16 @@ from pydantic import ValidationError
 
 
 class KnowledgeStructureTests(unittest.TestCase):
+    def test_local_values_are_checked_even_when_initial_classifier_says_work(self):
+        from unittest.mock import Mock
+        from src.ai.llm.qwen import QwenLLMProvider
+        llm = QwenLLMProvider.__new__(QwenLLMProvider)
+        llm._complete = Mock(side_effect=['WORK', 'OBSERVED'])
+        self.assertEqual(llm.rewrite_query('Какой IP у кассы в нашем магазине?'), 'NOT_FOUND')
+        llm._complete = Mock(side_effect=['WORK', 'DOCUMENTATION'])
+        question = 'Какие роли доступны нашим кассирам по умолчанию?'
+        self.assertEqual(llm.rewrite_query(question), question)
+
     def test_named_list_groups_are_not_mixed_but_comparisons_keep_both(self):
         from src.ai.evidence import EvidencePassage, select_requested_groups
         cashier = EvidencePassage('Роли', 'Касса', 'Касса:\n- Кассир\n- Сервисный инженер')

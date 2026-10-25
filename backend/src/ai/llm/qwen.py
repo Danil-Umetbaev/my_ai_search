@@ -267,7 +267,12 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
                 and re.search(r'\b(?:точн\w*|именно|уверенн\w*|какой компонент|какую деталь)\b', question, re.I)
                 and self._complete(self.DIAGNOSTIC_FACT_PROMPT, question, max_new_tokens=12) == 'OBSERVED'):
             return 'NOT_FOUND'
-        if label == 'LOCAL_FACT':
+        asks_local_value = (
+            re.match(r'^(?:какой|какая|какие|какое|сколько|кто|когда|во сколько|назови|укажи|есть ли|установлен ли)\b',
+                     question.strip(), re.I)
+            and re.search(r'\b(?:наш\w*|мо[йяёюеи]\w*|у нас|у меня)\b', question, re.I)
+        )
+        if label == 'LOCAL_FACT' or asks_local_value:
             if self._complete(self.LOCAL_FACT_PROMPT, question) == 'OBSERVED':
                 return 'NOT_FOUND'
         return question.strip()
