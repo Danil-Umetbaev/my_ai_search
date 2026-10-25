@@ -276,7 +276,8 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
             and re.search(r'\b(?:наш\w*|мо[йяёюеи]\w*|у нас|у меня)\b', question, re.I)
         )
         if (asks_local_value
-                and re.search(r'\b(?:ip(?:-адрес\w*)?|парол\w*|серийн\w* номер\w*)\b', question, re.I)
+                and (re.search(r'\b(?:ip(?:-адрес\w*)?|парол\w*|серийн\w* номер\w*)\b', question, re.I)
+                     or re.search(r'\b(?:сейчас|сегодня|вчера|на данный момент)\b', question, re.I))
                 and not re.search(r'\b(?:по умолчанию|стандарт\w*|можно|нуж\w*|следует|долж\w*|рекоменд\w*)\b', question, re.I)):
             return 'NOT_FOUND'
         if label == 'LOCAL_FACT' or asks_local_value:

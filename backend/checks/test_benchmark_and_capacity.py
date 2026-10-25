@@ -68,6 +68,7 @@ class KnowledgeStructureTests(unittest.TestCase):
         llm._complete = Mock(return_value='WORK')
         self.assertEqual(llm.rewrite_query('Какой IP у кассы в нашем магазине на Ленина?'), 'NOT_FOUND')
         self.assertEqual(llm.rewrite_query('Какой пароль установлен на нашем сервере?'), 'NOT_FOUND')
+        self.assertEqual(llm.rewrite_query('Есть ли сейчас право CREATE у installer в нашей базе PostgreSQL?'), 'NOT_FOUND')
         question = 'Какой стандартный пароль у нашей кассы по умолчанию?'
         llm._complete = Mock(side_effect=['WORK', 'DOCUMENTATION'])
         self.assertEqual(llm.rewrite_query(question), question)
