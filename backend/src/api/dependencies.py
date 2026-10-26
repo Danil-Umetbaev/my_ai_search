@@ -1,7 +1,9 @@
 from typing import Annotated
 from functools import lru_cache
-from fastapi import Depends
+from fastapi import Depends, HTTPException, Request
 
+from src.services.auth import AuthService
+from src.exceptions import UserNotAuthenticatedHTTPException
 from src.database import async_session_maker
 from src.utils.db import DBManager
 from src.ai.embeddings.qwen import QwenEmbeddingProvider
@@ -15,7 +17,7 @@ from src.notifications.base import NotificationProvider
 from src.services.escalation import EscalationService
 from src.services.conversation import ConversationService
 from src.config import settings
-
+from src.schemas.users import UserDepSchema
 
 async def get_db():
     async with DBManager(async_session_maker) as db:
@@ -84,3 +86,30 @@ def get_conversation_service(db: DBDep):
 
 
 ConversationServiceDep = Annotated[ConversationService, Depends(get_conversation_service)]
+
+
+def get_token(request: Request):
+    access_token = request.cookies.get("access_token", None)
+    if access_token is None:
+        raise UserNotAuthenticatedHTTPException
+    return access_token
+
+
+def get_current_user_data(token: str = Depends(get_token)):
+    data = AuthService().decode_jwt(token)
+    return UserDepSchema(id=data['user_id'], role=data['role'])
+
+
+UserDataDep = Annotated[UserDepSchema, Depends(get_current_user_data)]
+
+def require_trusted_origin(request: Request):
+    if request.method in {"GET", "HEAD", "OPTIONS"}:
+        return
+
+    origin = request.headers.get("origin")
+
+    if origin not in settings.AUTH_TRUSTED_ORIGINS:
+        raise HTTPException(
+            status_code=403,
+            detail="Недопустимый источник запроса",
+        )

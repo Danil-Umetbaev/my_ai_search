@@ -11,7 +11,8 @@ from src.schemas.messages import MessageSourceSchema
 from src.models.message_sources import MessageSourceORM
 from src.models.escalations import EscalationORM
 from src.schemas.escalations import EscalationSchema
-
+from src.models.users import UsersORM
+from src.schemas.users import User
 
 class ConversationDataMapper(DataMapper):
     db_model = ConversationORM
@@ -39,3 +40,8 @@ class MessageSourceMapper(DataMapper):
 class EscalationDataMapper(DataMapper):
     db_model = EscalationORM
     schema = EscalationSchema
+
+
+class UserDataMapper(DataMapper):
+    db_model = UsersORM
+    schema = User
