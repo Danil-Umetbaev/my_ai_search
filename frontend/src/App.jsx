@@ -17,16 +17,6 @@ import {
 
 import "./styles.css";
 
-const CONVERSATIONS_STORAGE_KEY =
-  "ai-search-conversations-v4";
-
-const ACTIVE_CONVERSATION_STORAGE_KEY =
-  "ai-search-active-conversation-v4";
-
-const META_STORAGE_KEY =
-  "ai-search-message-meta-v4";
-
-
 function loadJson(key, fallback) {
   try {
     const raw =
@@ -95,7 +85,11 @@ function mergeMessagesWithMeta(
 }
 
 
-export default function App() {
+export default function App({ user, onLogin, onLogout, logoutBusy, logoutError }) {
+  const scope = user ? `:user-${user.id}` : "";
+  const CONVERSATIONS_STORAGE_KEY = `ai-search-conversations-v4${scope}`;
+  const ACTIVE_CONVERSATION_STORAGE_KEY = `ai-search-active-conversation-v4${scope}`;
+  const META_STORAGE_KEY = `ai-search-message-meta-v4${scope}`;
   const [
     conversations,
     setConversations,
@@ -665,6 +659,11 @@ export default function App() {
     <div className="app-shell">
 
       <Sidebar
+        user={user}
+        onLogin={onLogin}
+        onLogout={onLogout}
+        logoutBusy={logoutBusy}
+        logoutError={logoutError}
         mobile={isMobile}
         open={
           isMobile ? mobilePanel === "history" : sidebarOpen

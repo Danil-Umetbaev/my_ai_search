@@ -74,11 +74,12 @@ async function request(path, options = {}) {
 
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
       },
-      ...options,
     })
   } catch (error) {
     throw new ApiError({
@@ -104,10 +105,12 @@ async function request(path, options = {}) {
       payload?.code ||
       "HTTP_ERROR"
 
-    const message =
-      payload?.message ||
-      payload?.detail ||
-      `HTTP ${response.status}`
+    const detail = payload?.message || payload?.detail
+    const message = typeof detail === "string" ? detail : `HTTP ${response.status}`
+
+    if (response.status === 401 && !path.startsWith("/auth/")) {
+      window.dispatchEvent(new Event("auth:expired"))
+    }
 
     throw new ApiError({
       message,
@@ -145,6 +148,28 @@ async function request(path, options = {}) {
 
 export function healthCheck() {
   return request("/health")
+}
+
+export function getCurrentUser() {
+  return request("/auth/me", { cache: "no-store", signal: AbortSignal.timeout(10000) })
+}
+
+export function loginUser(email, password) {
+  return request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  })
+}
+
+export function registerUser(email, password, role) {
+  return request("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password, role }),
+  })
+}
+
+export function logoutUser() {
+  return request("/auth/logout", { method: "DELETE" })
 }
 
 
