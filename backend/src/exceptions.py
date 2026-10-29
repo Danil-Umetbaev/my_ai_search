@@ -48,6 +48,16 @@ class DatabaseException(AppException):
     detail = "Ошибка при работе с базой данных"
 
 
+class UserAlreadyExistsException(AppException):
+    detail = "Похожий пользователь уже есть"
+
+class UserNotFoundException(AppException):
+    detail = "Нет такого пользователя"
+
+class InvalidPasswordException(AppException):
+    detail = "Неверный пароль"
+
+
 # ==========================================
 # CHAT / APPLICATION
 # ==========================================
@@ -90,3 +100,27 @@ class DatabaseHTTPException(BaseHTTPException):
     status_code = 500
     code = "DATABASE_ERROR"
     detail = "Внутренняя ошибка сервера"
+
+
+
+class UserEmailAlreadyExistsHTTPException(BaseHTTPException):
+    detail = "Пользователь с таким email уже есть"
+    code ='USER_EXISTS'
+    status_code = 409
+
+class UserNotFoundHTTPException(BaseHTTPException):
+    detail = "Нет такого пользователя"
+    code ='USER_NOT_FOUND'
+    status_code = 404
+
+class UserNotAuthenticatedHTTPException(BaseHTTPException):
+    status_code = 401
+    code ='UNAUTHORAZED'
+    detail = "Вы не аутенфицированы в системе"
+
+
+class InvalidPasswordHTTPException(BaseHTTPException):
+    detail = "Неверный пароль"
+    code ='INVALID_PASSWORD'
+    status_code = 401
+
