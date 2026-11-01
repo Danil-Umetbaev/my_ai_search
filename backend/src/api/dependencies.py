@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException, Request
 
 from src.models.enums import UserRole
 from src.services.auth import AuthService
+from src.services.admin import AdminService
 from src.exceptions import PermissionHTTPError, UserNotAuthenticatedHTTPException
 from src.database import async_session_maker
 from src.utils.db import DBManager
@@ -123,3 +124,20 @@ def require_trusted_origin(request: Request):
             status_code=403,
             detail="Недопустимый источник запроса",
         )
+
+@lru_cache
+def get_admin_chunker():
+    from src.ai.chunking.token import TokenChunker
+    return TokenChunker("Qwen/Qwen3-Embedding-0.6B", 120, 30)
+
+
+def build_admin_indexer(db):
+    from src.services.document_indexer import DocumentIndexerService
+    return DocumentIndexerService(db, get_admin_chunker(), get_embedding_provider())
+
+
+def get_admin_service(db: DBDep):
+    return AdminService(db, indexer_factory=build_admin_indexer)
+
+
+AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]

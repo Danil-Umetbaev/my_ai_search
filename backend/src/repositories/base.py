@@ -2,9 +2,9 @@ from typing import Sequence, Type
 import logging
 
 from asyncpg import UniqueViolationError
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, func
 from pydantic import BaseModel
-from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy.exc import IntegrityError, NoResultFound, SQLAlchemyError
 
 from src.database import Base
 from src.exceptions import (
@@ -12,6 +12,7 @@ from src.exceptions import (
     TooMuchResultFoundException,
     ObjectAlreadyExistsException,
     DataIntegrityException,
+    DatabaseException,
 )
 
 from src.repositories.mappers.base import DataMapper
@@ -23,6 +24,77 @@ class BaseRepository:
 
     def __init__(self, session):
         self.session = session
+
+    async def execute_admin(self, statement):
+        try:
+            return await self.session.execute(statement)
+        except IntegrityError as error:
+            if getattr(error.orig, "sqlstate", None) == "23505":
+                raise ObjectAlreadyExistsException from error
+            raise DataIntegrityException from error
+        except SQLAlchemyError as error:
+            raise DatabaseException from error
+
+    async def get_page(self, limit=50, offset=0):
+        total = (
+            await self.execute_admin(select(func.count()).select_from(self.model))
+        ).scalar_one()
+        rows = (
+            (
+                await self.execute_admin(
+                    select(self.model)
+                    .order_by(self.model.id)
+                    .limit(limit)
+                    .offset(offset)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return {
+            "items": [self.mapper.map_to_domain_entity(row) for row in rows],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    async def get_admin(self, object_id, lock=False):
+        query = select(self.model).where(self.model.id == object_id)
+        if lock:
+            query = query.with_for_update()
+        row = (await self.execute_admin(query)).scalar_one_or_none()
+        if row is None:
+            raise NoResultFoundException
+        return self.mapper.map_to_domain_entity(row)
+
+    async def create_admin(self, values):
+        row = (
+            await self.execute_admin(
+                insert(self.model).values(**values).returning(self.model)
+            )
+        ).scalar_one()
+        return self.mapper.map_to_domain_entity(row)
+
+    async def update_admin(self, object_id, values):
+        row = (
+            await self.execute_admin(
+                update(self.model)
+                .where(self.model.id == object_id)
+                .values(**values)
+                .returning(self.model)
+                .execution_options(populate_existing=True)
+            )
+        ).scalar_one_or_none()
+        if row is None:
+            raise NoResultFoundException
+        return self.mapper.map_to_domain_entity(row)
+
+    async def delete_admin(self, object_id):
+        result = await self.execute_admin(
+            delete(self.model).where(self.model.id == object_id)
+        )
+        if result.rowcount == 0:
+            raise NoResultFoundException
 
     async def get_all(self, *filter, **kwargs):
         query = select(self.model)
@@ -51,21 +123,23 @@ class BaseRepository:
 
     async def add(self, data: BaseModel):
         try:
-            add_model = insert(self.model).values(**data.model_dump()).returning(self.model)
+            add_model = (
+                insert(self.model).values(**data.model_dump()).returning(self.model)
+            )
             result = await self.session.execute(add_model)
             model = result.scalars().first()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as ex:
             logging.debug(
-                f'Не удалось добавить данные в БД, данные - {data}, тип ошибки - {type(ex.orig.__cause__)=}'
+                f"Не удалось добавить данные в БД, данные - {data}, тип ошибки - {type(ex.orig.__cause__)=}"
             )
             if isinstance(ex.orig.__cause__, UniqueViolationError):
                 raise ObjectAlreadyExistsException
             else:
-                logging.error(f'Незнакомая ошибка: данные - {data}, тип ошибки: {type(ex.orig.__cause__)=}')
+                logging.error(
+                    f"Незнакомая ошибка: данные - {data}, тип ошибки: {type(ex.orig.__cause__)=}"
+                )
                 raise ex
-
-
 
     async def add_bulk(self, data: Sequence[BaseModel]):
         if not data:

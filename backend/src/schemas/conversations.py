@@ -8,3 +8,4 @@ class ConversationAddSchema(BaseModel):
 class ConversationSchema(BaseModel):
     id: UUID
     created_at: datetime
+    title: str = "Новый диалог"

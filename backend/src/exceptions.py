@@ -153,3 +153,42 @@ class PermissionHTTPError(BaseHTTPException):
     detail = 'У вас недостаточно прав для просмотра данной страницы'
     code = 'PERMISSION_ERROR'
     status_code = 403
+
+class AdminConflictException(AppException):
+    detail = "Операция конфликтует с существующими данными или связанными записями"
+
+
+class AdminConflictHTTPException(BaseHTTPException):
+    detail = "Операция конфликтует с существующими данными или связанными записями"
+    status_code = 409
+    code = "ADMIN_CONFLICT"
+
+
+class AdminStorageException(AppException):
+    detail = "Не удалось выполнить операцию с данными"
+
+
+class AdminStorageHTTPException(BaseHTTPException):
+    detail = "Не удалось выполнить операцию с данными"
+    status_code = 500
+    code = "ADMIN_STORAGE_ERROR"
+
+
+class DocumentImportException(AppException):
+    detail = "Не удалось загрузить документ из источника"
+
+
+class DocumentImportHTTPException(BaseHTTPException):
+    detail = "Не удалось загрузить документ из источника"
+    status_code = 502
+    code = "DOCUMENT_IMPORT_ERROR"
+
+
+class DocumentIndexingException(AppException):
+    detail = "Не удалось построить индекс документа. Изменения отменены"
+
+
+class DocumentIndexingHTTPException(BaseHTTPException):
+    detail = "Не удалось построить индекс документа. Изменения отменены"
+    status_code = 503
+    code = "DOCUMENT_INDEXING_ERROR"
