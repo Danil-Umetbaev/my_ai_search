@@ -25,8 +25,9 @@ class UserAdd(BaseModel):
     role: UserRole
 
 
-
 class User(BaseModel):
+    is_active: bool = True
+    token_version: int = 0
     id: int
     email: EmailStr
     role: UserRole

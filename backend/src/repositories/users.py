@@ -22,3 +22,10 @@ class UsersRepository(BaseRepository):
         except NoResultFound:
             raise NoResultFoundException
         return UserWithHashPassword.model_validate(model, from_attributes=True)
+
+    async def get_specialists(self):
+        from src.models.enums import UserRole
+
+        return await self.get_all(
+            self.model.role.in_([UserRole.admin, UserRole.it]), is_active=True
+        )

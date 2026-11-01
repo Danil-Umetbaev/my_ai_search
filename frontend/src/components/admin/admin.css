@@ -145,3 +145,17 @@
   .ad-field input, .ad-field select, .ad-field textarea { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .ad-spinner { animation-duration: 2s; } .ad-shell button { transition: none; } }
+.ad-heading-count { font-size: 15px; color: #84978b; margin-left: 14px; font-weight: 400; letter-spacing: 0; }
+.ad-tools { justify-content: flex-end; }
+.ad-tools select { margin-right: auto; margin-left: 0; }
+.ad-table a { color: #42866a; font-size: 12px; text-decoration: none; }
+.ad-details { border-top: 1px solid #e3ebe5; padding: 18px 0; margin-top: 12px; }
+.ad-details summary { cursor: pointer; color: #688573; font-size: 12px; padding: 4px 0; }
+.ad-details[open] summary { margin-bottom: 14px; }
+.ad-question { font-size: 17px; line-height: 1.6; font-weight: 550; margin: 0 0 22px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ad-delivery { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; color: #84978b; margin-top: 18px; }
+.ad-helper { color: #84978b; font-size: 12px; line-height: 1.6; }
+.ad-message-source { font-size: 11px; line-height: 1.8; color: #688573; }
+.ad-message-source a { color: #338566; }
+.ad-advanced:empty { display: none; }
+@media(max-width:760px) { .ad-sidebar nav { overflow-x: auto; } .ad-sidebar nav button { flex: 0 0 auto; } .ad-heading-count { font-size: 13px; } .ad-delivery { flex-wrap: wrap; } }

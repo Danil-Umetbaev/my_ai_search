@@ -38,18 +38,24 @@ class DocumentRepository(BaseRepository):
         ).scalar_one_or_none()
         return self.mapper.map_to_domain_entity(row) if row else None
 
-    async def get_page(self, limit=50, offset=0):
+    async def get_page(self, limit=50, offset=0, **filter_by):
         from sqlalchemy import select, func
         from src.schemas.documents import DocumentSummary
 
         fields = [getattr(self.model, name) for name in DocumentSummary.model_fields]
         total = (
-            await self._execute(select(func.count()).select_from(self.model))
+            await self._execute(
+                select(func.count()).select_from(self.model).filter_by(**filter_by)
+            )
         ).scalar_one()
         rows = (
             (
                 await self._execute(
-                    select(*fields).order_by(self.model.id).limit(limit).offset(offset)
+                    select(*fields)
+                    .filter_by(**filter_by)
+                    .order_by(self.model.updated_at.desc(), self.model.id)
+                    .limit(limit)
+                    .offset(offset)
                 )
             )
             .mappings()
@@ -62,22 +68,5 @@ class DocumentRepository(BaseRepository):
             "offset": offset,
         }
 
-    async def delete_with_chunks(self, object_id):
-        from sqlalchemy import delete, select
-        from src.models.document_chunk import DocumentChunkORM
-        from src.models.message_sources import MessageSourceORM
-        from src.exceptions import DataIntegrityException
-
-        await self.get_one(id=object_id, for_update=True)
-        used = await self._execute(
-            select(MessageSourceORM.id)
-            .join(DocumentChunkORM, MessageSourceORM.chunk_id == DocumentChunkORM.id)
-            .where(DocumentChunkORM.document_id == object_id)
-            .limit(1)
-        )
-        if used.first() is not None:
-            raise DataIntegrityException
-        await self._execute(
-            delete(DocumentChunkORM).where(DocumentChunkORM.document_id == object_id)
-        )
-        await super().delete(id=object_id)
+    async def set_archived(self, document_id, archived):
+        return await self.edit({"is_archived": archived}, id=document_id)

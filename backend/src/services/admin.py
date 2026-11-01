@@ -1,8 +1,9 @@
 import asyncio
 import hashlib
 from datetime import datetime, timezone
+from src.models.enums import UserRole, Status
+from src.exceptions import NotificationRetryException
 from src.services.base import BaseService
-from src.services.auth import AuthService
 from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
 from src.schemas.documents import DocumentAddSchema
 from src.schemas.admin import DocumentImport
@@ -23,8 +24,16 @@ from src.exceptions import (
 
 
 class AdminService(BaseService):
-    def __init__(self, db, indexer=None, source=None, indexer_factory=None):
+    def __init__(
+        self,
+        db,
+        indexer=None,
+        source=None,
+        indexer_factory=None,
+        notification_provider=None,
+    ):
         super().__init__(db)
+        self.notification_provider = notification_provider
         self.indexer = indexer
         self.indexer_factory = indexer_factory
         self.source = source or ConfluenceKnowledgeSource()
@@ -43,58 +52,20 @@ class AdminService(BaseService):
         except DatabaseException as error:
             raise AdminStorageException from error
 
-    async def add_user(self, data):
-        try:
-            values = data.model_dump(exclude_unset=False)
-            if "password" in values:
-                values["hashed_password"] = await asyncio.to_thread(
-                    AuthService().hash_password, values.pop("password")
-                )
-            saved = await self.db.users.add(values)
-            await self.db.commit()
-            return saved
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoUserFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
     async def update_user(self, user_id, data, actor_id):
         try:
+            existing = await self.db.users.get_one(id=user_id, for_update=True)
             values = data.model_dump(exclude_unset=True)
-            if (
-                user_id == actor_id
-                and "role" in values
-                and values["role"].value != "admin"
+            if user_id == actor_id and (
+                values.get("is_active") is False
+                or ("role" in values and values["role"] != UserRole.admin)
             ):
                 raise AdminConflictException
-            if "password" in values:
-                values["hashed_password"] = await asyncio.to_thread(
-                    AuthService().hash_password, values.pop("password")
-                )
+            if any(getattr(existing, key) != value for key, value in values.items()):
+                values["token_version"] = existing.token_version + 1
             saved = await self.db.users.edit(values, id=user_id)
             await self.db.commit()
             return saved
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoUserFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
-    async def delete_user(self, user_id, actor_id):
-        try:
-            if user_id == actor_id:
-                raise AdminConflictException
-            await self.db.users.delete(id=user_id)
-            await self.db.commit()
         except NoResultFoundException as error:
             await self.db.rollback()
             raise NoUserFoundException from error
@@ -119,55 +90,11 @@ class AdminService(BaseService):
         except DatabaseException as error:
             raise AdminStorageException from error
 
-    async def add_conversation(self, data):
+    async def get_escalations(self, limit=50, offset=0, work_status=None):
         try:
-            values = data.model_dump(exclude_unset=False)
-            saved = await self.db.conversations.add(values)
-            await self.db.commit()
-            return saved
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoConversationFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
-    async def update_conversation(self, conversation_id, data):
-        try:
-            values = data.model_dump(exclude_unset=True)
-            saved = await self.db.conversations.edit(values, id=conversation_id)
-            await self.db.commit()
-            return saved
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoConversationFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
-    async def delete_conversation(self, conversation_id):
-        try:
-            await self.db.conversations.delete_with_related(conversation_id)
-            await self.db.commit()
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoConversationFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
-    async def get_escalations(self, limit=50, offset=0):
-        try:
-            return await self.db.escalations.get_page(limit, offset)
+            return await self.db.escalations.get_page(
+                limit, offset, **({"work_status": work_status} if work_status else {})
+            )
         except DatabaseException as error:
             raise AdminStorageException from error
 
@@ -179,26 +106,29 @@ class AdminService(BaseService):
         except DatabaseException as error:
             raise AdminStorageException from error
 
-    async def add_escalation(self, data):
-        try:
-            values = data.model_dump(exclude_unset=False)
-            await self.get_conversation_by_id(data.conversation_id)
-            saved = await self.db.escalations.add(values)
-            await self.db.commit()
-            return saved
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoEscalationFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
     async def update_escalation(self, escalation_id, data):
         try:
+            existing = await self.db.escalations.get_one(
+                id=escalation_id, for_update=True
+            )
             values = data.model_dump(exclude_unset=True)
+            assignee = values.get("assigned_to", existing.assigned_to)
+            state = values.get("work_status", existing.work_status)
+            if assignee is not None:
+                specialist = await self.db.users.get_one_or_none(id=assignee)
+                if (
+                    not specialist
+                    or not specialist.is_active
+                    or specialist.role not in {UserRole.admin, UserRole.it}
+                ):
+                    raise AdminConflictException
+            if state == "in_progress" and assignee is None:
+                raise AdminConflictException
+            if (
+                state in {"resolved", "closed"}
+                and not values.get("resolution", existing.resolution).strip()
+            ):
+                raise AdminConflictException
             saved = await self.db.escalations.edit(values, id=escalation_id)
             await self.db.commit()
             return saved
@@ -212,23 +142,9 @@ class AdminService(BaseService):
             await self.db.rollback()
             raise AdminStorageException from error
 
-    async def delete_escalation(self, escalation_id):
+    async def get_documents(self, limit=50, offset=0, archived=False):
         try:
-            await self.db.escalations.delete(id=escalation_id)
-            await self.db.commit()
-        except NoResultFoundException as error:
-            await self.db.rollback()
-            raise NoEscalationFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
-            await self.db.rollback()
-            raise AdminConflictException from error
-        except DatabaseException as error:
-            await self.db.rollback()
-            raise AdminStorageException from error
-
-    async def get_documents(self, limit=50, offset=0):
-        try:
-            return await self.db.documents.get_page(limit, offset)
+            return await self.db.documents.get_page(limit, offset, is_archived=archived)
         except DatabaseException as error:
             raise AdminStorageException from error
 
@@ -292,8 +208,10 @@ class AdminService(BaseService):
                 existing = await self.db.documents.find_url(document.source_url)
                 if existing is not None:
                     raise AdminConflictException
+            if existing and existing.is_archived:
+                raise AdminConflictException
             if document is None:
-                values = existing.model_dump(exclude={"id"})
+                values = existing.model_dump(exclude={"id", "is_archived"})
                 values.update(patch or {})
                 document = DocumentAddSchema(**values)
             document.checksum = hashlib.sha256(
@@ -354,17 +272,83 @@ class AdminService(BaseService):
         document = await self._fetch_document(existing.source_url)
         return await self._write_document(document=document, document_id=document_id)
 
-    async def delete_document(self, document_id):
+    async def archive_document(self, document_id):
         try:
             await self.db.documents.lock_catalog()
-            await self.db.documents.delete_with_chunks(document_id)
+            await self.db.documents.get_one(id=document_id, for_update=True)
+            saved = await self.db.documents.set_archived(document_id, True)
+            await self.db.document_chunks.deactivate_document(document_id)
             await self.db.commit()
+            return saved
         except NoResultFoundException as error:
             await self.db.rollback()
             raise NoDocumentFoundException from error
-        except (ObjectAlreadyExistsException, DataIntegrityException) as error:
+        except (DatabaseException, DataIntegrityException) as error:
             await self.db.rollback()
-            raise AdminConflictException from error
+            raise AdminStorageException from error
+
+    async def restore_document(self, document_id):
+        try:
+            await self.db.documents.lock_catalog()
+            current = await self.db.documents.get_one(id=document_id, for_update=True)
+            if not current.is_archived:
+                await self.db.commit()
+                return current
+            saved = await self.db.documents.set_archived(document_id, False)
+            await self._index(saved)
+            await self.db.commit()
+            return saved
+        except NoResultFoundException as error:
+            await self.db.rollback()
+            raise NoDocumentFoundException from error
+        except (DatabaseException, DataIntegrityException) as error:
+            await self.db.rollback()
+            raise AdminStorageException from error
+        except BaseException:
+            await self.db.rollback()
+            raise
+
+    async def retry_notification(self, escalation_id):
+        try:
+            current = await self.db.escalations.get_one(
+                id=escalation_id, for_update=True
+            )
+            if current.status == Status.sent:
+                raise AdminConflictException
+            if self.notification_provider is None:
+                raise NotificationRetryException
+            try:
+                await self.notification_provider.send_escalation(
+                    question=current.question,
+                    reason=current.reason,
+                    conversation_id=current.conversation_id,
+                    created_at=current.created_at,
+                )
+            except Exception as error:
+                await self.db.escalations.edit(
+                    {"status": Status.failed}, id=escalation_id
+                )
+                await self.db.commit()
+                raise NotificationRetryException from error
+            saved = await self.db.escalations.edit(
+                {"status": Status.sent}, id=escalation_id
+            )
+            await self.db.commit()
+            return saved
+        except NoResultFoundException as error:
+            raise NoEscalationFoundException from error
+        except (DatabaseException, DataIntegrityException) as error:
+            await self.db.rollback()
+            raise AdminStorageException from error
+
+    async def get_unanswered(self, limit=50, offset=0):
+        try:
+            return await self.db.messages.get_unanswered(limit, offset)
         except DatabaseException as error:
-            await self.db.rollback()
+            raise AdminStorageException from error
+
+    async def get_specialists(self):
+        try:
+            return await self.db.users.get_specialists()
+        except DatabaseException as error:
             raise AdminStorageException from error

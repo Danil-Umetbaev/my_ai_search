@@ -8,6 +8,7 @@ export const ROLE_LABELS = {
 };
 
 export function authErrorMessage(error) {
+  if (error.code === "SESSION_REVOKED") return "Доступ к аккаунту закрыт. Обратитесь к администратору.";
   if (error.status === 401 || error.code === "USER_NOT_FOUND") return "Неверный email или пароль.";
   if (error.status === 409) return "Этот email уже зарегистрирован. Попробуйте войти.";
   if (error.status === 403) return "Вход с этого адреса сайта не разрешён. Обратитесь к администратору.";

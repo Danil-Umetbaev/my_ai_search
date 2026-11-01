@@ -5,11 +5,7 @@ class AppException(Exception):
     detail = "Произошла ошибка приложения"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(
-            self.detail,
-            *args,
-            **kwargs
-        )
+        super().__init__(self.detail, *args, **kwargs)
 
 
 class BaseHTTPException(HTTPException):
@@ -18,15 +14,13 @@ class BaseHTTPException(HTTPException):
     detail = "Внутренняя ошибка сервера"
 
     def __init__(self):
-        super().__init__(
-            status_code=self.status_code,
-            detail=self.detail
-        )
+        super().__init__(status_code=self.status_code, detail=self.detail)
 
 
 # ==========================================
 # DOMAIN / REPOSITORY
 # ==========================================
+
 
 class NoResultFoundException(AppException):
     detail = "Объект не найден"
@@ -51,8 +45,10 @@ class DatabaseException(AppException):
 class UserAlreadyExistsException(AppException):
     detail = "Похожий пользователь уже есть"
 
+
 class UserNotFoundException(AppException):
     detail = "Нет такого пользователя"
+
 
 class InvalidPasswordException(AppException):
     detail = "Неверный пароль"
@@ -62,14 +58,18 @@ class InvalidPasswordException(AppException):
 # CHAT / APPLICATION
 # ==========================================
 
+
 class NoConversationFoundException(AppException):
     detail = "Нет такой беседы"
+
 
 class NoEscalationFoundException(AppException):
     detail = "Нет такой эскалации"
 
+
 class NoDocumentFoundException(AppException):
     detail = "Нет такого документа"
+
 
 class NoUserFoundException(AppException):
     detail = "Нет такого пользователя"
@@ -87,20 +87,24 @@ class AIServiceUnavailableException(AppException):
 # HTTP
 # ==========================================
 
+
 class NoConversationFoundHTTPException(BaseHTTPException):
     status_code = 404
     code = "CONVERSATION_NOT_FOUND"
     detail = "Нет такой беседы"
+
 
 class NoEscalationFoundHTTPException(BaseHTTPException):
     status_code = 404
     code = "ESCALATION_NOT_FOUND"
     detail = "Нет такой эскалации"
 
+
 class NoDocumentFoundHTTPException(BaseHTTPException):
     status_code = 404
     code = "DOCUMENT_NOT_FOUND"
     detail = "Нет такого документа"
+
 
 class NoUserFoundHTTPException(BaseHTTPException):
     status_code = 404
@@ -126,33 +130,35 @@ class DatabaseHTTPException(BaseHTTPException):
     detail = "Внутренняя ошибка сервера"
 
 
-
 class UserEmailAlreadyExistsHTTPException(BaseHTTPException):
     detail = "Пользователь с таким email уже есть"
-    code ='USER_EXISTS'
+    code = "USER_EXISTS"
     status_code = 409
+
 
 class UserNotFoundHTTPException(BaseHTTPException):
     detail = "Нет такого пользователя"
-    code ='USER_NOT_FOUND'
+    code = "USER_NOT_FOUND"
     status_code = 404
+
 
 class UserNotAuthenticatedHTTPException(BaseHTTPException):
     status_code = 401
-    code ='UNAUTHORAZED'
+    code = "UNAUTHORAZED"
     detail = "Вы не аутенфицированы в системе"
 
 
 class InvalidPasswordHTTPException(BaseHTTPException):
     detail = "Неверный пароль"
-    code ='INVALID_PASSWORD'
+    code = "INVALID_PASSWORD"
     status_code = 401
 
 
 class PermissionHTTPError(BaseHTTPException):
-    detail = 'У вас недостаточно прав для просмотра данной страницы'
-    code = 'PERMISSION_ERROR'
+    detail = "У вас недостаточно прав для просмотра данной страницы"
+    code = "PERMISSION_ERROR"
     status_code = 403
+
 
 class AdminConflictException(AppException):
     detail = "Операция конфликтует с существующими данными или связанными записями"
@@ -192,3 +198,33 @@ class DocumentIndexingHTTPException(BaseHTTPException):
     detail = "Не удалось построить индекс документа. Изменения отменены"
     status_code = 503
     code = "DOCUMENT_INDEXING_ERROR"
+
+
+class SessionRevokedException(AppException):
+    detail = "Доступ к аккаунту закрыт или сессия завершена. Войдите снова."
+
+
+class SessionRevokedHTTPException(BaseHTTPException):
+    status_code = 401
+    code = "SESSION_REVOKED"
+    detail = SessionRevokedException.detail
+
+
+class NotificationRetryException(AppException):
+    detail = "Не удалось отправить уведомление. Проверьте подключение VK."
+
+
+class NotificationRetryHTTPException(BaseHTTPException):
+    status_code = 502
+    code = "NOTIFICATION_FAILED"
+    detail = NotificationRetryException.detail
+
+
+class AuthUnavailableException(AppException):
+    detail = "Не удалось проверить сессию. Попробуйте ещё раз."
+
+
+class AuthUnavailableHTTPException(BaseHTTPException):
+    status_code = 503
+    code = "AUTH_UNAVAILABLE"
+    detail = AuthUnavailableException.detail

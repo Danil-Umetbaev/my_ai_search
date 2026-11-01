@@ -1,17 +1,15 @@
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Literal
 from uuid import UUID
 from urllib.parse import urlsplit
 import re
 from pydantic import (
     BaseModel,
     ConfigDict,
-    EmailStr,
     Field,
     field_validator,
     model_validator,
 )
-from src.models.enums import UserRole, Status
-from src.schemas.users import UserRequestAdd, UserLogin
+from src.models.enums import UserRole
 
 T = TypeVar("T")
 
@@ -84,46 +82,23 @@ class DocumentImport(AdminInput):
         )
 
 
-class ConversationCreate(AdminInput):
-    title: str = Field(
-        default="Новый диалог", min_length=1, max_length=255, pattern=r"\S"
-    )
-
-
-class ConversationPatch(PatchInput):
-    title: str | None = Field(default=None, min_length=1, max_length=255, pattern=r"\S")
-
-
-class UserCreate(UserRequestAdd):
-    email: EmailStr = Field(max_length=100)
-    model_config = ConfigDict(extra="forbid")
-
-
 class UserPatch(PatchInput):
-    email: EmailStr | None = Field(default=None, max_length=100)
     role: UserRole | None = None
-    password: str | None = Field(default=None, min_length=8, max_length=72)
-
-    @field_validator("password")
-    @classmethod
-    def password_bytes(cls, value):
-        if value is not None:
-            UserLogin.validate_password_bytes(value)
-        return value
+    is_active: bool | None = None
 
 
-class EscalationCreate(AdminInput):
-    conversation_id: UUID
-    question: str = Field(min_length=1, max_length=4000, pattern=r"\S")
-    reason: str = Field(min_length=1, max_length=4000, pattern=r"\S")
-    status: Status = Status.pending
+class EscalationPatch(AdminInput):
+    work_status: Literal["new", "in_progress", "resolved", "closed"] | None = None
+    assigned_to: int | None = None
+    resolution: str | None = Field(default=None, max_length=4000)
 
-
-class EscalationPatch(PatchInput):
-    question: str | None = Field(
-        default=None, min_length=1, max_length=4000, pattern=r"\S"
-    )
-    reason: str | None = Field(
-        default=None, min_length=1, max_length=4000, pattern=r"\S"
-    )
-    status: Status | None = None
+    @model_validator(mode="after")
+    def validate_patch(self):
+        if not self.model_fields_set:
+            raise ValueError("Нет изменений")
+        if any(
+            getattr(self, key) is None
+            for key in self.model_fields_set - {"assigned_to"}
+        ):
+            raise ValueError("Поле не может быть пустым")
+        return self

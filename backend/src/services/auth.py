@@ -5,7 +5,18 @@ import jwt
 from datetime import datetime, timedelta, timezone
 
 from src.config import settings
-from src.exceptions import ObjectAlreadyExistsException, UserAlreadyExistsException, NoResultFoundException, UserNotFoundException, InvalidPasswordException
+from src.exceptions import (
+    ObjectAlreadyExistsException,
+    UserAlreadyExistsException,
+    NoResultFoundException,
+    UserNotFoundException,
+    InvalidPasswordException,
+)
+from src.exceptions import (
+    SessionRevokedException,
+    DatabaseException,
+    AuthUnavailableException,
+)
 from src.schemas.users import UserRequestAdd, UserAdd, UserLogin
 from src.services.base import BaseService
 
@@ -33,8 +44,10 @@ class AuthService(BaseService):
     def decode_jwt(self, token: str) -> dict:
         try:
             return jwt.decode(
-                token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
-                 options={"require": ["exp", "user_id", "role"]},
+                token,
+                settings.JWT_SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
+                options={"require": ["exp", "user_id", "role"]},
             )
         except jwt.ExpiredSignatureError:
             raise HTTPException(
@@ -49,9 +62,6 @@ class AuthService(BaseService):
         except jwt.exceptions.DecodeError:
             raise HTTPException(status_code=401, detail="Неверный токен")
 
-
-
-
     async def register_user(self, data: UserRequestAdd):
         hashed_password = self.hash_password(data.password)
         new_user_data = UserAdd(
@@ -65,16 +75,23 @@ class AuthService(BaseService):
         except ObjectAlreadyExistsException:
             raise UserAlreadyExistsException
 
-
     async def login_user(self, data: UserLogin, response: Response):
         try:
             user = await self.db.users.get_user_with_hashed_password(email=data.email)
 
         except NoResultFoundException:
             raise UserNotFoundException
+        if not user.is_active:
+            raise SessionRevokedException
         if not self.verify_password(data.password, user.hashed_password):
             raise InvalidPasswordException
-        access_token = self.create_access_token(data={"user_id": user.id, 'role': user.role.value})
+        access_token = self.create_access_token(
+            data={
+                "user_id": user.id,
+                "role": user.role.value,
+                "token_version": user.token_version,
+            }
+        )
         response.set_cookie(
             key="access_token",
             value=access_token,
@@ -85,8 +102,6 @@ class AuthService(BaseService):
             samesite="lax",
         )
         response.headers["Cache-Control"] = "no-store"
-
-
 
     async def get_me(self, user_id: int):
         user = await self.db.users.get_one_or_none(id=user_id)
@@ -99,7 +114,6 @@ class AuthService(BaseService):
 
         return user
 
-
     async def logout_user(self, response: Response):
         response.delete_cookie(
             key="access_token",
@@ -109,3 +123,17 @@ class AuthService(BaseService):
             samesite="lax",
         )
         response.headers["Cache-Control"] = "no-store"
+
+    async def validate_session(self, data):
+        try:
+            user = await self.db.users.get_one_or_none(id=data["user_id"])
+        except DatabaseException as error:
+            raise AuthUnavailableException from error
+        if (
+            user is None
+            or not user.is_active
+            or user.token_version != data.get("token_version", 0)
+            or user.role.value != data["role"]
+        ):
+            raise SessionRevokedException
+        return user

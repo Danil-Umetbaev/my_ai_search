@@ -21,6 +21,8 @@ class DocumentIndexerService(BaseService):
         self.embedding_provider = embedding_provider
 
     async def index_document(self, document: DocumentSchema) -> int:
+        if document.is_archived:
+            raise ValueError("Archived documents cannot be indexed")
         if not document.content or not document.content.strip():
             raise ValueError("Cannot replace a document index with empty content")
         chunks = await asyncio.to_thread(self.chunker.split, document.content)

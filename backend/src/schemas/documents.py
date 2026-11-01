@@ -12,10 +12,12 @@ class DocumentAddSchema(BaseModel):
 
 
 class DocumentSchema(DocumentAddSchema):
+    is_archived: bool = False
     id: UUID
 
 
 class DocumentSummary(BaseModel):
+    is_archived: bool = False
     id: UUID
     title: str
     source_type: str

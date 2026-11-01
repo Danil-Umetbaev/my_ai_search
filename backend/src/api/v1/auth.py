@@ -1,10 +1,17 @@
 from fastapi import APIRouter, Response
+from src.exceptions import SessionRevokedException, SessionRevokedHTTPException
 from src.api.dependencies import UserDataDep
 from src.schemas.users import UserRequestAdd, UserAdd, UserLogin
 from src.services.auth import AuthService
 from src.api.dependencies import DBDep
-from src.exceptions import UserEmailAlreadyExistsHTTPException, UserAlreadyExistsException, UserNotFoundException, \
-    UserNotFoundHTTPException, InvalidPasswordException, InvalidPasswordHTTPException
+from src.exceptions import (
+    UserEmailAlreadyExistsHTTPException,
+    UserAlreadyExistsException,
+    UserNotFoundException,
+    UserNotFoundHTTPException,
+    InvalidPasswordException,
+    InvalidPasswordHTTPException,
+)
 
 auth_router = APIRouter(prefix="/auth", tags=["Авторизация и аутенфикация"])
 
@@ -24,9 +31,11 @@ async def login_user(data: UserLogin, response: Response, db: DBDep):
         await AuthService(db).login_user(data, response)
     except UserNotFoundException:
         raise UserNotFoundHTTPException
+    except SessionRevokedException as error:
+        raise SessionRevokedHTTPException from error
     except InvalidPasswordException:
         raise InvalidPasswordHTTPException
-    return {"status": 'OK'}
+    return {"status": "OK"}
 
 
 @auth_router.get("/me")

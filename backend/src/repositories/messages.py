@@ -49,3 +49,53 @@ class MessageRepository(BaseRepository):
             "limit": limit,
             "offset": offset,
         }
+
+    async def get_unanswered(self, limit=50, offset=0):
+        from sqlalchemy import func
+        from sqlalchemy.orm import aliased
+
+        previous = aliased(self.model)
+        prior_question = (
+            select(previous.content)
+            .where(
+                previous.conversation_id == self.model.conversation_id,
+                previous.role == "user",
+                previous.created_at <= self.model.created_at,
+            )
+            .order_by(previous.created_at.desc(), previous.id.desc())
+            .limit(1)
+            .correlate(self.model)
+            .scalar_subquery()
+        )
+        condition = (self.model.role == "assistant") & (
+            self.model.response_meta["status"].astext == "not_found"
+        )
+        total = (
+            await self._execute(
+                select(func.count()).select_from(self.model).where(condition)
+            )
+        ).scalar_one()
+        query = (
+            select(
+                self.model.id,
+                self.model.conversation_id,
+                self.model.created_at,
+                func.coalesce(
+                    self.model.response_meta["question"].astext,
+                    prior_question,
+                    "Вопрос в истории диалога",
+                ).label("question"),
+                self.model.content.label("answer"),
+            )
+            .where(condition)
+            .order_by(self.model.created_at.desc(), self.model.id)
+            .limit(limit)
+            .offset(offset)
+        )
+        rows = (await self._execute(query)).mappings().all()
+        return {
+            "items": [dict(row) for row in rows],
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }

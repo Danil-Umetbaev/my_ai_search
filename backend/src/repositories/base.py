@@ -40,15 +40,18 @@ class BaseRepository:
             else dict(data)
         )
 
-    async def get_page(self, limit=50, offset=0):
+    async def get_page(self, limit=50, offset=0, *, order_by=None, **filter_by):
         total = (
-            await self._execute(select(func.count()).select_from(self.model))
+            await self._execute(
+                select(func.count()).select_from(self.model).filter_by(**filter_by)
+            )
         ).scalar_one()
         rows = (
             (
                 await self._execute(
                     select(self.model)
-                    .order_by(self.model.id)
+                    .filter_by(**filter_by)
+                    .order_by(*(order_by if order_by is not None else (self.model.id,)))
                     .limit(limit)
                     .offset(offset)
                 )
