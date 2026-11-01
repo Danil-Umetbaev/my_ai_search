@@ -44,6 +44,7 @@ function formatRelativeTime(
 export default function Sidebar({
   user,
   onLogin,
+  onAdmin,
   onLogout,
   logoutBusy,
   logoutError,
@@ -223,6 +224,7 @@ export default function Sidebar({
 
       </div>
 
+      {user?.role === "admin" && <button className="admin-entry" type="button" onClick={onAdmin} title="Администрирование">⚙ <span>Администрирование</span></button>}
       <div className="sidebar-account">
         <div className="sidebar-account__identity">
           <span className="sidebar-account__avatar" aria-hidden="true">{user ? user.email.charAt(0).toUpperCase() : "○"}</span>

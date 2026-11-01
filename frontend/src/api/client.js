@@ -199,3 +199,11 @@ export function sendMessage(
     }),
   })
 }
+
+
+export function adminRequest(path, { method = "GET", data, signal } = {}) {
+  return request(`/admin/${path}`, {
+    method, signal, cache: "no-store",
+    ...(data === undefined ? {} : { body: JSON.stringify(data) }),
+  });
+}

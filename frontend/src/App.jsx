@@ -85,7 +85,7 @@ function mergeMessagesWithMeta(
 }
 
 
-export default function App({ user, onLogin, onLogout, logoutBusy, logoutError }) {
+export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logoutError }) {
   const scope = user ? `:user-${user.id}` : "";
   const CONVERSATIONS_STORAGE_KEY = `ai-search-conversations-v4${scope}`;
   const ACTIVE_CONVERSATION_STORAGE_KEY = `ai-search-active-conversation-v4${scope}`;
@@ -659,6 +659,7 @@ export default function App({ user, onLogin, onLogout, logoutBusy, logoutError }
     <div className="app-shell">
 
       <Sidebar
+        onAdmin={() => { setMobilePanel(null); onAdmin?.(); }}
         user={user}
         onLogin={onLogin}
         onLogout={onLogout}
