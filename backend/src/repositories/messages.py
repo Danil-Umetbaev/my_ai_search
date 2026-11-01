@@ -21,18 +21,18 @@ class MessageRepository(BaseRepository):
         objects = result.scalars().all()
         return [self.mapper.map_to_domain_entity(obj) for obj in objects]
 
-    async def get_admin_messages(self, conversation_id, limit=50, offset=0):
+    async def get_page_by_conversation_id(self, conversation_id, limit=50, offset=0):
         from sqlalchemy import func
 
         condition = self.model.conversation_id == conversation_id
         total = (
-            await self.execute_admin(
+            await self._execute(
                 select(func.count()).select_from(self.model).where(condition)
             )
         ).scalar_one()
         rows = (
             (
-                await self.execute_admin(
+                await self._execute(
                     select(self.model)
                     .where(condition)
                     .order_by(self.model.created_at, self.model.id)

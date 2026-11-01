@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Generic, TypeVar
 from uuid import UUID
 from urllib.parse import urlsplit
@@ -83,16 +82,6 @@ class DocumentImport(AdminInput):
         return (
             f"https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/{match[1]}"
         )
-
-
-class DocumentSummary(BaseModel):
-    id: UUID
-    title: str
-    source_type: str
-    source_url: str
-    checksum: str
-    created_at: datetime
-    updated_at: datetime
 
 
 class ConversationCreate(AdminInput):

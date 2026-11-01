@@ -37,7 +37,7 @@ class AdminService(BaseService):
 
     async def get_user_by_id(self, user_id):
         try:
-            return await self.db.users.get_admin(user_id)
+            return await self.db.users.get_one(id=user_id)
         except NoResultFoundException as error:
             raise NoUserFoundException from error
         except DatabaseException as error:
@@ -50,7 +50,7 @@ class AdminService(BaseService):
                 values["hashed_password"] = await asyncio.to_thread(
                     AuthService().hash_password, values.pop("password")
                 )
-            saved = await self.db.users.create_admin(values)
+            saved = await self.db.users.add(values)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -76,7 +76,7 @@ class AdminService(BaseService):
                 values["hashed_password"] = await asyncio.to_thread(
                     AuthService().hash_password, values.pop("password")
                 )
-            saved = await self.db.users.update_admin(user_id, values)
+            saved = await self.db.users.edit(values, id=user_id)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -93,7 +93,7 @@ class AdminService(BaseService):
         try:
             if user_id == actor_id:
                 raise AdminConflictException
-            await self.db.users.delete_admin(user_id)
+            await self.db.users.delete(id=user_id)
             await self.db.commit()
         except NoResultFoundException as error:
             await self.db.rollback()
@@ -113,7 +113,7 @@ class AdminService(BaseService):
 
     async def get_conversation_by_id(self, conversation_id):
         try:
-            return await self.db.conversations.get_admin(conversation_id)
+            return await self.db.conversations.get_one(id=conversation_id)
         except NoResultFoundException as error:
             raise NoConversationFoundException from error
         except DatabaseException as error:
@@ -122,7 +122,7 @@ class AdminService(BaseService):
     async def add_conversation(self, data):
         try:
             values = data.model_dump(exclude_unset=False)
-            saved = await self.db.conversations.create_admin(values)
+            saved = await self.db.conversations.add(values)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -138,7 +138,7 @@ class AdminService(BaseService):
     async def update_conversation(self, conversation_id, data):
         try:
             values = data.model_dump(exclude_unset=True)
-            saved = await self.db.conversations.update_admin(conversation_id, values)
+            saved = await self.db.conversations.edit(values, id=conversation_id)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -153,7 +153,7 @@ class AdminService(BaseService):
 
     async def delete_conversation(self, conversation_id):
         try:
-            await self.db.conversations.delete_admin(conversation_id)
+            await self.db.conversations.delete_with_related(conversation_id)
             await self.db.commit()
         except NoResultFoundException as error:
             await self.db.rollback()
@@ -173,7 +173,7 @@ class AdminService(BaseService):
 
     async def get_escalation_by_id(self, escalation_id):
         try:
-            return await self.db.escalations.get_admin(escalation_id)
+            return await self.db.escalations.get_one(id=escalation_id)
         except NoResultFoundException as error:
             raise NoEscalationFoundException from error
         except DatabaseException as error:
@@ -183,7 +183,7 @@ class AdminService(BaseService):
         try:
             values = data.model_dump(exclude_unset=False)
             await self.get_conversation_by_id(data.conversation_id)
-            saved = await self.db.escalations.create_admin(values)
+            saved = await self.db.escalations.add(values)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -199,7 +199,7 @@ class AdminService(BaseService):
     async def update_escalation(self, escalation_id, data):
         try:
             values = data.model_dump(exclude_unset=True)
-            saved = await self.db.escalations.update_admin(escalation_id, values)
+            saved = await self.db.escalations.edit(values, id=escalation_id)
             await self.db.commit()
             return saved
         except NoResultFoundException as error:
@@ -214,7 +214,7 @@ class AdminService(BaseService):
 
     async def delete_escalation(self, escalation_id):
         try:
-            await self.db.escalations.delete_admin(escalation_id)
+            await self.db.escalations.delete(id=escalation_id)
             await self.db.commit()
         except NoResultFoundException as error:
             await self.db.rollback()
@@ -234,7 +234,7 @@ class AdminService(BaseService):
 
     async def get_document_by_id(self, document_id):
         try:
-            return await self.db.documents.get_admin(document_id)
+            return await self.db.documents.get_one(id=document_id)
         except NoResultFoundException as error:
             raise NoDocumentFoundException from error
         except DatabaseException as error:
@@ -244,8 +244,8 @@ class AdminService(BaseService):
         self, conversation_id, limit=50, offset=0
     ):
         try:
-            await self.db.conversations.get_admin(conversation_id)
-            return await self.db.messages.get_admin_messages(
+            await self.db.conversations.get_one(id=conversation_id)
+            return await self.db.messages.get_page_by_conversation_id(
                 conversation_id, limit, offset
             )
         except NoResultFoundException as error:
@@ -285,7 +285,9 @@ class AdminService(BaseService):
             await self.db.documents.lock_catalog()
             existing = None
             if document_id is not None:
-                existing = await self.db.documents.get_admin(document_id, lock=True)
+                existing = await self.db.documents.get_one(
+                    id=document_id, for_update=True
+                )
             elif document is not None:
                 existing = await self.db.documents.find_url(document.source_url)
                 if existing is not None:
@@ -308,9 +310,9 @@ class AdminService(BaseService):
             values = document.model_dump()
             values["updated_at"] = datetime.now(timezone.utc)
             if existing:
-                saved = await self.db.documents.update_admin(existing.id, values)
+                saved = await self.db.documents.edit(values, id=existing.id)
             else:
-                saved = await self.db.documents.create_admin(values)
+                saved = await self.db.documents.add(values)
             await self._index(saved)
             await self.db.commit()
             return saved
@@ -355,7 +357,7 @@ class AdminService(BaseService):
     async def delete_document(self, document_id):
         try:
             await self.db.documents.lock_catalog()
-            await self.db.documents.delete_admin(document_id)
+            await self.db.documents.delete_with_chunks(document_id)
             await self.db.commit()
         except NoResultFoundException as error:
             await self.db.rollback()

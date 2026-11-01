@@ -1,10 +1,8 @@
 from typing import Sequence, Type
-import logging
 
-from asyncpg import UniqueViolationError
 from sqlalchemy import select, insert, update, delete, func
 from pydantic import BaseModel
-from sqlalchemy.exc import IntegrityError, NoResultFound, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, MultipleResultsFound, SQLAlchemyError
 
 from src.database import Base
 from src.exceptions import (
@@ -14,18 +12,17 @@ from src.exceptions import (
     DataIntegrityException,
     DatabaseException,
 )
-
 from src.repositories.mappers.base import DataMapper
 
 
 class BaseRepository:
-    model = Type[Base]
+    model: Type[Base]
     mapper: Type[DataMapper]
 
     def __init__(self, session):
         self.session = session
 
-    async def execute_admin(self, statement):
+    async def _execute(self, statement):
         try:
             return await self.session.execute(statement)
         except IntegrityError as error:
@@ -35,13 +32,21 @@ class BaseRepository:
         except SQLAlchemyError as error:
             raise DatabaseException from error
 
+    @staticmethod
+    def _values(data: BaseModel | dict, exclude_unset=False):
+        return (
+            data.model_dump(exclude_unset=exclude_unset)
+            if isinstance(data, BaseModel)
+            else dict(data)
+        )
+
     async def get_page(self, limit=50, offset=0):
         total = (
-            await self.execute_admin(select(func.count()).select_from(self.model))
+            await self._execute(select(func.count()).select_from(self.model))
         ).scalar_one()
         rows = (
             (
-                await self.execute_admin(
+                await self._execute(
                     select(self.model)
                     .order_by(self.model.id)
                     .limit(limit)
@@ -58,115 +63,60 @@ class BaseRepository:
             "offset": offset,
         }
 
-    async def get_admin(self, object_id, lock=False):
-        query = select(self.model).where(self.model.id == object_id)
-        if lock:
+    async def get_all(self, *filters, **filter_by):
+        query = select(self.model).filter(*filters).filter_by(**filter_by)
+        rows = (await self._execute(query)).scalars().all()
+        return [self.mapper.map_to_domain_entity(row) for row in rows]
+
+    async def get_one_or_none(self, *, for_update=False, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        if for_update:
             query = query.with_for_update()
-        row = (await self.execute_admin(query)).scalar_one_or_none()
-        if row is None:
-            raise NoResultFoundException
-        return self.mapper.map_to_domain_entity(row)
+        try:
+            row = (await self._execute(query)).scalar_one_or_none()
+        except MultipleResultsFound as error:
+            raise TooMuchResultFoundException from error
+        return self.mapper.map_to_domain_entity(row) if row is not None else None
 
-    async def create_admin(self, values):
-        row = (
-            await self.execute_admin(
-                insert(self.model).values(**values).returning(self.model)
-            )
-        ).scalar_one()
-        return self.mapper.map_to_domain_entity(row)
-
-    async def update_admin(self, object_id, values):
-        row = (
-            await self.execute_admin(
-                update(self.model)
-                .where(self.model.id == object_id)
-                .values(**values)
-                .returning(self.model)
-                .execution_options(populate_existing=True)
-            )
-        ).scalar_one_or_none()
-        if row is None:
-            raise NoResultFoundException
-        return self.mapper.map_to_domain_entity(row)
-
-    async def delete_admin(self, object_id):
-        result = await self.execute_admin(
-            delete(self.model).where(self.model.id == object_id)
-        )
-        if result.rowcount == 0:
-            raise NoResultFoundException
-
-    async def get_all(self, *filter, **kwargs):
-        query = select(self.model)
-        result = await self.session.execute(query)
-        result = result.scalars().all()
+    async def get_one(self, *, for_update=False, **filter_by):
+        result = await self.get_one_or_none(for_update=for_update, **filter_by)
         if result is None:
-            return None
-        return [self.mapper.map_to_domain_entity(obj) for obj in result]
-
-    async def get_one_or_none(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
-        result = await self.session.execute(query)
-        obj = result.scalars().one_or_none()
-        if obj is None:
-            return None
-        return self.mapper.map_to_domain_entity(obj)
-
-    async def get_one(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by)
-        result = await self.session.execute(query)
-        try:
-            obj = result.scalars().one()
-        except NoResultFound:
             raise NoResultFoundException
-        return self.mapper.map_to_domain_entity(obj)
+        return result
 
-    async def add(self, data: BaseModel):
-        try:
-            add_model = (
-                insert(self.model).values(**data.model_dump()).returning(self.model)
-            )
-            result = await self.session.execute(add_model)
-            model = result.scalars().first()
-            return self.mapper.map_to_domain_entity(model)
-        except IntegrityError as ex:
-            logging.debug(
-                f"Не удалось добавить данные в БД, данные - {data}, тип ошибки - {type(ex.orig.__cause__)=}"
-            )
-            if isinstance(ex.orig.__cause__, UniqueViolationError):
-                raise ObjectAlreadyExistsException
-            else:
-                logging.error(
-                    f"Незнакомая ошибка: данные - {data}, тип ошибки: {type(ex.orig.__cause__)=}"
-                )
-                raise ex
+    async def add(self, data: BaseModel | dict):
+        query = insert(self.model).values(**self._values(data)).returning(self.model)
+        row = (await self._execute(query)).scalar_one()
+        return self.mapper.map_to_domain_entity(row)
 
     async def add_bulk(self, data: Sequence[BaseModel]):
         if not data:
             return
+        query = insert(self.model).values([self._values(item) for item in data])
         try:
-            add_model = insert(self.model).values([item.model_dump() for item in data])
-            await self.session.execute(add_model)
-        except IntegrityError as ex:
-            raise DataIntegrityException from ex
+            await self._execute(query)
+        except ObjectAlreadyExistsException as error:
+            raise DataIntegrityException from error
 
-    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
-        edit_model = (
+    async def edit(self, data: BaseModel | dict, exclude_unset=False, **filter_by):
+        query = (
             update(self.model)
             .filter_by(**filter_by)
-            .values(**data.model_dump(exclude_unset=exclude_unset))
+            .values(**self._values(data, exclude_unset))
+            .returning(self.model)
+            .execution_options(populate_existing=True)
         )
-        result = await self.session.execute(edit_model)
+        rows = (await self._execute(query)).scalars().all()
+        is_valid_delete_edit(len(rows))
+        return self.mapper.map_to_domain_entity(rows[0])
+
+    async def delete(self, *filters, **filter_by):
+        query = delete(self.model).filter(*filters).filter_by(**filter_by)
+        result = await self._execute(query)
         is_valid_delete_edit(result.rowcount)
 
-    async def delete(self, *filter, **filter_by):
-        delete_model = delete(self.model).filter(*filter).filter_by(**filter_by)
-        res = await self.session.execute(delete_model)
-        is_valid_delete_edit(res.rowcount)
-
     async def delete_all(self):
-        query = delete(self.model)
-        await self.session.execute(query)
+        await self._execute(delete(self.model))
 
 
 def is_valid_delete_edit(res: int):

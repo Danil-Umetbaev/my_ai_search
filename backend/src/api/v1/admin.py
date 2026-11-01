@@ -7,7 +7,6 @@ from src.schemas.admin import (
     DocumentCreate,
     DocumentPatch,
     DocumentImport,
-    DocumentSummary,
     UserCreate,
     UserPatch,
     ConversationCreate,
@@ -17,7 +16,7 @@ from src.schemas.admin import (
 )
 from src.schemas.users import User
 from src.schemas.conversations import ConversationSchema
-from src.schemas.documents import DocumentSchema
+from src.schemas.documents import DocumentSchema, DocumentSummary
 from src.schemas.escalations import EscalationSchema
 from src.schemas.messages import MessageSchema
 from src.exceptions import (
