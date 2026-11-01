@@ -65,6 +65,15 @@ class InvalidPasswordException(AppException):
 class NoConversationFoundException(AppException):
     detail = "Нет такой беседы"
 
+class NoEscalationFoundException(AppException):
+    detail = "Нет такой эскалации"
+
+class NoDocumentFoundException(AppException):
+    detail = "Нет такого документа"
+
+class NoUserFoundException(AppException):
+    detail = "Нет такого пользователя"
+
 
 class RAGProcessingException(AppException):
     detail = "Не удалось обработать запрос"
@@ -82,6 +91,21 @@ class NoConversationFoundHTTPException(BaseHTTPException):
     status_code = 404
     code = "CONVERSATION_NOT_FOUND"
     detail = "Нет такой беседы"
+
+class NoEscalationFoundHTTPException(BaseHTTPException):
+    status_code = 404
+    code = "ESCALATION_NOT_FOUND"
+    detail = "Нет такой эскалации"
+
+class NoDocumentFoundHTTPException(BaseHTTPException):
+    status_code = 404
+    code = "DOCUMENT_NOT_FOUND"
+    detail = "Нет такого документа"
+
+class NoUserFoundHTTPException(BaseHTTPException):
+    status_code = 404
+    code = "USER_NOT_FOUND"
+    detail = "Нет такого пользователя"
 
 
 class RAGProcessingHTTPException(BaseHTTPException):
@@ -124,3 +148,8 @@ class InvalidPasswordHTTPException(BaseHTTPException):
     code ='INVALID_PASSWORD'
     status_code = 401
 
+
+class PermissionHTTPError(BaseHTTPException):
+    detail = 'У вас недостаточно прав для просмотра данной страницы'
+    code = 'PERMISSION_ERROR'
+    status_code = 403

@@ -2,8 +2,9 @@ from typing import Annotated
 from functools import lru_cache
 from fastapi import Depends, HTTPException, Request
 
+from src.models.enums import UserRole
 from src.services.auth import AuthService
-from src.exceptions import UserNotAuthenticatedHTTPException
+from src.exceptions import PermissionHTTPError, UserNotAuthenticatedHTTPException
 from src.database import async_session_maker
 from src.utils.db import DBManager
 from src.ai.embeddings.qwen import QwenEmbeddingProvider
@@ -100,7 +101,16 @@ def get_current_user_data(token: str = Depends(get_token)):
     return UserDepSchema(id=data['user_id'], role=data['role'])
 
 
+
+
 UserDataDep = Annotated[UserDepSchema, Depends(get_current_user_data)]
+
+def get_admin_id(user: UserDataDep):
+    if user.role == UserRole.admin:
+        return user.id
+    raise PermissionHTTPError
+
+AdminIdDep = Annotated[int, Depends(get_admin_id)]
 
 def require_trusted_origin(request: Request):
     if request.method in {"GET", "HEAD", "OPTIONS"}:
