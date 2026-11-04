@@ -117,7 +117,7 @@ export default function AuthScreen({ onAuthenticated, onGuest, notice = "" }) {
                 <input id="auth-confirm" name="password-confirmation" type={visible ? "text" : "password"} autoComplete="new-password" required maxLength={72} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
                 <label htmlFor="auth-role">Ваша роль</label>
                 <select id="auth-role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                  {Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  <option value="kassir">Кассир</option>
                 </select>
               </>}
               {error && <p className="auth-error" role="alert">{error}</p>}

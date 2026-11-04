@@ -47,14 +47,21 @@ async def clear_test_data():
                     message_sources,
                     escalations,
                     messages,
-                    conversations
+                    conversations,
+                    support_ticket_events,
+                    support_tickets,
+                    support_sessions,
+                    users
                 CASCADE
                 """
             )
         )
 
 @pytest_asyncio.fixture(autouse=True)
-async def clean_database():
+async def clean_database(request):
+    if "integration" not in request.node.path.parts:
+        yield
+        return
     await clear_test_data()
 
     yield
@@ -65,12 +72,15 @@ async def clean_database():
 @pytest_asyncio.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_db] = override_get_db
+    previous_models = getattr(app.state, "models", None)
+    app.state.models = {"status": "ready"}
 
 
     transport = ASGITransport(app=app)
 
-    async with AsyncClient(transport=transport, base_url='http://test') as async_client:
+    async with AsyncClient(transport=transport, base_url='http://test', headers={"Origin": "http://localhost:5173"}) as async_client:
         yield async_client
 
 
     app.dependency_overrides.clear()
+    app.state.models = previous_models or {"status": "loading"}

@@ -6,9 +6,9 @@ from src.services.auth import AuthService
 from src.exceptions import UserNotAuthenticatedHTTPException
 from src.database import async_session_maker
 from src.utils.db import DBManager
-from src.ai.embeddings.qwen import QwenEmbeddingProvider
-from src.ai.llm.qwen import QwenLLMProvider
-from src.ai.reranking.cross_encoder import CrossEncoderRerankerProvider
+from src.ai.embeddings.base import EmbeddingProvider
+from src.ai.llm.base import LLMProvider
+from src.ai.reranking.base import RerankerProvider
 from src.services.rag import RAGService
 from src.services.chat import ChatService
 from src.services.vector_search import VectorSearchService
@@ -30,22 +30,25 @@ DBDep = Annotated[DBManager, Depends(get_db)]
 
 @lru_cache
 def get_embedding_provider():
+    from src.ai.embeddings.qwen import QwenEmbeddingProvider
     return QwenEmbeddingProvider()
 
-embeddingDep = Annotated[QwenEmbeddingProvider, Depends(get_embedding_provider)]
+embeddingDep = Annotated[EmbeddingProvider, Depends(get_embedding_provider)]
 
 
 @lru_cache
 def get_llm_provider():
+    from src.ai.llm.qwen import QwenLLMProvider
     return QwenLLMProvider()
 
-llmDep = Annotated[QwenLLMProvider, Depends(get_llm_provider)]
+llmDep = Annotated[LLMProvider, Depends(get_llm_provider)]
 
 @lru_cache
 def get_reranker_provider():
+    from src.ai.reranking.cross_encoder import CrossEncoderRerankerProvider
     return CrossEncoderRerankerProvider()
 
-rerankerDep = Annotated[CrossEncoderRerankerProvider, Depends(get_reranker_provider)]
+rerankerDep = Annotated[RerankerProvider, Depends(get_reranker_provider)]
 
 
 def get_rag_service(db: DBDep, embedding: embeddingDep, llm: llmDep, reranker: rerankerDep):
