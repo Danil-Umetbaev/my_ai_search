@@ -6,7 +6,8 @@ def extract_pdf_page(page, page_number: int) -> str:
     plain = page.extract_text() or ''
     lines = [line.strip() for line in plain.splitlines() if line.strip()]
     fragmented = sum(len(line.split()) == 1 for line in lines)
-    if lines and fragmented / len(lines) > 0.5:
+    joined_words = bool(re.search(r'[А-Яа-яЁё]{30,}', plain))
+    if lines and (fragmented / len(lines) > 0.5 or joined_words):
         plain = page.extract_text(extraction_mode='layout') or plain
         numbered = list(re.finditer(r'(?m)^( *)(\d+\.\s+[^\n]+)', plain))
         indents = {len(match[1]) for match in numbered}
