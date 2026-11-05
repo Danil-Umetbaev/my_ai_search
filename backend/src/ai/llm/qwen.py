@@ -241,6 +241,16 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         raw = self._generate_text(self.SELECTION_PROMPT,
                                   excerpts + '\n\nQuestion: ' + question, max_new_tokens=192)
         indices = self._parse_selection(raw, len(blocks))
+        if indices is None:
+            correction = (
+                f'\nThere are exactly {len(blocks)} blocks. Use only block IDs from 1 to '
+                f'{len(blocks)}, not numbers of steps inside the text. Return valid JSON.'
+            )
+            raw = self._generate_text(
+                self.SELECTION_PROMPT, excerpts + '\n\nQuestion: ' + question + correction,
+                max_new_tokens=192,
+            )
+            indices = self._parse_selection(raw, len(blocks))
         if not indices:
             return LLMAnswerSchema(answerable=False, answer=None)
         selected = [blocks[index - 1] for index in sorted(indices)]
@@ -278,10 +288,10 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
             indices = data['sections']
             if (text[end:].strip() or not isinstance(indices, list)
                     or not all(type(index) is int and 1 <= index <= count for index in indices)):
-                return []
+                return None
             return list(dict.fromkeys(indices))
         except (ValueError, KeyError, TypeError):
-            return []
+            return None
 
     @log_execution_time('LLM query classification')
     def rewrite_query(self, question):
