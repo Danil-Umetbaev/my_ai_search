@@ -109,7 +109,7 @@ def pdf_documents(path, url, manufacturer, models, version):
     return result
 
 
-async def index():
+async def index(device='cpu'):
     from src.config import settings
     if settings.DB_NAME != 'customer_knowledge':
         raise RuntimeError('This importer only writes to customer_knowledge')
@@ -121,6 +121,9 @@ async def index():
     documents = [DocumentAddSchema.model_validate(x) for x in json.loads((ASSETS / 'documents.json').read_text(encoding='utf-8'))]
     chunker = TokenChunker('Qwen/Qwen3-Embedding-0.6B', 120, 30)
     embedding = QwenEmbeddingProvider()
+    if device != 'cpu':
+        embedding.model.to(device)
+        embedding.device = device
     async with DBManager(async_session_maker) as db:
         indexer = DocumentIndexerService(db, chunker, embedding)
         for position, document in enumerate(documents, 1):
@@ -137,9 +140,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['download', 'index'])
     parser.add_argument('--pirit', type=Path)
+    parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     args = parser.parse_args()
     if args.action == 'index':
-        asyncio.run(index())
+        asyncio.run(index(args.device))
     else:
         urls = [s.strip() for s in (ROOT / 'knowledge_urls.txt').read_text(encoding='utf-8').splitlines() if s.strip() and not s.lstrip().startswith('#')]
         raise SystemExit(bool(asyncio.run(download(urls, args.pirit))))
