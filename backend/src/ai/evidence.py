@@ -160,8 +160,11 @@ def _keep_numbered_steps_together(blocks):
     """A sequence of procedure steps is one selectable evidence block."""
     result = []
     step = re.compile(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))')
+    error_entry = re.compile(r'^\d+[.)]\s*[«"“]')
     for block in blocks:
         if (result and step.match(block.text) and step.match(result[-1].text)
+                and not error_entry.match(block.text)
+                and not error_entry.match(result[-1].text)
                 and (block.title, block.section) == (result[-1].title, result[-1].section)):
             previous = result[-1]
             result[-1] = EvidencePassage(previous.title, previous.section,
