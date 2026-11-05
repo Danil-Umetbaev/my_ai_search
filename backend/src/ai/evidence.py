@@ -16,6 +16,11 @@ class EvidencePassage:
 
 def compatible_title(title, question):
     query = question.casefold()
+    equipment_families = (r'вики\s*принт', r'пирит', r'fprint')
+    requested = {family for family in equipment_families if re.search(family, query)}
+    documented = {family for family in equipment_families if re.search(family, title, re.I)}
+    if requested and documented and requested.isdisjoint(documented):
+        return False
     platforms = {
         'setretail10', 'setretail', 'set10', 'settouch', 'setcentrum',
         'setcentrum10', 'setkit', 'setloyalty', 'pos', 'касса', 'клавиатурная касса',
@@ -139,10 +144,13 @@ def render_answer(passage):
     return answer
 
 
-def split_evidence_blocks(passages):
+def split_evidence_blocks(passages, preserve_procedures=False):
     blocks = []
     seen = set()
     for passage in passages:
+        if preserve_procedures and _is_short_procedure(passage.text):
+            blocks.append(passage)
+            continue
         passage_keys = set()
         parent = passage.section.split(' → ') if passage.section else []
         for scope, text, _ in _units(passage.text):
@@ -159,13 +167,24 @@ def split_evidence_blocks(passages):
     return _keep_numbered_steps_together(blocks)
 
 
+def _is_short_procedure(text):
+    if len(text) > 1800 or re.search(r'(?m)^#{1,6} ', text):
+        return False
+    actions = re.findall(
+        r'(?im)^(?:\d+[.)]?\s+)?(?:[А-Яа-яё]+(?:йте|ните|дите|жите|рите|ть))\b', text,
+    )
+    return len(actions) >= 2
+
+
 def _keep_numbered_steps_together(blocks):
     """A sequence of procedure steps is one selectable evidence block."""
     result = []
     step = re.compile(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))')
+    action = re.compile(r'^\d+[.)]?\s+[А-Яа-яё]+(?:йте|ните|дите|жите|рите|ть)\b')
     error_entry = re.compile(r'^\d+[.)]\s*[«"“]')
     for block in blocks:
         if (result and step.match(block.text) and step.match(result[-1].text)
+                and action.match(result[-1].text)
                 and not error_entry.match(block.text)
                 and not error_entry.match(result[-1].text)
                 and (block.title, block.section) == (result[-1].title, result[-1].section)):
