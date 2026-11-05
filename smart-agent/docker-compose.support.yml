@@ -1,8 +1,0 @@
-services:
-  app:
-    image: my_ai_search_support:${RELEASE_TAG:-latest}
-    build:
-      dockerfile: Dockerfile.support
-    gpus: !reset []
-    environment:
-      LOAD_SEARCH_MODELS: 'false'
