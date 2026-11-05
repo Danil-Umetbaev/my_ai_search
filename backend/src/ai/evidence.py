@@ -68,8 +68,6 @@ def _units(body):
             label = text
             continue
         is_step = bool(re.match(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))', text))
-        if label and not is_step:
-            label = ''
         table = ' | ' in text and '```' not in text
         pieces = text.splitlines() if table else [text]
         for piece in pieces:
@@ -78,6 +76,8 @@ def _units(body):
                 names = [name for _, name in path] + ([label.rstrip(':')] if label else [])
                 result.append((' → '.join(names),
                                (label + '\n' if label else '') + value, table))
+        if not is_step:
+            label = ''
     return result
 
 
