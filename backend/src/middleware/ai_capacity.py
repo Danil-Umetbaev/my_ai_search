@@ -5,6 +5,22 @@ from starlette.responses import JSONResponse
 
 
 _model_lock = asyncio.Lock()
+_support_jobs = set()
+
+
+async def run_support_model(function, *args, timeout=45):
+    if len(_support_jobs) >= 16:
+        raise RuntimeError("Support model queue is full")
+    task = asyncio.create_task(run_model(function, *args))
+    _support_jobs.add(task)
+
+    def finish(done):
+        _support_jobs.discard(done)
+        if not done.cancelled():
+            done.exception()
+
+    task.add_done_callback(finish)
+    return await asyncio.wait_for(asyncio.shield(task), timeout=timeout)
 
 
 async def run_model(function, *args, **kwargs):
@@ -28,8 +44,12 @@ class AICapacityMiddleware:
         self.tasks = set()
 
     async def __call__(self, scope, receive, send):
+        path = scope.get('path', '').rstrip('/')
+        model_request = path == '/api/v1/chat/messages' or (
+            path.startswith('/api/v1/support/sessions/') and path.endswith('/messages')
+        )
         if (scope['type'] != 'http' or scope.get('method') != 'POST'
-                or scope.get('path', '').rstrip('/') != '/api/v1/chat/messages'):
+                or not model_request):
             return await self.app(scope, receive, send)
         if len(self.tasks) >= self.max_requests:
             return await JSONResponse(

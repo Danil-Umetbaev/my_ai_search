@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Response
 
-from passlib.context import CryptContext
+import bcrypt
 import jwt
 from datetime import datetime, timedelta, timezone
 
@@ -22,7 +22,6 @@ from src.services.base import BaseService
 
 
 class AuthService(BaseService):
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def create_access_token(self, data: dict):
         to_encode = data.copy()
@@ -36,10 +35,10 @@ class AuthService(BaseService):
         return encoded_jwt
 
     def verify_password(self, plain_password, hashed_password):
-        return self.pwd_context.verify(plain_password, hashed_password)
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
     def hash_password(self, password):
-        return self.pwd_context.hash(password)
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     def decode_jwt(self, token: str) -> dict:
         try:
@@ -63,6 +62,8 @@ class AuthService(BaseService):
             raise HTTPException(status_code=401, detail="Неверный токен")
 
     async def register_user(self, data: UserRequestAdd):
+        if data.role.value != "kassir":
+            raise HTTPException(403, "Роль сотрудника назначает администратор")
         hashed_password = self.hash_password(data.password)
         new_user_data = UserAdd(
             email=data.email,

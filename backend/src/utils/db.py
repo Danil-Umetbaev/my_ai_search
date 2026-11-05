@@ -9,6 +9,7 @@ from src.repositories.escalations import EscalationRepository
 from src.repositories.users import UsersRepository
 
 
+from src.repositories.support import SupportRepository
 class DBManager:
     def __init__(self, session_factory):
         self.session_factory = session_factory
@@ -23,6 +24,7 @@ class DBManager:
         self.message_sources = MessageSourceRepository(self.session)
         self.escalations = EscalationRepository(self.session)
         self.users = UsersRepository(self.session)
+        self.support = SupportRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

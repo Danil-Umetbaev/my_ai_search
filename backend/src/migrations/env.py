@@ -19,6 +19,7 @@ from src.models.messages import MessageORM
 from src.models.document_chunk import DocumentChunkORM
 from src.models.message_sources import MessageSourceORM
 from src.models.users import UsersORM
+from src.models.support import SupportSessionORM, SupportTicketORM, SupportTicketEventORM
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

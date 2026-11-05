@@ -62,6 +62,9 @@ function getUserMessage(status, code, fallback) {
   }
 
   if (status >= 500) {
+    if (status === 502 || status === 503 || status === 504) {
+      return "Сервер ещё запускается или временно недоступен. Дождитесь готовности и повторите запрос."
+    }
     return "На сервере произошла ошибка. Попробуйте ещё раз."
   }
 
@@ -69,7 +72,7 @@ function getUserMessage(status, code, fallback) {
 }
 
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   let response
 
   try {
