@@ -1,4 +1,4 @@
-# Вики Принт: статьи и разделы; перед импортом отбирать страницы инструкций
+# Вики Принт: проверенные статьи; HTML и изображения
 https://help.dreamkas.ru/kb/viki-printy/integratsii-viki-print/viki-print-f-1s/
 https://help.dreamkas.ru/kb/viki-printy/integratsii-viki-print/viki-print-f-shtrikh-m-kassir-5-roznichnaya-torgovlya-5/
 https://help.dreamkas.ru/kb/viki-printy/integratsii-viki-print/viki-print-frontol-6/
@@ -52,4 +52,4 @@ https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3
 
 # Пирит 2Ф: локальное руководство, публичный URL пока не подтверждён
 # C:/Users/user/Desktop/Manual_Pirit2F_1_.pdf
-# Evo-tex: доступность и прямые ссылки требуют проверки
+# Evo-tex проверен: база посвящена Эвотор, в этот набор не включена

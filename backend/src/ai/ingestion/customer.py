@@ -3,11 +3,12 @@ import argparse
 import asyncio
 import hashlib
 import json
+import re
 from pathlib import Path
 from urllib.parse import urljoin
 
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Doctype, ProcessingInstruction
 from pypdf import PdfReader
 
 from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
@@ -55,7 +56,10 @@ async def download(urls, pirit):
                     img.replace_with(soup.new_string(f"\n[Иллюстрация {position + 1}: {caption or title}]\n"))
                 for node in article.select('script, style'):
                     node.decompose()
-                content = ConfluenceKnowledgeSource()._render(article).strip()
+                for node in list(article.descendants):
+                    if isinstance(node, (Doctype, ProcessingInstruction)):
+                        node.extract()
+                content = clean_text(ConfluenceKnowledgeSource()._render(article))
                 if len(content) < 80:
                     raise ValueError("Article text is too short")
                 documents.append(record(url, title, content, 'Дримкас', [], None, None, images))
@@ -79,6 +83,11 @@ def record(url, title, content, manufacturer, models, version, page, images):
                 page_number=page, images=images)
     data['checksum'] = hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     return data
+
+
+def clean_text(content):
+    content = re.sub(r'^html PUBLIC[^\n]*', '', content)
+    return re.sub(r'\n[ \t]*\n(?:[ \t]*\n)+', '\n\n', content).strip()
 
 
 def pdf_documents(path, url, manufacturer, models, version):
