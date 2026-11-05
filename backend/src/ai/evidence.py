@@ -74,7 +74,8 @@ def _units(body):
             value = piece.strip()
             if value:
                 names = [name for _, name in path] + ([label.rstrip(':')] if label else [])
-                result.append((' → '.join(names), value, table))
+                prefix = label + '\n' if label and not is_step else ''
+                result.append((' → '.join(names), prefix + value, table))
         if not is_step:
             label = ''
     return result
