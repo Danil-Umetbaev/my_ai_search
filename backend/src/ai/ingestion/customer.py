@@ -66,7 +66,7 @@ async def download(urls, pirit):
     if pirit:
         target = ASSETS / 'pirit-2f-manual.pdf'
         target.write_bytes(pirit.read_bytes())
-        documents.extend(pdf_documents(target, '/knowledge-assets/pirit-2f-manual.pdf', 'Дримкас', ['Пирит 2Ф'], None))
+        documents.extend(pdf_documents(target, '/api/v1/knowledge-assets/pirit-2f-manual.pdf', None, ['Пирит 2Ф'], None))
     (ASSETS / 'documents.json').write_text(json.dumps(documents, ensure_ascii=False, indent=2), encoding='utf-8')
     (ASSETS / 'failures.json').write_text(json.dumps(failures, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f"Prepared {len(documents)} documents; {len(failures)} failures", flush=True)
