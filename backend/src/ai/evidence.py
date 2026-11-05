@@ -171,7 +171,7 @@ def _is_short_procedure(text):
     if len(text) > 1800 or re.search(r'(?m)^#{1,6} ', text):
         return False
     actions = re.findall(
-        r'(?im)^(?:\d+[.)]?\s+)?(?:[А-Яа-яё]+(?:йте|ите|ть))\b', text,
+        r'(?im)^[ \t]*(?:\d+[.)]?\s+)?(?:[А-Яа-яё]+(?:йте|ите|ть))\b', text,
     )
     return len(actions) >= 2
 
