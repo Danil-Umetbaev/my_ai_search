@@ -174,6 +174,20 @@ def render_evidence_blocks(passages):
     return answer
 
 
+def include_referenced_footnotes(selected, candidates):
+    """Keep numbered qualifications referenced by the selected source text."""
+    result = list(selected)
+    for candidate in candidates:
+        match = re.match(r'^(\d+)\s*[–—-]\s+\S', candidate.text.strip())
+        if not match or candidate in result:
+            continue
+        reference = re.compile(r'[\w)]' + re.escape(match[1]) + r'(?!\d)')
+        if any(block.title == candidate.title and reference.search(block.text)
+               for block in selected):
+            result.append(candidate)
+    return result
+
+
 def select_requested_groups(blocks, question):
     def words(text):
         return {word[:4] for word in re.findall(r'[а-яёa-z]{4,}', text.casefold())}
