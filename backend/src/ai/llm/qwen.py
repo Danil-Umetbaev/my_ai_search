@@ -277,7 +277,7 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
                 and self._complete(self.DIAGNOSTIC_FACT_PROMPT, question, max_new_tokens=12) == 'OBSERVED'):
             return 'NOT_FOUND'
         asks_local_value = (
-            re.match(r'^(?:какой|какая|какие|какое|сколько|кто|когда|во сколько|назови|укажи|есть ли|установлен ли)\b',
+            re.match(r'^(?:какой|какая|какие|какое|каков|какова|каковы|каково|сколько|кто|когда|во сколько|назови|укажи|есть ли|установлен ли)\b',
                      question.strip(), re.I)
             and re.search(r'\b(?:наш\w*|мо[йяёюеи]\w*|у нас|у меня)\b', question, re.I)
         )
