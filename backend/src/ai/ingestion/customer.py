@@ -106,6 +106,9 @@ def pdf_documents(path, url, manufacturer, models, version):
         if len(content.strip()) < 30 and not images:
             continue
         title = f"{' '.join(models)} — руководство, страница {number}"
+        headings = re.findall(r'(?m)^##\s+\d+\.\s+(.+)$', content)
+        if headings:
+            title = f"{' '.join(models)} — {'; '.join(headings)}"[:512]
         content = content.strip() or title + '. Страница содержит иллюстрации; текст требует визуальной проверки.'
         result.append(record(f"{url}#page={number}", title, content, manufacturer, models, version, number, images))
     grouped = group_pages(result, section_starts(reader))
