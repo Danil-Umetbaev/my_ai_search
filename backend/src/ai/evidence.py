@@ -171,7 +171,7 @@ def _is_short_procedure(text):
     if len(text) > 1800 or re.search(r'(?m)^#{1,6} ', text):
         return False
     actions = re.findall(
-        r'(?im)^(?:\d+[.)]?\s+)?(?:[А-Яа-яё]+(?:йте|ните|дите|жите|рите|ть))\b', text,
+        r'(?im)^(?:\d+[.)]?\s+)?(?:[А-Яа-яё]+(?:йте|ите|ть))\b', text,
     )
     return len(actions) >= 2
 
@@ -180,7 +180,7 @@ def _keep_numbered_steps_together(blocks):
     """A sequence of procedure steps is one selectable evidence block."""
     result = []
     step = re.compile(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))')
-    action = re.compile(r'^\d+[.)]?\s+[А-Яа-яё]+(?:йте|ните|дите|жите|рите|ть)\b')
+    action = re.compile(r'^\d+[.)]?\s+[А-Яа-яё]+(?:йте|ите|ть)\b')
     error_entry = re.compile(r'^\d+[.)]\s*[«"“]')
     for block in blocks:
         if (result and step.match(block.text) and step.match(result[-1].text)
