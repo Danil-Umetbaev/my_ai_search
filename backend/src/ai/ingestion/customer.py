@@ -13,7 +13,7 @@ from pypdf import PdfReader
 
 from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
 from src.schemas.documents import DocumentAddSchema
-from src.ai.ingestion.text_cleanup import clean_article, clean_pdf_page
+from src.ai.ingestion.text_cleanup import clean_article, extract_pdf_page
 from src.ai.ingestion.pdf_sections import group_pages, section_starts
 
 ROOT = Path(__file__).resolve().parents[3] / "data"
@@ -95,7 +95,7 @@ def pdf_documents(path, url, manufacturer, models, version):
     result = []
     reader = PdfReader(path)
     for number, page in enumerate(reader.pages, 1):
-        content = clean_pdf_page(page.extract_text(extraction_mode='layout') or '', number)
+        content = extract_pdf_page(page, number)
         images = []
         for position, picture in enumerate(page.images):
             suffix = Path(picture.name).suffix

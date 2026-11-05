@@ -2,6 +2,15 @@
 import re
 
 
+def extract_pdf_page(page, page_number: int) -> str:
+    plain = page.extract_text() or ''
+    lines = [line.strip() for line in plain.splitlines() if line.strip()]
+    fragmented = sum(len(line.split()) == 1 for line in lines)
+    if lines and fragmented / len(lines) > 0.5:
+        plain = page.extract_text(extraction_mode='layout') or plain
+    return clean_pdf_page(plain, page_number)
+
+
 def clean_article(text: str) -> str:
     text = re.sub(r'^html PUBLIC[^\n]*', '', text)
     text = re.sub(r'\[Иллюстрация \d+:[^\n]*\]', '', text)
@@ -18,7 +27,7 @@ def clean_pdf_page(text: str, page_number: int) -> str:
     paragraphs, current = [], []
     for line in lines:
         line = re.sub(r'[ \t]+', ' ', line).strip()
-        starts_item = bool(re.match(r'^(?:[●•]|\d+[.)])\s', line))
+        starts_item = bool(re.match(r'^(?:[●•]|\d+[.)]|\d+(?=\s+[А-ЯA-Z]))\s', line))
         if not line or starts_item:
             if current:
                 paragraphs.append(' '.join(current))
