@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_USER: str
     DB_PASS: str
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int
     VK_TOKEN: str = ""
     VK_PEER_ID: int = 0
     VK_API_VERSION: str = "5.199"
@@ -20,7 +23,11 @@ class Settings(BaseSettings):
     MODE: Literal["test", "local", "dev", "prod"]
     ENABLE_DOCS: bool = False
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
-
+    AUTH_COOKIE_SECURE: bool = False
+    AUTH_TRUSTED_ORIGINS: list[str] = [
+        "http://localhost:18081",
+        "http://localhost:5173",
+    ]
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     @property

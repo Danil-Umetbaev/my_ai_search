@@ -1,3 +1,5 @@
+import { ROLE_LABELS } from "./AuthScreen";
+
 function formatRelativeTime(
   dateString
 ) {
@@ -40,6 +42,11 @@ function formatRelativeTime(
 
 
 export default function Sidebar({
+  user,
+  onLogin,
+  onLogout,
+  logoutBusy,
+  logoutError,
   open,
   mobile = false,
 
@@ -216,6 +223,19 @@ export default function Sidebar({
 
       </div>
 
+      <div className="sidebar-account">
+        <div className="sidebar-account__identity">
+          <span className="sidebar-account__avatar" aria-hidden="true">{user ? user.email.charAt(0).toUpperCase() : "○"}</span>
+          <div className="sidebar-account__text">
+            <strong title={user?.email}>{user?.email || "Гостевой доступ"}</strong>
+            <span>{user ? ROLE_LABELS[user.role] || "Пользователь" : "Без регистрации"}</span>
+          </div>
+        </div>
+        <button type="button" className="sidebar-account__action" disabled={logoutBusy} onClick={user ? onLogout : onLogin} title={user ? "Выйти из аккаунта" : "Войти в аккаунт"} aria-label={user ? "Выйти из аккаунта" : "Войти в аккаунт"}>
+          {logoutBusy ? "…" : user ? "Выйти" : "Войти"}
+        </button>
+        {logoutError && <p className="sidebar-account__error" role="alert">{logoutError}</p>}
+      </div>
     </aside>
   );
 }
