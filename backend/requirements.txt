@@ -59,3 +59,4 @@ pytest-asyncio==1.4.0
 bcrypt
 passlib==1.7.4
 PyJWT==2.13.0
+pypdf[image]==6.21.4

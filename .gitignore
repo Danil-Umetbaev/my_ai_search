@@ -16,6 +16,7 @@ htmlcov/
 node_modules/
 dist/
 # Local reports, data and backups
+backend/data/knowledge_assets/
 test_output/
 backups/
 handoff/

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 class DocumentImage(BaseModel):
     source_url: str
+    local_path: str | None = None
     caption: str = ""
     page_number: int | None = Field(default=None, ge=1)
     position: int = Field(default=0, ge=0)
