@@ -13,6 +13,8 @@ from pypdf import PdfReader
 
 from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
 from src.schemas.documents import DocumentAddSchema
+from src.ai.ingestion.text_cleanup import clean_article, clean_pdf_page
+from src.ai.ingestion.pdf_sections import group_pages, section_starts
 
 ROOT = Path(__file__).resolve().parents[3] / "data"
 ASSETS = ROOT / "knowledge_assets"
@@ -86,14 +88,14 @@ def record(url, title, content, manufacturer, models, version, page, images):
 
 
 def clean_text(content):
-    content = re.sub(r'^html PUBLIC[^\n]*', '', content)
-    return re.sub(r'\n[ \t]*\n(?:[ \t]*\n)+', '\n\n', content).strip()
+    return clean_article(content)
 
 
 def pdf_documents(path, url, manufacturer, models, version):
     result = []
-    for number, page in enumerate(PdfReader(path).pages, 1):
-        content = page.extract_text() or ''
+    reader = PdfReader(path)
+    for number, page in enumerate(reader.pages, 1):
+        content = clean_pdf_page(page.extract_text(extraction_mode='layout') or '', number)
         images = []
         for position, picture in enumerate(page.images):
             suffix = Path(picture.name).suffix
@@ -106,7 +108,11 @@ def pdf_documents(path, url, manufacturer, models, version):
         title = f"{' '.join(models)} — руководство, страница {number}"
         content = content.strip() or title + '. Страница содержит иллюстрации; текст требует визуальной проверки.'
         result.append(record(f"{url}#page={number}", title, content, manufacturer, models, version, number, images))
-    return result
+    grouped = group_pages(result, section_starts(reader))
+    for document in grouped:
+        document.pop('checksum', None)
+        document['checksum'] = hashlib.sha256(json.dumps(document, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+    return grouped
 
 
 async def index(device='cpu'):
@@ -134,16 +140,40 @@ async def index(device='cpu'):
             count = await indexer.index_document(saved)
             await db.commit()
             print(f'[{position}/{len(documents)}] {document.title}: {count} chunks', flush=True)
+        await db.documents.retire_missing_sources([document.source_url for document in documents])
+        await db.commit()
+
+
+def refresh_saved_documents():
+    manifest = ASSETS / 'documents.json'
+    old_documents = json.loads(manifest.read_text(encoding='utf-8'))
+    documents, manuals = [], {}
+    for document in old_documents:
+        if document['source_type'] == 'pdf':
+            manuals.setdefault(document['source_url'].split('#')[0], document)
+        else:
+            document['content'] = clean_article(document['content'])
+            document.pop('checksum', None)
+            document['checksum'] = hashlib.sha256(json.dumps(document, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+            documents.append(document)
+    for url, sample in manuals.items():
+        filename = 'pirit-2f-manual.pdf' if url.startswith('/') else hashlib.sha256(url.encode()).hexdigest() + '.pdf'
+        documents.extend(pdf_documents(ASSETS / filename, url, sample['manufacturer'],
+                                       sample['equipment_models'], sample['software_version']))
+    manifest.write_text(json.dumps(documents, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(f'Prepared {len(documents)} documents from saved files', flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['download', 'index'])
+    parser.add_argument('action', choices=['download', 'refresh', 'index'])
     parser.add_argument('--pirit', type=Path)
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     args = parser.parse_args()
     if args.action == 'index':
         asyncio.run(index(args.device))
+    elif args.action == 'refresh':
+        refresh_saved_documents()
     else:
         urls = [s.strip() for s in (ROOT / 'knowledge_urls.txt').read_text(encoding='utf-8').splitlines() if s.strip() and not s.lstrip().startswith('#')]
         raise SystemExit(bool(asyncio.run(download(urls, args.pirit))))
