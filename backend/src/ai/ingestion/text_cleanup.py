@@ -8,6 +8,15 @@ def extract_pdf_page(page, page_number: int) -> str:
     fragmented = sum(len(line.split()) == 1 for line in lines)
     if lines and fragmented / len(lines) > 0.5:
         plain = page.extract_text(extraction_mode='layout') or plain
+        numbered = list(re.finditer(r'(?m)^( *)(\d+\.\s+[^\n]+)', plain))
+        indents = {len(match[1]) for match in numbered}
+        if len(indents) > 1:
+            minimum = min(indents)
+            plain = re.sub(
+                r'(?m)^( *)(\d+\.\s+[^\n]+)',
+                lambda match: '\n## ' + match[2].strip() + '\n' if len(match[1]) == minimum else match[0],
+                plain,
+            )
     return clean_pdf_page(plain, page_number)
 
 
@@ -27,6 +36,12 @@ def clean_pdf_page(text: str, page_number: int) -> str:
     paragraphs, current = [], []
     for line in lines:
         line = re.sub(r'[ \t]+', ' ', line).strip()
+        if line.startswith('## '):
+            if current:
+                paragraphs.append(' '.join(current))
+                current = []
+            paragraphs.append(line)
+            continue
         starts_item = bool(re.match(r'^(?:[●•]|\d+[.)]|\d+(?=\s+[А-ЯA-Z]))\s', line))
         if not line or starts_item:
             if current:
