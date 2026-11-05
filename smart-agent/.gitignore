@@ -1,0 +1,29 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.env
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+# Frontend
+node_modules/
+dist/
+# Local reports, data and backups
+test_output/
+backups/
+handoff/
+deploy/secrets/
+*.dump
+*.log
+rag_*.txt
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store

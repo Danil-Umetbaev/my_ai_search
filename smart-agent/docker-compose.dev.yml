@@ -1,0 +1,10 @@
+services:
+  app:
+    environment:
+      MODE: dev
+      ENABLE_DOCS: 'true'
+      CORS_ORIGINS: '["http://localhost:5173"]'
+    ports:
+      - '127.0.0.1:7777:8000'
+    volumes:
+      - ./backend:/backend

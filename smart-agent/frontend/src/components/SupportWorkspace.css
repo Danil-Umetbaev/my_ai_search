@@ -1,0 +1,34 @@
+.support-launch { position: fixed; right: 18px; bottom: 18px; z-index: 70; padding: 13px 20px; border: 0; border-radius: 24px; background: #163f53; color: white; box-shadow: 0 4px 20px #163f5333; cursor: pointer; }
+.support-backdrop { position: fixed; inset: 0; z-index: 100; background: #102f4399; display: flex; justify-content: center; padding: 24px; }
+.support-panel { width: min(1060px, 100%); background: #f9fbfc; color: #17323e; border-radius: 20px; padding: 28px; overflow: auto; box-shadow: 0 20px 80px #102f4344; }
+.support-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.support-panel h2 { margin: 6px 0 22px; font-size: 28px; }
+.support-eyebrow { color: #52727c; font-size: 11px; letter-spacing: .16em; font-weight: 700; }
+.support-panel nav { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid #dce6ea; }
+.support-panel button, .support-panel select { font: inherit; padding: 10px 14px; border: 1px solid #c9d9df; border-radius: 10px; background: white; color: #17323e; cursor: pointer; }
+.support-panel button:disabled { opacity: .55; cursor: default; }
+.support-panel button[aria-current="page"], .support-panel .support-primary { background: #163f53; border-color: #163f53; color: white; }
+.support-panel button:focus-visible, .support-panel textarea:focus-visible, .support-panel select:focus-visible { outline: 3px solid #b8d6e0; outline-offset: 2px; }
+.support-panel p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.support-mode, .support-progress { color: #597079; font-size: 13px; }
+.support-conversation { margin: 20px 0; display: grid; gap: 14px; }
+.support-message { max-width: 90%; border: 1px solid #dde7eb; background: white; padding: 16px 20px; border-radius: 14px; }
+.support-message strong { font-size: 12px; color: #52727c; }
+.support-message p { margin-bottom: 0; }
+.support-message--user { justify-self: end; background: #e9f2f6; }
+.support-panel label { display: block; margin-top: 14px; font-size: 14px; font-weight: 600; }
+.support-panel textarea { display: block; box-sizing: border-box; width: 100%; min-height: 90px; resize: vertical; margin: 8px 0 12px; padding: 12px; color: #17323e; background: white; border: 1px solid #c9d9df; border-radius: 10px; font: inherit; }
+.support-actions, .support-list-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0; }
+.support-error { color: #9f2828; background: #fff0ee; padding: 12px; border-radius: 10px; }
+.support-ticket-card { display: grid; text-align: left; width: 100%; gap: 9px; margin: 12px 0; }
+.support-ticket-card span, .support-ticket-card small { color: #597079; font-size: 12px; }
+.support-ticket-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.support-facts > div { padding: 14px 0; border-bottom: 1px solid #dce6ea; }
+.support-facts dt { font-size: 12px; color: #597079; font-weight: 600; }
+.support-facts dd { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.support-sources { padding-left: 22px; }
+.support-sources a { color: #1c617d; }
+.support-sources blockquote { margin: 8px 0; padding-left: 14px; border-left: 3px solid #b6d0db; }
+.support-resolution { background: #e8f4ee; border-radius: 12px; padding: 16px; }
+.support-panel details { margin: 20px 0; }
+@media (max-width: 600px) { .support-backdrop { padding: 0; } .support-panel { border-radius: 0; padding: 18px; } .support-panel h2 { font-size: 23px; } .support-message { max-width: 100%; } }
