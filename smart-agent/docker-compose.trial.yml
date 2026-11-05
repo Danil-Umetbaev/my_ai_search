@@ -1,0 +1,16 @@
+name: smart_agent_trial
+
+services:
+  app:
+    image: smart_agent_trial_backend:local
+    environment:
+      AUTH_TRUSTED_ORIGINS: '["http://localhost:18082","http://127.0.0.1:18082"]'
+  frontend:
+    image: smart_agent_trial_frontend:local
+    ports: !override
+      - '127.0.0.1:18082:80'
+
+volumes:
+  hf_cache:
+    name: smart_agent_trial_hf_cache
+    external: false
