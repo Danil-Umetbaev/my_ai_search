@@ -216,6 +216,17 @@ class DocumentChunkRepository(BaseRepository):
                 term
             )
 
+            if re.fullmatch(r"[а-яё]{3,}", term):
+                term_query = func.plainto_tsquery("russian", term)
+                title_match = or_(
+                    title_match,
+                    func.to_tsvector("russian", title_text).op("@@")(term_query),
+                )
+                content_match = or_(
+                    content_match,
+                    func.to_tsvector("russian", content_text).op("@@")(term_query),
+                )
+
             conditions.extend([
                 title_match,
                 content_match,
