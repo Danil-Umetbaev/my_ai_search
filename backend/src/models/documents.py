@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 
 from src.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
@@ -13,6 +14,11 @@ class DocumentORM(Base):
     title: Mapped[str] = mapped_column(String(512), nullable=False)
     content: Mapped[str] = mapped_column(Text(), nullable=False)
     checksum: Mapped[str] = mapped_column(String(64), nullable=False)
+    manufacturer: Mapped[str | None] = mapped_column(String(100))
+    equipment_models: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default="[]")
+    software_version: Mapped[str | None] = mapped_column(String(100))
+    page_number: Mapped[int | None] = mapped_column()
+    images: Mapped[list[dict]] = mapped_column(JSONB, default=list, server_default="[]")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
