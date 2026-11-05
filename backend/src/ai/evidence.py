@@ -25,7 +25,8 @@ def compatible_title(title, question):
         'setretail10', 'setretail', 'set10', 'settouch', 'setcentrum',
         'setcentrum10', 'setkit', 'setloyalty', 'pos', 'касса', 'клавиатурная касса',
     }
-    formats = {'XML', 'JSON', 'CSV', 'HTTP', 'HTTPS', 'HTML', 'HTML5', 'PDF', 'SQL', 'POS'}
+    formats = {'XML', 'JSON', 'CSV', 'HTTP', 'HTTPS', 'HTML', 'HTML5', 'PDF', 'SQL', 'POS',
+               'WINDOWS', 'LINUX'}
     parts = [p.strip(' ▪️◾️') for p in re.split('[▪◾]', title) if p.strip(' ▪️◾️')]
     if len(parts) > 1 and parts[0].casefold() not in platforms:
         prefix = parts[0].casefold()
