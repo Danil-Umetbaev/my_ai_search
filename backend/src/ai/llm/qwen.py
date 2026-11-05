@@ -137,7 +137,7 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         selected = []
         for passage in passages:
             for index, other in enumerate(selected):
-                if (passage.title, passage.section) != (other.title, other.section):
+                if passage.title != other.title:
                     continue
                 if covers(other, passage):
                     break

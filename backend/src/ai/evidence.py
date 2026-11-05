@@ -67,6 +67,9 @@ def _units(body):
         if text.endswith(':') and '\n' not in text and len(text) < 100:
             label = text
             continue
+        is_step = bool(re.match(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))', text))
+        if label and not is_step:
+            label = ''
         table = ' | ' in text and '```' not in text
         pieces = text.splitlines() if table else [text]
         for piece in pieces:
@@ -75,7 +78,6 @@ def _units(body):
                 names = [name for _, name in path] + ([label.rstrip(':')] if label else [])
                 result.append((' → '.join(names),
                                (label + '\n' if label else '') + value, table))
-        label = ''
     return result
 
 
@@ -87,8 +89,7 @@ def collect_evidence(context, question, max_section_chars=4500):
         if not compatible_title(title, question):
             continue
         units = _units(body)
-        if (len(body) <= 3500 and '[… ]' not in body and 'Раздел документа:' not in body
-                and re.search(r'(?m)^#{1,6} ', body)):
+        if len(body) <= 3500 and '[… ]' not in body and 'Раздел документа:' not in body:
             passages.append(EvidencePassage(title, '', body.strip()))
         groups = {}
         for index, (section, text, table) in enumerate(units):
