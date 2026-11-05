@@ -142,6 +142,7 @@ def split_evidence_blocks(passages):
     blocks = []
     seen = set()
     for passage in passages:
+        passage_keys = set()
         parent = passage.section.split(' → ') if passage.section else []
         for scope, text, _ in _units(passage.text):
             child = scope.split(' → ') if scope else []
@@ -152,7 +153,8 @@ def split_evidence_blocks(passages):
                 identity = (passage.title, section, item)
                 if identity not in seen:
                     blocks.append(EvidencePassage(passage.title, section, item))
-                    seen.add(identity)
+                    passage_keys.add(identity)
+        seen.update(passage_keys)
     return _keep_numbered_steps_together(blocks)
 
 
