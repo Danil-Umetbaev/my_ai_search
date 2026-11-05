@@ -153,7 +153,22 @@ def split_evidence_blocks(passages):
                 if identity not in seen:
                     blocks.append(EvidencePassage(passage.title, section, item))
                     seen.add(identity)
-    return blocks
+    return _keep_numbered_steps_together(blocks)
+
+
+def _keep_numbered_steps_together(blocks):
+    """A sequence of procedure steps is one selectable evidence block."""
+    result = []
+    step = re.compile(r'^\d+(?:[.)]\s|\s+(?=[А-ЯA-Z]))')
+    for block in blocks:
+        if (result and step.match(block.text) and step.match(result[-1].text)
+                and (block.title, block.section) == (result[-1].title, result[-1].section)):
+            previous = result[-1]
+            result[-1] = EvidencePassage(previous.title, previous.section,
+                                         previous.text + '\n\n' + block.text)
+        else:
+            result.append(block)
+    return result
 
 
 def render_evidence_blocks(passages):
