@@ -1,3 +1,4 @@
+import { knowledgeSpace } from "./knowledge";
 import {
   useEffect,
   useMemo,
@@ -88,7 +89,7 @@ function mergeMessagesWithMeta(
 
 export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logoutError }) {
   const [supportOpen, setSupportOpen] = useState(false);
-  const scope = user ? `:user-${user.id}` : "";
+  const scope = `:${knowledgeSpace}${user ? `:user-${user.id}` : ""}`;
   const CONVERSATIONS_STORAGE_KEY = `ai-search-conversations-v4${scope}`;
   const ACTIVE_CONVERSATION_STORAGE_KEY = `ai-search-active-conversation-v4${scope}`;
   const META_STORAGE_KEY = `ai-search-message-meta-v4${scope}`;

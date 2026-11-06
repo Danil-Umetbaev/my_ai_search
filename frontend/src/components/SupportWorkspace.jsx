@@ -1,3 +1,4 @@
+import { knowledgeSpace, isSourceUrl } from "../knowledge";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { request } from "../api/client";
@@ -15,7 +16,7 @@ function writeStorage(key, value) {
 }
 
 function Sources({ sources = [] }) {
-  return <ul className="support-sources">{sources.filter(source => /^https?:\/\//i.test(source.url)).map((source, index) => <li key={index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>{source.quote && <blockquote>{source.quote}</blockquote>}</li>)}</ul>;
+  return <ul className="support-sources">{sources.filter(source => isSourceUrl(source.url)).map((source, index) => <li key={index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>{source.quote && <blockquote>{source.quote}</blockquote>}</li>)}</ul>;
 }
 
 function FactValue({ value }) {
@@ -25,8 +26,8 @@ function FactValue({ value }) {
 }
 
 export default function SupportWorkspace({ user, onClose }) {
-  const storageKey = `support-session-${user.id}`;
-  const pendingKey = `support-pending-${user.id}`;
+  const storageKey = `support-session-${knowledgeSpace}-${user.id}`;
+  const pendingKey = `support-pending-${knowledgeSpace}-${user.id}`;
   const panelRef = useRef(null);
   const sendingRef = useRef(false);
   const [session, setSession] = useState(null);

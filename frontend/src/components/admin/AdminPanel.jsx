@@ -1,3 +1,4 @@
+import { isSourceUrl } from "../../knowledge";
 import { useEffect, useState } from "react";
 import { adminRequest } from "../../api/client";
 import { Icon } from "../Icons";
@@ -25,7 +26,7 @@ export function errorLabel(error) {
 }
 export function Badge({ value, children }) { return <span className={`ad-badge ad-badge--${value}`}>{children}</span>; }
 export function SafeLink({ url }) {
-  if (!/^https?:\/\//i.test(url || "")) return null;
+  if (!isSourceUrl(url)) return null;
   return <a href={url} target="_blank" rel="noopener noreferrer">Источник ↗</a>;
 }
 
