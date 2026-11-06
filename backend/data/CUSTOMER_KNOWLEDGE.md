@@ -90,6 +90,22 @@ docker compose up -d --no-build
    `docker compose exec app python -m src.support_admin --email YOUR_EMAIL --role admin`.
    После смены роли войдите заново.
 
+Создание и восстановление базы на новом компьютере (только в пустую базу):
+
+```powershell
+docker compose up -d db
+docker compose exec db sh -c 'createdb -U "$POSTGRES_USER" customer_knowledge'
+docker compose cp ./backups/customer_knowledge_quality_20261105.dump db:/tmp/customer.dump
+docker compose exec db sh -c 'pg_restore -U "$POSTGRES_USER" -d customer_knowledge --no-owner --no-acl /tmp/customer.dump'
+docker compose up -d --build
+```
+
+После восстановления дампа более старой версии приложение само применит
+недостающие миграции. Не запускайте восстановление поверх заполненной базы.
+Для отдельного окружения задайте `VITE_KNOWLEDGE_SPACE` при сборке фронтенда:
+оно отделяет локальную историю браузера от других баз. По умолчанию используется
+`customer-knowledge`.
+
 `BACKEND_IMAGE` — необязательное переопределение образа backend. На текущем
 ноутбуке используется `my_ai_search_backend:customer-local`: сохранённый локальный
 образ с уже установленными зависимостями. Другому разработчику этот образ не нужен.
