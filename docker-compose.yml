@@ -36,13 +36,14 @@ services:
       DB_PORT: 5432
       DB_USER: ${POSTGRES_USER}
       DB_PASS: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
+      DB_NAME: ${APP_DB_NAME:-${POSTGRES_DB}}
       ENABLE_DOCS: 'false'
       CORS_ORIGINS: '[]'
       HF_HOME: /cache/huggingface
       PYTHONUNBUFFERED: '1'
     volumes:
       - hf_cache:/cache/huggingface
+      - ./backend/data/knowledge_assets:/backend/data/knowledge_assets:ro
     gpus: all
     depends_on:
       db:

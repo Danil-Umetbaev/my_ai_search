@@ -79,19 +79,19 @@ export default function AuthScreen({ onAuthenticated, onGuest, notice = "" }) {
         <section className="auth-intro" aria-label="О сервисе">
           <a className="auth-brand" href="/" onClick={(event) => { event.preventDefault(); if (!busy) onGuest(); }}>
             <img src="/logo.png" alt="" />
-            <span>Умный поиск<small>База знаний SetRetail10</small></span>
+            <span>Умный поиск<small>База знаний по кассам</small></span>
           </a>
           <div className="auth-intro__body">
             <span className="auth-eyebrow">ЗНАНИЯ РЯДОМ</span>
             <h1>Меньше поисков.<br />Больше ясности.</h1>
-            <p>Задайте вопрос о SetRetail10 — найдите ответ и проверьте его по источнику.</p>
+            <p>Задайте вопрос о Вики Принт, Пирит или АТОЛ — найдите ответ и проверьте его по источнику.</p>
             <div className="auth-example">
               <span>Например</span>
               <p>Как выполнить возврат по номеру чека?</p>
               <div><span aria-hidden="true">✦</span> Ответы с опорой на документацию</div>
             </div>
           </div>
-          <a className="auth-knowledge" href="https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/overview" target="_blank" rel="noreferrer">Открыть базу знаний ↗</a>
+          <a className="auth-knowledge" href="https://help.dreamkas.ru/kb/viki-printy/" target="_blank" rel="noreferrer">Инструкции Вики Принт ↗</a>
         </section>
 
         <section className="auth-card" aria-labelledby="auth-title">

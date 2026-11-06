@@ -298,8 +298,8 @@ export default function ChatArea({
   return (
     <div className="chat-area">
       <aside className="knowledge-banner" aria-label="База знаний">
-        <strong>Спросите о SetRetail10</strong>
-        <a href="https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/overview" target="_blank" rel="noopener noreferrer">Открыть базу знаний ↗</a>
+        <strong>Спросите о Вики Принт, Пирит или АТОЛ</strong>
+        <a href="https://help.dreamkas.ru/kb/viki-printy/" target="_blank" rel="noopener noreferrer">Инструкции Вики Принт ↗</a>
       </aside>
 
       <div
@@ -324,7 +324,7 @@ export default function ChatArea({
               </strong>
 
               <span>
-                Например: как создать товарные полки в SetRetail10?
+                Например: как заправить чековую ленту в Пирит 2Ф?
               </span>
 
             </div>
