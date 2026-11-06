@@ -137,9 +137,11 @@ async def index(device='cpu'):
         indexer = DocumentIndexerService(db, chunker, embedding)
         for position, document in enumerate(documents, 1):
             old = await db.documents.get_one_or_none(source_url=document.source_url)
-            if old and old.checksum == document.checksum:
+            if old and old.checksum == document.checksum and not old.is_archived:
                 continue
             saved = await db.documents.update_by_id(old.id, document) if old else await db.documents.add(document)
+            if saved.is_archived:
+                saved = await db.documents.set_archived(saved.id, False)
             count = await indexer.index_document(saved)
             await db.commit()
             print(f'[{position}/{len(documents)}] {document.title}: {count} chunks', flush=True)

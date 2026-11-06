@@ -22,6 +22,11 @@ class DocumentRepository(BaseRepository):
             .where(DocumentChunkORM.document_id.in_(obsolete))
             .values(is_active=False)
         )
+        await self.session.execute(
+            update(self.model)
+            .where(self.model.source_url.not_in(source_urls))
+            .values(is_archived=True)
+        )
 
 
     async def update_by_id(
