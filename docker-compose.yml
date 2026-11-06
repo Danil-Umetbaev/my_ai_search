@@ -27,7 +27,7 @@ services:
     build:
       context: ./backend
       dockerfile: dockerfile
-    image: my_ai_search_backend:${RELEASE_TAG:-latest}
+    image: ${BACKEND_IMAGE:-my_ai_search_backend:${RELEASE_TAG:-latest}}
     restart: unless-stopped
     env_file: .env
     environment:
