@@ -17,7 +17,7 @@ QUESTIONS = {
 
 def applies(state, message):
     return bool(state.get("_receipt") or re.search(
-        r"не\s*печат|не\s*выходит.*(?:чек|бумаг)|касс\w*.*(?:слом|не работает)", message, re.I,
+        r"не\s*печат|не\s*выходит.*(?:чек|бумаг)|касс\w*.*(?:слом|не работает)|ничего.*не работает", message, re.I,
     ))
 
 
@@ -52,6 +52,9 @@ async def respond_receipt(state, message, lookup, timeout=45):
         state["environment"] = message
     if re.search(r"перезагруз|перезапус|пробовал|проверял", text):
         state["attempts"] = message
+    if re.search(r"нет бумаги|бумага закончилась|бумага есть", text):
+        flow["paper"] = message
+        flow["paper_missing"] = bool(re.search(r"нет бумаги|бумага закончилась", text))
     if re.search(r"qr|куар", text):
         flow["symptom"] = "не печатается QR-код"
     elif re.search(r"пуст\w* (?:чек|бумаг)|бел\w* (?:чек|бумаг)", text):
@@ -65,6 +68,10 @@ async def respond_receipt(state, message, lookup, timeout=45):
             return state, "Отлично, печать восстановлена. Обращение завершено."
         return handoff(state, "Проверка не подтвердила решение. Передадим результат специалисту без повторения тех же действий.")
     if pending in {"model", "symptom"} and not flow.get(pending):
+        if not flow.get("retried_" + pending) and not re.search(r"не знаю|не могу|не понимаю", text):
+            flow["retried_" + pending] = True
+            flow.update(pending=pending, question=QUESTIONS[pending])
+            return state, QUESTIONS[pending]
         return handoff(state, "Не удалось определить модель или характер неисправности. Специалисту понадобится уточнение.")
     if pending == "paper":
         flow["paper"] = message
