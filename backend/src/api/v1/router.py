@@ -5,11 +5,16 @@ from src.api.v1.conversations import conversation_router
 from src.api.v1.chat import chat_router
 from src.api.v1.auth import auth_router
 from src.api.v1.knowledge_assets import router as knowledge_assets_router
+from src.api.v1.admin import admin_router
+from src.api.v1.support import support_router
 router = APIRouter(prefix='/api/v1', dependencies=[Depends(require_trusted_origin)],)
 
 router.include_router(health_router)
 router.include_router(conversation_router)
 router.include_router(chat_router)
 router.include_router(auth_router)
-router.include_router(knowledge_assets_router)
+router.include_router(support_router)
 
+
+router.include_router(admin_router)
+router.include_router(knowledge_assets_router)

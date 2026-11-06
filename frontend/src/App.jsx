@@ -16,6 +16,7 @@ import {
 } from "./api/client";
 
 import "./styles.css";
+import SupportWorkspace from "./components/SupportWorkspace";
 
 function loadJson(key, fallback) {
   try {
@@ -85,7 +86,8 @@ function mergeMessagesWithMeta(
 }
 
 
-export default function App({ user, onLogin, onLogout, logoutBusy, logoutError }) {
+export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logoutError }) {
+  const [supportOpen, setSupportOpen] = useState(false);
   const scope = user ? `:user-${user.id}` : "";
   const CONVERSATIONS_STORAGE_KEY = `ai-search-conversations-v4${scope}`;
   const ACTIVE_CONVERSATION_STORAGE_KEY = `ai-search-active-conversation-v4${scope}`;
@@ -657,8 +659,11 @@ export default function App({ user, onLogin, onLogout, logoutBusy, logoutError }
 
   return (
     <div className="app-shell">
+      <button className="support-launch" onClick={() => user ? setSupportOpen(true) : onLogin()}>Техподдержка</button>
+      {supportOpen && user && <SupportWorkspace user={user} onClose={() => setSupportOpen(false)} />}
 
       <Sidebar
+        onAdmin={() => { setMobilePanel(null); onAdmin?.(); }}
         user={user}
         onLogin={onLogin}
         onLogout={onLogout}

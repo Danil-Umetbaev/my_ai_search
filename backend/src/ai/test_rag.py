@@ -61,6 +61,7 @@ async def run(args, cases):
                          answer_mode=os.getenv('LLM_ANSWER_MODE', 'grounded'),
                          quantization=os.getenv('LLM_LOAD_IN_4BIT', 'auto'),
                          model_revision=os.getenv('LLM_MODEL_REVISION', 'default'))
+    
     with args.output.open('x', encoding='utf-8') as output:
         metadata = dict(type='run', started_at=datetime.now(timezone.utc).isoformat(),
                         label=args.label, selected_ids=[c['id'] for c in cases],

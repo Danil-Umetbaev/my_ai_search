@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import App from "../App";
+import AdminPanel from "./admin/AdminPanel";
 import AuthScreen, { authErrorMessage } from "./AuthScreen";
 import { getCurrentUser, logoutUser } from "../api/client";
 
@@ -65,12 +66,18 @@ export default function SessionApp() {
     onGuest={() => { setUser(null); setView("chat"); }}
   />;
 
-  return <App
+  return <>
+    {view === "admin" && user?.role === "admin" && <AdminPanel user={user} onBack={() => setView("chat")} onLogout={logout} logoutBusy={logoutBusy} logoutError={logoutError} />}
+    <div style={{ height: "100%", display: view === "admin" ? "none" : "block" }}>
+    <App
+    onAdmin={() => setView("admin")}
     key={user ? `user-${user.id}` : "guest"}
     user={user}
     onLogin={() => { setNotice(""); setView("auth"); }}
     onLogout={logout}
     logoutBusy={logoutBusy}
     logoutError={logoutError}
-  />;
+  />
+    </div>
+  </>;
 }

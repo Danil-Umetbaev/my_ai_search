@@ -1,5 +1,5 @@
 import logging
-import asyncio
+import threading
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -27,10 +27,20 @@ async def lifespan(app: FastAPI):
     from src.api.dependencies import (
         get_embedding_provider, get_llm_provider, get_reranker_provider,
     )
-    logger.info("Preparing search models before accepting requests")
-    for load in (get_llm_provider, get_reranker_provider, get_embedding_provider):
-        await asyncio.to_thread(load)
-    logger.info("Search models ready")
+    app.state.models = {"status": "loading" if settings.LOAD_SEARCH_MODELS else "disabled"}
+    def prepare():
+        try:
+            for load in (get_llm_provider, get_reranker_provider, get_embedding_provider):
+                app.state.models["stage"] = load.__name__.removeprefix("get_")
+                load()
+            app.state.models.update(status="ready", llm=get_llm_provider(), embedding=get_embedding_provider())
+            app.state.models.pop("stage", None)
+            logger.info("Search models ready")
+        except Exception:
+            app.state.models["status"] = "failed"
+            logger.exception("Model initialization failed; support remains available")
+    if settings.LOAD_SEARCH_MODELS:
+        threading.Thread(target=prepare, daemon=True, name="model-loader").start()
     yield
 
 setup_logging()
@@ -47,6 +57,13 @@ app.add_middleware(CORSMiddleware,
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(AICapacityMiddleware)
 app.include_router(main_router)
+
+@app.middleware("http")
+async def require_search_ready(request: Request, call_next):
+    if request.url.path.rstrip("/") == "/api/v1/chat/messages":
+        if getattr(request.app.state, "models", {}).get("status") != "ready":
+            return JSONResponse(status_code=503, content={"code": "AI_SERVICE_UNAVAILABLE", "message": "Поиск подготавливается. Диагностика доступна через Техподдержку."}, headers={"Retry-After": "30"})
+    return await call_next(request)
 
 @app.exception_handler(BaseHTTPException)
 async def app_http_exception_handler(

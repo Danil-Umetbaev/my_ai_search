@@ -98,17 +98,22 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
         model.eval()
         return tokenizer, model
 
-    def _generate_text(self, system, question, max_new_tokens=256):
+    def _generate_text(self, system, question, max_new_tokens=256, max_time=None, max_input_tokens=None):
         prompt = self.tokenizer.apply_chat_template(
             [{'role': 'system', 'content': system}, {'role': 'user', 'content': question}],
             tokenize=False, add_generation_prompt=True, enable_thinking=False,
         )
-        tokens = self.tokenizer(prompt, return_tensors='pt').to(self.device)
+        token_options = {"truncation": True, "max_length": max_input_tokens} if max_input_tokens else {}
+        tokens = self.tokenizer(prompt, return_tensors='pt', **token_options).to(self.device)
         with torch.inference_mode():
-            output = self.model.generate(**tokens, max_new_tokens=max_new_tokens, do_sample=False)
+            generation_options = {"max_time": max_time} if max_time else {}
+            output = self.model.generate(**tokens, max_new_tokens=max_new_tokens, do_sample=False, **generation_options)
         return self.tokenizer.decode(
             output[0][tokens['input_ids'].shape[-1]:], skip_special_tokens=True,
         ).strip()
+
+    def plan_support(self, system, payload):
+        return self._generate_text(system, payload, max_new_tokens=768, max_time=35, max_input_tokens=8192)
 
     def _complete(self, system, question, max_new_tokens=8):
         text = self._generate_text(system, question, max_new_tokens).upper().strip(' .!"\'')

@@ -21,4 +21,16 @@ class DocumentAddSchema(BaseModel):
     page_number: int | None = Field(default=None, ge=1)
     images: list[DocumentImage] = Field(default_factory=list)
 class DocumentSchema(DocumentAddSchema):
-    id : UUID
+    is_archived: bool = False
+    id: UUID
+
+
+class DocumentSummary(BaseModel):
+    is_archived: bool = False
+    id: UUID
+    title: str
+    source_type: str
+    source_url: str
+    checksum: str
+    created_at: datetime
+    updated_at: datetime

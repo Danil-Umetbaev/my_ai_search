@@ -1,3 +1,5 @@
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from src.exceptions import DataIntegrityException, DatabaseException
 from src.repositories.conversations import ConversationsRepository
 from src.repositories.messages import MessageRepository
 from src.repositories.document_chunk import DocumentChunkRepository
@@ -5,6 +7,9 @@ from src.repositories.documents import DocumentRepository
 from src.repositories.message_sources import MessageSourceRepository
 from src.repositories.escalations import EscalationRepository
 from src.repositories.users import UsersRepository
+
+
+from src.repositories.support import SupportRepository
 class DBManager:
     def __init__(self, session_factory):
         self.session_factory = session_factory
@@ -19,6 +24,7 @@ class DBManager:
         self.message_sources = MessageSourceRepository(self.session)
         self.escalations = EscalationRepository(self.session)
         self.users = UsersRepository(self.session)
+        self.support = SupportRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -27,6 +33,12 @@ class DBManager:
         await self.session.close()
 
     async def commit(self):
-        await self.session.commit()
+        try:
+            await self.session.commit()
+        except IntegrityError as error:
+            raise DataIntegrityException from error
+        except SQLAlchemyError as error:
+            raise DatabaseException from error
+
     async def rollback(self):
         await self.session.rollback()

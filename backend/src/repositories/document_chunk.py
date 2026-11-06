@@ -495,3 +495,7 @@ class DocumentChunkRepository(BaseRepository):
         )
 
         await self.session.execute(query)
+
+
+    async def deactivate_document(self, document_id):
+        await self._execute(update(self.model).where(self.model.document_id == document_id).values(is_active=False))

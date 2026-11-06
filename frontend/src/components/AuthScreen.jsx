@@ -8,6 +8,7 @@ export const ROLE_LABELS = {
 };
 
 export function authErrorMessage(error) {
+  if (error.code === "SESSION_REVOKED") return "Доступ к аккаунту закрыт. Обратитесь к администратору.";
   if (error.status === 401 || error.code === "USER_NOT_FOUND") return "Неверный email или пароль.";
   if (error.status === 409) return "Этот email уже зарегистрирован. Попробуйте войти.";
   if (error.status === 403) return "Вход с этого адреса сайта не разрешён. Обратитесь к администратору.";
@@ -117,7 +118,7 @@ export default function AuthScreen({ onAuthenticated, onGuest, notice = "" }) {
                 <input id="auth-confirm" name="password-confirmation" type={visible ? "text" : "password"} autoComplete="new-password" required maxLength={72} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
                 <label htmlFor="auth-role">Ваша роль</label>
                 <select id="auth-role" name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                  {Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  <option value="kassir">Кассир</option>
                 </select>
               </>}
               {error && <p className="auth-error" role="alert">{error}</p>}
