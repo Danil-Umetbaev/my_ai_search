@@ -34,6 +34,7 @@ def compatible_title(title, question):
         if prefix not in query and not any(word[:5] in query for word in words):
             return False
     for name in re.findall(r'\b[A-Za-z][A-Za-z0-9_-]{2,}\b', title):
+        name = name.rstrip('-_')
         if (not name.islower() and not name.startswith('Set')
                 and name.upper() not in formats and name.casefold() not in platforms
                 and name.casefold() not in query):

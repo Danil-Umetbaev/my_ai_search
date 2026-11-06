@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
             for load in (get_llm_provider, get_reranker_provider, get_embedding_provider):
                 app.state.models["stage"] = load.__name__.removeprefix("get_")
                 load()
-            app.state.models.update(status="ready", llm=get_llm_provider(), embedding=get_embedding_provider())
+            app.state.models.update(status="ready", llm=get_llm_provider(), embedding=get_embedding_provider(), reranker=get_reranker_provider())
             app.state.models.pop("stage", None)
             logger.info("Search models ready")
         except Exception:

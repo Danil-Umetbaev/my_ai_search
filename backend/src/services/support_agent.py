@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.middleware.ai_capacity import run_support_model
 from src.services.diagnosis import advance, is_ready, summary
+from src.services.receipt_diagnosis import applies, respond_receipt
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ def allowed_text(content):
     return not re.search(prohibited, content, re.I)
 
 
-async def respond(state, history, message, llm=None, retrieve=None, timeout=45):
+async def respond(state, history, message, llm=None, retrieve=None, timeout=45, lookup=None):
     normalized = message.strip().casefold().rstrip(".!?")
     if state.get("_phase") in {"cancelled", "resolved"}:
         updated, answer, _ = advance(state, message)
@@ -111,6 +112,8 @@ async def respond(state, history, message, llm=None, retrieve=None, timeout=45):
         updated, answer, _ = advance(corrected, message)
         updated["_engine"] = "system"
         return updated, answer
+    if applies(state, message):
+        return await respond_receipt(state, message, lookup, timeout)
     if llm is None:
         return fallback(state, message, "models_unavailable")
     try:

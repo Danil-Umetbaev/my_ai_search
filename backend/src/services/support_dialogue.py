@@ -8,6 +8,7 @@ from src.services.base import BaseService
 from src.services.diagnosis import is_ready, ticket_details
 from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
+from src.services.rag import RAGService
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -87,6 +88,12 @@ class SupportDialogueService(BaseService):
                     for chunk in chunks
                 ]
 
+            async def lookup(query):
+                rag = RAGService(self.db, VectorSearchService(self.db, models["embedding"]),
+                                 models["llm"], models["reranker"])
+                result = await rag.answer(query)
+                return result.model_dump(mode="json")
+
             try:
                 state, answer = await respond(
                     state,
@@ -95,6 +102,7 @@ class SupportDialogueService(BaseService):
                     models.get("llm") if models.get("status") == "ready" else None,
                     retrieve,
                     timeout=settings.SUPPORT_MODEL_TIMEOUT_SECONDS,
+                    lookup=lookup if models.get("status") == "ready" else None,
                 )
             finally:
                 await self.db.rollback()
