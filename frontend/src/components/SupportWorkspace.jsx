@@ -19,6 +19,14 @@ function Sources({ sources = [] }) {
   return <ul className="support-sources">{sources.filter(source => isSourceUrl(source.url)).map((source, index) => <li key={index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>{source.quote && <blockquote>{source.quote}</blockquote>}</li>)}</ul>;
 }
 
+function ReplyText({ text }) {
+  return <div className="support-reply">{text.split("\n").filter(line => line.trim()).map((line, index) => {
+    const match = line.match(/^(.*?):\s*((?:https?:\/\/|\/api\/)[^\s]+)$/);
+    if (match && isSourceUrl(match[2])) return <a className="support-source-link" key={index} href={match[2]} target="_blank" rel="noreferrer">{match[1]} ↗</a>;
+    return <p key={index}>{line}</p>;
+  })}</div>;
+}
+
 function FactValue({ value }) {
   if (typeof value === "string") return value;
   if (Array.isArray(value)) return <ul>{value.map((entry, index) => <li key={index}>{typeof entry === "string" ? entry : Object.entries(entry).map(([key, text]) => `${{ answer: "Ответ", question: "Вопрос", field: "Поле", previous: "Раньше", current: "Теперь" }[key] || key}: ${text}`).join(" · ")}</li>)}</ul>;
@@ -149,10 +157,10 @@ export default function SupportWorkspace({ user, onClose }) {
       {error && <p className="support-error" role="alert">{error}</p>}
       {busy && <p className="support-progress" role="status">Обрабатываем запрос…</p>}
       {view === "diagnosis" ? <>
-        <p className="support-mode">{mode?.engine === "llm" ? "ИИ-диагностика с учётом истории" : "Резервная диагностика — модели ещё не готовы или отключены"}{mode && !mode.knowledge_ready ? ". База знаний пока не наполнена." : ""}</p>
-        <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><p>{message.content}</p></article>)}</div>
-        {!terminal && <form onSubmit={event => { event.preventDefault(); send(input); }}>
-          <label htmlFor="support-message">Ваш ответ</label><textarea id="support-message" maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder="Опишите симптомы или результат проверки" />
+
+        <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
+        {!terminal && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input); }}>
+          <textarea id="support-message" aria-label="Ваш ответ" maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder="Опишите симптомы или результат проверки" />
           <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>Отправить</button>{phase === "confirm" && <button type="button" disabled={busy} onClick={() => send("да")}>Подтвердить заявку</button>}<button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button><button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>
         </form>}
         <button type="button" disabled={busy} onClick={() => run(async () => { const data = await request("/support/sessions", { method: "POST" }); restore(data); writeStorage(storageKey, data.id); writeStorage(pendingKey, null); setInput(""); })}>Новое обращение</button>

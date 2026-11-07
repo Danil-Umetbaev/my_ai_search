@@ -4,7 +4,6 @@ import logging
 import re
 from copy import deepcopy
 
-from src.services.diagnosis import summary
 
 logger = logging.getLogger(__name__)
 QUESTIONS = {
@@ -33,7 +32,7 @@ def model_name(message):
 
 def handoff(state, reason):
     state.update(_phase="confirm", unknowns=[reason])
-    return state, reason + "\n\n" + summary(state)
+    return state, reason + "\n\nПередать обращение специалисту вместе с вашими ответами?"
 
 
 async def respond_receipt(state, message, lookup, timeout=45):
@@ -70,13 +69,18 @@ async def respond_receipt(state, message, lookup, timeout=45):
     if pending in {"model", "symptom"} and not flow.get(pending):
         if not flow.get("retried_" + pending) and not re.search(r"не знаю|не могу|не понимаю", text):
             flow["retried_" + pending] = True
-            flow.update(pending=pending, question=QUESTIONS[pending])
-            return state, QUESTIONS[pending]
+            question = QUESTIONS[pending]
+            if pending == "model" and re.search(r"атол", text):
+                question = "АТОЛ — это производитель. На наклейке указано FPrint-22ПТК или другая модель?"
+            flow.update(pending=pending, question=question)
+            return state, question
         return handoff(state, "Не удалось определить модель или характер неисправности. Специалисту понадобится уточнение.")
     if pending == "paper":
         flow["paper"] = message
         state["check_result"] = message
         flow["paper_missing"] = bool(re.search(r"бумаг\w* нет|нет бумаг|закончилась|^нет[.! ]*$", text))
+    if pending == "error" and re.search(r"не понимаю|не могу|не знаю", text):
+        return handoff(state, "Без сообщения об ошибке или состояния индикаторов пока нельзя выбрать подходящую инструкцию. Не будем предлагать случайные настройки кассы.")
     if pending == "error":
         flow["error"] = message
         state["check_result"] = (state.get("check_result", "") + "\nОшибка/индикаторы: " + message).strip()
@@ -104,8 +108,8 @@ async def respond_receipt(state, message, lookup, timeout=45):
     sources = result.get("sources") or []
     if result.get("status") != "answered" or not sources:
         return handoff(state, "Подходящая инструкция не найдена. Не будем угадывать причину поломки.")
-    if re.search(r"вскр|разбер|открут|шлейф|плат[уы]|сброс|прошив|замкн|повтор\w* оплат", answer, re.I):
-        return handoff(state, "Найденная инструкция затрагивает сервисные работы. Дальнейшую диагностику лучше выполнить специалисту.")
+    if len(answer) > 2400 or re.search(r"вскр|разбер|открут|шлейф|плат[уы]|сброс|прошив|замкн|повтор\w* оплат|перерегистр|замен\w* ФН|открыть чек|закрыть чек|чек прихода", answer, re.I):
+        return handoff(state, "Не удалось выделить короткую инструкцию, подходящую для самостоятельной проверки. Дальнейшую диагностику передадим специалисту.")
     state["sources"] = sources
     flow.update(pending="result", question="После выполнения инструкции чек печатается?")
     state["attempts"] = (state.get("attempts", "") + "\nПредложена инструкция: " + query).strip()
