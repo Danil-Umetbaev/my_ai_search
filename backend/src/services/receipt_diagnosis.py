@@ -133,9 +133,12 @@ async def respond_receipt(state, message, lookup, timeout=45):
     sources = result.get("sources") or []
     if result.get("status") != "answered" or not sources:
         return handoff(state, "Подходящая инструкция не найдена. Не будем угадывать причину поломки.")
-    if len(answer) > 2400 or re.search(r"вскр|разбер|открут|шлейф|плат[уы]|сброс|прошив|замкн|повтор\w* оплат|перерегистр|замен\w* ФН|открыть чек|закрыть чек|чек прихода", answer, re.I):
-        return handoff(state, "Не удалось выделить короткую инструкцию, подходящую для самостоятельной проверки. Дальнейшую диагностику передадим специалисту.")
     state["sources"] = sources
+    links = "\n".join(f"{source['title']}: {source['url']}" for source in sources)
+    evidence = (answer + "\n\n" if answer else "") + "Источники:\n" + links
+    if result.get("kind") != "instruction":
+        reason = result.get("reason") or "Применимая инструкция по устранению проблемы не найдена."
+        return handoff(state, evidence + "\n\n" + reason)
     flow.update(pending="result", question="После выполнения инструкции чек печатается?")
     state["attempts"] = (state.get("attempts", "") + "\nПредложена инструкция: " + query).strip()
     links = "\n".join(f"{source['title']}: {source['url']}" for source in sources)
