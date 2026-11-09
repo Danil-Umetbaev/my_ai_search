@@ -102,6 +102,8 @@ class SupportDialogueService(BaseService):
                     sections = await self.db.documents.find_instruction_sections(prefix) if prefix else []
                     documents = [({"title": doc.title, "url": doc.source_url}, doc.content) for doc in sections]
                     return select_instruction({}, documents, flow)
+                if models.get("status") != "ready":
+                    return {"status": "loading", "sources": []}
                 rag = RAGService(self.db, VectorSearchService(self.db, models["embedding"]),
                                  models["llm"], models["reranker"])
                 result = await rag.answer(query)
@@ -121,7 +123,7 @@ class SupportDialogueService(BaseService):
                     models.get("llm") if models.get("status") == "ready" else None,
                     retrieve,
                     timeout=settings.SUPPORT_MODEL_TIMEOUT_SECONDS,
-                    lookup=lookup if models.get("status") == "ready" or state.get("_receipt") else None,
+                    lookup=lookup,
                 )
             finally:
                 await self.db.rollback()

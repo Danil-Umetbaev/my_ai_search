@@ -127,6 +127,8 @@ async def respond_receipt(state, message, lookup, timeout=45):
     except Exception:
         logger.exception("Receipt knowledge lookup failed")
         return state, "Не удалось получить инструкцию. Данные сохранены; попробуйте «продолжить» или выберите специалиста."
+    if result.get("status") == "loading":
+        return state, "Поиск по инструкциям ещё загружается. Ответы сохранены; напишите «продолжить» через минуту."
     answer = result.get("answer") or ""
     sources = result.get("sources") or []
     if result.get("status") != "answered" or not sources:
