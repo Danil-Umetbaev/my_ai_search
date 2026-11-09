@@ -10,7 +10,7 @@ from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
 from src.services.rag import RAGService
 from src.services.receipt_choices import choices_for
-from src.services.receipt_instructions import select_instruction
+from src.services.receipt_instructions import select_instruction, PAPER_SECTIONS
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -97,6 +97,11 @@ class SupportDialogueService(BaseService):
                 ]
 
             async def lookup(query, flow):
+                if flow.get("paper_missing"):
+                    prefix = PAPER_SECTIONS.get(flow["model"])
+                    sections = await self.db.documents.find_instruction_sections(prefix) if prefix else []
+                    documents = [({"title": doc.title, "url": doc.source_url}, doc.content) for doc in sections]
+                    return select_instruction({}, documents, flow)
                 rag = RAGService(self.db, VectorSearchService(self.db, models["embedding"]),
                                  models["llm"], models["reranker"])
                 result = await rag.answer(query)
@@ -116,7 +121,7 @@ class SupportDialogueService(BaseService):
                     models.get("llm") if models.get("status") == "ready" else None,
                     retrieve,
                     timeout=settings.SUPPORT_MODEL_TIMEOUT_SECONDS,
-                    lookup=lookup if models.get("status") == "ready" else None,
+                    lookup=lookup if models.get("status") == "ready" or state.get("_receipt") else None,
                 )
             finally:
                 await self.db.rollback()

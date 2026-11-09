@@ -1,6 +1,12 @@
 """Select a single applicable section from retrieved source documents."""
 import re
 
+PAPER_SECTIONS = {
+    "Пирит 2Ф": "Пирит 2Ф — Порядок замены (установки) термобумаги",
+    "Вики Принт": "Вики Принт не печатает документы",
+    "АТОЛ FPrint-22ПТК": "FPrint-22ПТК — Заправка бумаги",
+}
+
 
 def between(content, start, end):
     match = re.search(start + r"(.*?)" + end, content, re.I | re.S)

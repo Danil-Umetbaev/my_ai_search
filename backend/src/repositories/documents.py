@@ -13,6 +13,15 @@ class DocumentRepository(BaseRepository):
     mapper = DocumentDataMapper
     model = DocumentORM
 
+    async def find_instruction_sections(self, title_prefix: str) -> list[DocumentSchema]:
+        rows = (await self._execute(
+            select(self.model).where(
+                self.model.is_archived.is_(False),
+                self.model.title.startswith(title_prefix, autoescape=True),
+            ).order_by(self.model.title).limit(5)
+        )).scalars().all()
+        return [self.mapper.map_to_domain_entity(row) for row in rows]
+
     async def retire_missing_sources(self, source_urls: list[str]) -> None:
         if not source_urls:
             raise ValueError('Cannot replace an index with an empty source list')
