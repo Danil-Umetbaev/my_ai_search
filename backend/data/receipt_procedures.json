@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "catalog_version": "2026-11-09.2",
+  "catalog_version": "2026-11-09.3",
   "scope": "Печать чеков: проверенные процедуры и отдельный поиск материалов диагностики.",
   "coverage_fingerprint": "dcdc51b172bfac6f4c7e59dd158c2f9d937e7251f786dfe5897737208c6f768a",
   "selection_contract": {
@@ -1930,7 +1930,9 @@
           "paper_feed"
         ],
         "priority": 10,
-        "exclude_when_known": []
+        "exclude_when_known": [
+          "print_disabled"
+        ]
       },
       "result_question": "Галочка «Не печатать документы на чековой ленте» включена или выключена?"
     },

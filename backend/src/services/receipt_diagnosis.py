@@ -10,6 +10,7 @@ from src.services.receipt_facts import (
     SELECTION_FACTS,
     check_result,
     collect_facts,
+    legacy_facts,
     model_candidates,
     normalize,
 )
@@ -43,8 +44,9 @@ def model_name(message):
 
 
 def handoff(state, reason):
-    state.update(_phase="confirm", unknowns=[reason])
+    state.update(_phase="confirm", unknowns=[reason], next_action="offer_specialist")
     state.get("_receipt", {}).pop("pending", None)
+    state.get("_receipt", {}).pop("active_procedure", None)
     return (
         state,
         reason + "\n\nПередать обращение специалисту вместе с вашими ответами?",
@@ -56,7 +58,18 @@ def ask(state, field, question=None):
     flow["question_revision"] = flow.get("question_revision", 0) + 1
     flow.pop("question_options", None)
     flow.update(pending=field, question=question or QUESTIONS[field])
+    state["next_action"] = (
+        "ask_result" if field in {"result", "procedure_result"} else "ask_fact"
+    )
     return state, flow["question"]
+
+
+def search_unavailable(state):
+    state.update(next_action="retry_search", search_status="unavailable")
+    return (
+        state,
+        "Поиск временно недоступен. Ваши ответы сохранены. Повторите запрос или выберите специалиста; сейчас нельзя определить, есть ли подходящий ответ в базе.",
+    )
 
 
 async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None):
@@ -66,7 +79,26 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
     active_procedure = flow.get("active_procedure")
     result_action = flow.get("result_action")
     text = normalize(message).strip(" .!?")
+    historical_problem = state.get("problem")
     state.setdefault("problem", message)
+    if not flow.get("problem_facts_loaded"):
+        if historical_problem and historical_problem != message:
+            initial = {}
+            collect_facts(initial, historical_problem)
+            facts = legacy_facts(flow)
+            for key, value in initial["facts"].items():
+                facts.setdefault(key, value)
+        flow["problem_facts_loaded"] = True
+    if state.get("_phase") == "informed" and text in {
+        "спасибо",
+        "понятно",
+        "ок",
+        "хорошо",
+    }:
+        return state, "Пожалуйста. Если появится другой вопрос по кассе, напишите его."
+    if state.get("_phase") == "informed":
+        state["problem"] = message
+        state.pop("reference_id", None)
     state.update(_engine="rules", _phase="diagnosing")
     observations = state.setdefault("observations", [])
     observations.append(
@@ -77,6 +109,7 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
         {
             "collect_paper_presence": "paper_present",
             "collect_connection_result": "fito_connected",
+            "collect_print_setting": "print_disabled",
         }.get(result_action)
         if pending == "procedure_result"
         else None
@@ -84,6 +117,25 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
     update = collect_facts(flow, message, result_field or pending, selected_fact)
     facts = flow["facts"]
     state["receipt_facts"] = deepcopy(facts)
+    if (
+        pending not in {"result", "procedure_result"}
+        and re.search(
+            r"чек.{0,30}печата|проблема.{0,20}(?:решена|исчезла|устранена)", text
+        )
+        and check_result(message).get("problem_resolved") is True
+    ):
+        facts["problem_resolved"] = True
+        state.update(
+            _phase="resolved",
+            next_action="close_resolved",
+            resolution=message,
+            receipt_facts=deepcopy(facts),
+        )
+        flow.pop("active_procedure", None)
+        return (
+            state,
+            "Вы подтвердили, что проблема решена. Обращение завершено без заявки специалисту.",
+        )
     if "model" in update.changed:
         flow.pop("completed_procedures", None)
         state["environment"] = facts.get("model") or "Модель неизвестна"
@@ -126,17 +178,73 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
             + QUESTIONS.get(step, "Уточните значение: " + field),
         )
     flow.pop("conflict_asked", None)
+    if (
+        active_procedure
+        and pending in {"result", "procedure_result"}
+        and not update.changed & SELECTION_FACTS
+        and re.search(r"уточняю|без опечаток", text)
+        and lookup is not None
+    ):
+        try:
+            verified = await asyncio.wait_for(lookup(message, flow), timeout=timeout)
+        except Exception:
+            logger.exception("Procedure acknowledgement lookup failed")
+            flow["pending"] = pending
+            return search_unavailable(state)
+        if verified.get("status") == "blocked":
+            return handoff(state, verified["reason"])
+        if verified.get("procedure_id") == active_procedure:
+            flow["pending"] = pending
+            state["next_action"] = "acknowledge_existing_plan"
+            return (
+                state,
+                "Уточнение принято. Ранее предложенная инструкция остаётся применимой.\n\n"
+                + flow["question"],
+            )
+    if active_procedure and re.search(
+        r"(?:фото|схем\w*|рисунок|файл).{0,30}(?:не открыва|недоступ|не загру)|не могу открыть.{0,20}(?:фото|схем|файл)",
+        text,
+    ):
+        return handoff(
+            state,
+            "Обязательный материал инструкции недоступен. Продолжать по догадке нельзя; специалист поможет проверить материал и следующий шаг.",
+        )
     outcome = check_result(message) if pending == "result" else {}
     if (
         pending == "result"
         and "model" not in update.changed
         and (outcome or not update.changed & SELECTION_FACTS)
     ):
+        if not outcome:
+            if active_procedure and lookup is not None:
+                try:
+                    verified = await asyncio.wait_for(
+                        lookup(state["problem"], flow), timeout=timeout
+                    )
+                except Exception:
+                    logger.exception("Active procedure verification failed")
+                    flow["pending"] = "result"
+                    return search_unavailable(state)
+                if verified.get("status") == "blocked":
+                    return handoff(state, verified["reason"])
+                if verified.get("status") in {"loading", "error", "unavailable"}:
+                    flow["pending"] = "result"
+                    return search_unavailable(state)
+            retries = flow.setdefault("question_retries", {})
+            retries["result"] = retries.get("result", 0) + 1
+            if retries["result"] < 2:
+                return ask(
+                    state,
+                    "result",
+                    "Удалось выполнить инструкцию и устранить исходную проблему? Можно ответить: «помогло», «не помогло» или «не смог выполнить».",
+                )
         if active_procedure:
             flow.setdefault("completed_procedures", []).append(active_procedure)
         state["check_result"] = message
         if outcome.get("problem_resolved") is True:
-            state.update(_phase="resolved", resolution=message)
+            state.update(
+                _phase="resolved", resolution=message, next_action="close_resolved"
+            )
             facts["problem_resolved"] = True
             state["receipt_facts"] = deepcopy(facts)
             return state, "Отлично, печать восстановлена. Обращение завершено."
@@ -147,16 +255,24 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
             state,
             "Проверка не подтвердила решение. Передадим результат специалисту без повторения тех же действий.",
         )
-    if pending == "procedure_result" and not update.changed & {"model", "symptom"}:
+    if pending == "procedure_result" and "model" not in update.changed:
         state["check_result"] = message
         if active_procedure:
             flow.setdefault("completed_procedures", []).append(active_procedure)
             flow.pop("active_procedure", None)
-        outcome = check_result(message) if text not in {"да", "нет", "есть"} else {}
+        outcome = (
+            check_result(message)
+            if re.search(
+                r"чек.{0,30}печата|проблема.{0,20}(?:решена|исчезла|устранена)", text
+            )
+            else {}
+        )
         if outcome.get("problem_resolved") is True:
             facts.update(outcome)
             state["receipt_facts"] = deepcopy(facts)
-            state.update(_phase="resolved", resolution=message)
+            state.update(
+                _phase="resolved", resolution=message, next_action="close_resolved"
+            )
             return state, "Решение исходной проблемы подтверждено. Обращение завершено."
         if not result_field or facts.get(result_field) is None:
             return handoff(
@@ -209,10 +325,7 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
             question = "АТОЛ — это производитель. На наклейке указано FPrint-22ПТК или другая модель?"
         return ask(state, field, question)
     if lookup is None:
-        return (
-            state,
-            "Поиск по инструкциям пока загружается. Данные сохранены; напишите «продолжить» через минуту.",
-        )
+        return search_unavailable(state)
     query = state["problem"] + "\n" + message
     if flow.get("symptom"):
         query += "\nТекущий симптом: " + flow["symptom"]
@@ -220,10 +333,8 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
         result = await asyncio.wait_for(lookup(query, flow), timeout=timeout)
     except Exception:
         logger.exception("Receipt knowledge lookup failed")
-        return (
-            state,
-            "Не удалось получить инструкцию. Данные сохранены; попробуйте «продолжить» или выберите специалиста.",
-        )
+        return search_unavailable(state)
+    state["search_status"] = "available"
     if result.get("status") == "clarify":
         field = result["field"]
         retries = flow.setdefault("question_retries", {})
@@ -243,11 +354,8 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
         return handoff(state, result["reason"])
     if result.get("materials"):
         state["retrieved_materials"] = result["materials"]
-    if result.get("status") == "loading":
-        return (
-            state,
-            "Поиск по инструкциям ещё загружается. Ответы сохранены; напишите «продолжить» через минуту.",
-        )
+    if result.get("status") in {"loading", "error", "unavailable"}:
+        return search_unavailable(state)
     answer = result.get("answer") or ""
     sources = result.get("sources") or []
     if result.get("status") != "answered" or not sources:
@@ -259,11 +367,16 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
     links = "\n".join(f"{source['title']}: {source['url']}" for source in sources)
     evidence = (answer + "\n\n" if answer else "") + "Источники:\n" + links
     if result.get("kind") not in {"instruction", "diagnostic_check"}:
-        reason = (
-            result.get("reason")
-            or "Применимая инструкция по устранению проблемы не найдена."
-        )
-        return handoff(state, evidence + "\n\n" + reason)
+        flow.pop("pending", None)
+        flow.pop("active_procedure", None)
+        flow.pop("question_options", None)
+        state["reference_id"] = result.get("reference_id")
+        if result.get("reason"):
+            state, answer = handoff(state, evidence + "\n\n" + result["reason"])
+            state["next_action"] = "explain_and_offer_specialist"
+            return state, answer
+        state.update(_phase="informed", next_action="explain_information")
+        return state, evidence
     flow["question_revision"] = flow.get("question_revision", 0) + 1
     flow.pop("question_options", None)
     question = result.get(
@@ -275,6 +388,7 @@ async def respond_receipt(state, message, lookup, timeout=45, selected_fact=None
         active_procedure=result.get("procedure_id"),
         result_action=result.get("result_action"),
     )
+    state.update(next_action="offer_procedure", procedure_id=result.get("procedure_id"))
     state["attempts"] = (
         state.get("attempts", "") + "\nПредложена инструкция: " + query
     ).strip()

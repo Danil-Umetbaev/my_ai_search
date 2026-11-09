@@ -8,6 +8,7 @@ from pathlib import Path
 from src.services.receipt_choices import choices_for
 from src.services.receipt_diagnosis import respond_receipt
 from src.services.receipt_facts import ALIASES, SELECTION_FACTS, collect_facts
+from src.services.receipt_procedures import catalog
 
 DATA = Path(__file__).resolve().parents[1] / "data" / "receipt_dialogues"
 
@@ -39,8 +40,20 @@ class ReferenceFactTests(unittest.TestCase):
                 pending = next(
                     (a.get("fact") for a in actions if a["type"] == "ask_fact"), None
                 )
-                if any(a["type"] == "offer_procedure" for a in actions):
-                    pending = "result"
+                offered = next(
+                    (a for a in actions if a["type"] == "offer_procedure"), None
+                )
+                if offered:
+                    procedure = next(
+                        p
+                        for p in catalog()["procedures"]
+                        if p["id"] == offered["procedure_id"]
+                    )
+                    pending = {
+                        "collect_print_setting": "print_disabled",
+                        "collect_paper_presence": "paper_present",
+                        "collect_connection_result": "fito_connected",
+                    }.get(procedure["on_success"], "result")
 
     def test_reported_error_is_not_observation(self):
         for message in (

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 ALIASES = {"paper": "paper_present", "error": "exact_error", "width": "paper_width_mm"}
 DEVICE_SETTINGS = {
+    "print_disabled",
     "platform",
     "layout",
     "paper_width_mm",
@@ -66,6 +67,10 @@ SYMPTOMS = (
     ("device_error", r"появляется сообщение об ошибке"),
 )
 BOOLEAN_RULES = {
+    "print_disabled": (
+        r"(?:запрет печати|галочка|параметр).{0,15}(?:включен\w*|установлен\w*|стоит)",
+        r"(?:запрет печати|галочка|параметр).{0,15}(?:выключен\w*|снят\w*|не стоит)",
+    ),
     "printing_stopped": (
         r"печать.{0,12}(?:остановлена|завершена)|задания закончены",
         r"печать.{0,12}(?:еще идет|не остановлена)",
@@ -263,6 +268,8 @@ def extract_candidates(message, field):
     if re.search(r"другая платформа", text):
         add("platform", None)
     for key, (yes, no) in BOOLEAN_RULES.items():
+        if key == "print_disabled" and field != key and "запрет печати" not in text:
+            continue
         negative_spans = [m.span() for m in re.finditer(no, text)]
         for pattern, value in ((no, False), (yes, True)):
             for match in re.finditer(pattern, text):
@@ -290,6 +297,10 @@ def extract_candidates(message, field):
             if re.search(
                 r"запасн\w*\s*$", text[max(0, match.start() - 20) : match.start()]
             ) or re.match(r"\s+(?:на полке|в запасе|на складе)", text[match.end() :]):
+                continue
+            if re.search(
+                r"подходящ\w*\s*$", text[max(0, match.start() - 20) : match.start()]
+            ) and not re.search(r"установлен|стоит", match[0]):
                 continue
             if not negated(text, match.start()) and not re.search(
                 r"не (?:закончилась|кончилась)", match[0]

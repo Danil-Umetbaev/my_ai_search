@@ -22,6 +22,13 @@ def infer_intent(query, facts):
     symptom_intent = rules["symptom_intents"].get(facts.get("symptom"))
     for intent, pattern in rules["intent_patterns"]:
         if (
+            intent == "width_setting"
+            and facts.get("paper_present") is False
+            and facts.get("driver_width_mm") is not None
+            and facts["driver_width_mm"] == facts.get("paper_width_mm")
+        ):
+            continue
+        if (
             intent in {"paper_jam", "paper_skew", "qr_missing"}
             and symptom_intent
             and intent != symptom_intent

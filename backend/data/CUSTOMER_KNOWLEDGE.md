@@ -134,6 +134,7 @@ docker compose up -d --build
 ```powershell
 docker compose cp ./backend/src/. app:/backend/src/
 docker compose cp ./backend/data/receipt_procedures.json app:/backend/data/receipt_procedures.json
+docker compose cp ./backend/data/receipt_reference_notes.json app:/backend/data/receipt_reference_notes.json
 docker compose exec app alembic upgrade head
 docker compose restart app
 npm --prefix frontend run build
