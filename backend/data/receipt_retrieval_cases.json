@@ -1,0 +1,787 @@
+{
+  "version": 1,
+  "metric": "Recall@5 complete source sections, including the required fragment",
+  "frozen_before_tuning": true,
+  "cases": [
+    {
+      "id": "R001",
+      "question": "Как вставить ось при вертикальном расположении АТОЛ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "ось"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R002",
+      "question": "Касса стоит вертикально. Куда ставится стержень внутри рулона?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "ось"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R003",
+      "question": "Можно открывать крышку FPrint во время печати?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "Запрещается открывать крышку"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R004",
+      "question": "Какие запреты нужно соблюдать при смене ленты на АТОЛ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "Запрещается открывать крышку"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R005",
+      "question": "Как установить ограничитель для ленты 58 мм?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "ограничитель"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R006",
+      "question": "У АТОЛ узкий рулон, нужна схема заправки бумаги 58 миллиметров.",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "required_fragments": [
+        "ограничитель"
+      ],
+      "source_checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d",
+      "source_ref": "A1"
+    },
+    {
+      "id": "R007",
+      "question": "АТОЛ не реагирует на кнопку, пока выполняется команда. Что написано в руководстве?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "дождаться окончания"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R008",
+      "question": "Нажимаю кнопку кассы во время выполнения операции, реакции нет.",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "дождаться окончания"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R009",
+      "question": "Что означает ошибка Смена превысила 24 часа на АТОЛ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Смена превысила 24 часа"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R010",
+      "question": "АТОЛ пишет: Смена превысила 24 часа.",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Смена превысила 24 часа"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R011",
+      "question": "Что говорит руководство АТОЛ об ошибке Нет бумаги?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Нет бумаги"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R012",
+      "question": "Рулон установлен, но АТОЛ сообщает Нет бумаги. Какие причины перечислены?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Нет бумаги"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R013",
+      "question": "На АТОЛ отсутствует печать, какие причины указаны?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Отсутствует печать"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R014",
+      "question": "Какие неисправности дают отсутствие печати на FPrint?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "required_fragments": [
+        "Отсутствует печать"
+      ],
+      "source_checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca",
+      "source_ref": "A2"
+    },
+    {
+      "id": "R015",
+      "question": "Где на АТОЛ настраивается звуковой сигнал при ошибке?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "959daa06-eecd-44dc-a3b0-24e07750d075",
+      "required_fragments": [
+        "Звуковой сигнал при ошибке"
+      ],
+      "source_checksum": "2e088eeb5978c2bd301738376613d6077e2c04c5fa1ef38e5e3cf91f52974bce",
+      "source_ref": "A3"
+    },
+    {
+      "id": "R016",
+      "question": "Можно включить звук при протокольной ошибке АТОЛ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "959daa06-eecd-44dc-a3b0-24e07750d075",
+      "required_fragments": [
+        "Звуковой сигнал при ошибке"
+      ],
+      "source_checksum": "2e088eeb5978c2bd301738376613d6077e2c04c5fa1ef38e5e3cf91f52974bce",
+      "source_ref": "A3"
+    },
+    {
+      "id": "R017",
+      "question": "Как проверить связь АТОЛ через тест драйвера ККТ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "0ceed379-0feb-4924-8c45-a399684b9e48",
+      "required_fragments": [
+        "Проверка связи"
+      ],
+      "source_checksum": "9decf7f8fae5353d57859b0d59d6aa3d941238ca856576ccbe38bd8d091fb9bd",
+      "source_ref": "A4"
+    },
+    {
+      "id": "R018",
+      "question": "В тесте драйвера FPrint где увидеть результат соединения?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "0ceed379-0feb-4924-8c45-a399684b9e48",
+      "required_fragments": [
+        "Проверка связи"
+      ],
+      "source_checksum": "9decf7f8fae5353d57859b0d59d6aa3d941238ca856576ccbe38bd8d091fb9bd",
+      "source_ref": "A4"
+    },
+    {
+      "id": "R019",
+      "question": "Какие порты исключить при поиске оборудования АТОЛ?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "fd524963-6679-47e2-8fce-e6d5f9fcb95d",
+      "required_fragments": [
+        "порты, которые заняты"
+      ],
+      "source_checksum": "1ee6960635cfbd9a90e3b6634302e009f81630507491dbfe0b327eca98906d93",
+      "source_ref": "A5"
+    },
+    {
+      "id": "R020",
+      "question": "Как драйвер АТОЛ ищет кассу по доступным портам?",
+      "facts": {
+        "model": "АТОЛ FPrint-22ПТК"
+      },
+      "expected_document_id": "fd524963-6679-47e2-8fce-e6d5f9fcb95d",
+      "required_fragments": [
+        "порты, которые заняты"
+      ],
+      "source_checksum": "1ee6960635cfbd9a90e3b6634302e009f81630507491dbfe0b327eca98906d93",
+      "source_ref": "A5"
+    },
+    {
+      "id": "R021",
+      "question": "Как поменять чековую ленту Пирит 2Ф?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "7072bf94-f937-45b0-a687-d2b82a98f062",
+      "required_fragments": [
+        "направление намотки"
+      ],
+      "source_checksum": "1976059a26db02abe1a6ac8f6386c77a391d915c59006dea2905662f8fba1428",
+      "source_ref": "P1"
+    },
+    {
+      "id": "R022",
+      "question": "Куда положить новый рулон в Пирит и какой стороной?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "7072bf94-f937-45b0-a687-d2b82a98f062",
+      "required_fragments": [
+        "направление намотки"
+      ],
+      "source_checksum": "1976059a26db02abe1a6ac8f6386c77a391d915c59006dea2905662f8fba1428",
+      "source_ref": "P1"
+    },
+    {
+      "id": "R023",
+      "question": "Как получить диагностический отчёт Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "Печать диагностического отчёта"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R024",
+      "question": "Какая команда печатает отчёт проверки исправности Пирит 2Ф?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "Печать диагностического отчёта"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R025",
+      "question": "Каким должен быть статус фатальных ошибок Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "статус фатальных ошибок"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R026",
+      "question": "Что проверять в диагностическом отчёте Пирит, чтобы увидеть ошибки?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "статус фатальных ошибок"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R027",
+      "question": "Что означает индикатор БУМАГА на Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "Индикатор БУМАГА"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R028",
+      "question": "На Пирит горит лампа БУМАГА. Что сказано о ней в руководстве?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "required_fragments": [
+        "Индикатор БУМАГА"
+      ],
+      "source_checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58",
+      "source_ref": "P2"
+    },
+    {
+      "id": "R029",
+      "question": "Пирит пишет БАТАРЕЯ РАЗРЯЖЕНА. Что это?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "2b1d6de4-3c0b-4a2f-b2e3-9d51b3458acb",
+      "required_fragments": [
+        "БАТАРЕЯ РАЗРЯЖЕНА"
+      ],
+      "source_checksum": "1b1e97e3bed2e709ea08d38596fa9687dddd46abdedd60d41a4f15f096f04905",
+      "source_ref": "P3"
+    },
+    {
+      "id": "R030",
+      "question": "На диагностическом чеке Пирит сообщение БАТАРЕЯ РАЗРЯЖЕНА.",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "2b1d6de4-3c0b-4a2f-b2e3-9d51b3458acb",
+      "required_fragments": [
+        "БАТАРЕЯ РАЗРЯЖЕНА"
+      ],
+      "source_checksum": "1b1e97e3bed2e709ea08d38596fa9687dddd46abdedd60d41a4f15f096f04905",
+      "source_ref": "P3"
+    },
+    {
+      "id": "R031",
+      "question": "Что значит ККТ НЕ АВТОРИЗОВАНА у Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "2b1d6de4-3c0b-4a2f-b2e3-9d51b3458acb",
+      "required_fragments": [
+        "ККТ НЕ АВТОРИЗОВАНА"
+      ],
+      "source_checksum": "1b1e97e3bed2e709ea08d38596fa9687dddd46abdedd60d41a4f15f096f04905",
+      "source_ref": "P3"
+    },
+    {
+      "id": "R032",
+      "question": "Почему Пирит печатает сообщение ККТ НЕ АВТОРИЗОВАНА?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "2b1d6de4-3c0b-4a2f-b2e3-9d51b3458acb",
+      "required_fragments": [
+        "ККТ НЕ АВТОРИЗОВАНА"
+      ],
+      "source_checksum": "1b1e97e3bed2e709ea08d38596fa9687dddd46abdedd60d41a4f15f096f04905",
+      "source_ref": "P3"
+    },
+    {
+      "id": "R033",
+      "question": "Когда Пирит блокирует выполнение функций?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "3d2de392-2697-499f-a1e0-539c82d05fce",
+      "required_fragments": [
+        "отсутствия чековой ленты"
+      ],
+      "source_checksum": "2e3ee5d0813efce97aeb89247cde708bf09abf4273818726dbbca01eac9ca0fc",
+      "source_ref": "P4"
+    },
+    {
+      "id": "R034",
+      "question": "Какие условия блокировки при отсутствии чековой ленты описаны у Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "3d2de392-2697-499f-a1e0-539c82d05fce",
+      "required_fragments": [
+        "отсутствия чековой ленты"
+      ],
+      "source_checksum": "2e3ee5d0813efce97aeb89247cde708bf09abf4273818726dbbca01eac9ca0fc",
+      "source_ref": "P4"
+    },
+    {
+      "id": "R035",
+      "question": "Куда подключить питание Пирит 2Ф?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "354c2938-45b2-47eb-a848-ddcecfafb619",
+      "required_fragments": [
+        "DC24V"
+      ],
+      "source_checksum": "895dac015f48dbd92b1bfcd78a4264a5b390e0eeb6bc85cf928c8a83c6054d04",
+      "source_ref": "P5"
+    },
+    {
+      "id": "R036",
+      "question": "Какой разъём питания на задней панели Пирит используется при включении?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "354c2938-45b2-47eb-a848-ddcecfafb619",
+      "required_fragments": [
+        "DC24V"
+      ],
+      "source_checksum": "895dac015f48dbd92b1bfcd78a4264a5b390e0eeb6bc85cf928c8a83c6054d04",
+      "source_ref": "P5"
+    },
+    {
+      "id": "R037",
+      "question": "Какой максимальный диаметр рулона допускает Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "ed0d446a-c071-41e0-8717-6d5e82fb3d2f",
+      "required_fragments": [
+        "максимальный наружный диаметр"
+      ],
+      "source_checksum": "e1fe98a11064eac7ed02442fe2180f7e6e6a144772ff0c5080bf9ec29d88b744",
+      "source_ref": "P8"
+    },
+    {
+      "id": "R038",
+      "question": "Какие параметры термобумаги нужны для Пирит 2Ф?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "ed0d446a-c071-41e0-8717-6d5e82fb3d2f",
+      "required_fragments": [
+        "максимальный наружный диаметр"
+      ],
+      "source_checksum": "e1fe98a11064eac7ed02442fe2180f7e6e6a144772ff0c5080bf9ec29d88b744",
+      "source_ref": "P8"
+    },
+    {
+      "id": "R039",
+      "question": "Что означают COMX, COMY и COMZ при установке Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "0bcc97e8-1249-4adb-9509-466abea9e722",
+      "required_fragments": [
+        "COMZ"
+      ],
+      "source_checksum": "8a494c482f450a8ad19ac66016936771efca1a349fecd8b5c62dcf93b02d3eca",
+      "source_ref": "P12"
+    },
+    {
+      "id": "R040",
+      "question": "Какой виртуальный порт ComProxy взаимодействует с кассовой программой Пирит?",
+      "facts": {
+        "model": "Пирит 2Ф"
+      },
+      "expected_document_id": "0bcc97e8-1249-4adb-9509-466abea9e722",
+      "required_fragments": [
+        "COMZ"
+      ],
+      "source_checksum": "8a494c482f450a8ad19ac66016936771efca1a349fecd8b5c62dcf93b02d3eca",
+      "source_ref": "P12"
+    },
+    {
+      "id": "R041",
+      "question": "Красный индикатор бумаги на Вики Принт — что проверять?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "f31cf1e7-9574-46bd-bf76-9919aaf0db48",
+      "required_fragments": [
+        "оптический выключатель"
+      ],
+      "source_checksum": "cb79cc81e7ac8e749ba8c129f101744f8801b4bc558e94e465eb1155b10e95b2",
+      "source_ref": "V1"
+    },
+    {
+      "id": "R042",
+      "question": "Как в статье Вики описана работа датчика бумаги?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "f31cf1e7-9574-46bd-bf76-9919aaf0db48",
+      "required_fragments": [
+        "оптический выключатель"
+      ],
+      "source_checksum": "cb79cc81e7ac8e749ba8c129f101744f8801b4bc558e94e465eb1155b10e95b2",
+      "source_ref": "V1"
+    },
+    {
+      "id": "R043",
+      "question": "Как прочитать запрет печати документов на Вики?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "f31cf1e7-9574-46bd-bf76-9919aaf0db48",
+      "required_fragments": [
+        "Не печатать документы на чековой ленте"
+      ],
+      "source_checksum": "cb79cc81e7ac8e749ba8c129f101744f8801b4bc558e94e465eb1155b10e95b2",
+      "source_ref": "V1"
+    },
+    {
+      "id": "R044",
+      "question": "Какой флаг отключает печать на чековой ленте у Вики Принт?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "f31cf1e7-9574-46bd-bf76-9919aaf0db48",
+      "required_fragments": [
+        "Не печатать документы на чековой ленте"
+      ],
+      "source_checksum": "cb79cc81e7ac8e749ba8c129f101744f8801b4bc558e94e465eb1155b10e95b2",
+      "source_ref": "V1"
+    },
+    {
+      "id": "R045",
+      "question": "Почему Вики видна как Неизвестное USB-устройство?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "5024d170-41a9-48ea-ad43-c7269f20ef73",
+      "required_fragments": [
+        "Неизвестное USB"
+      ],
+      "source_checksum": "80b3b0076e160427d3e14a0363939a72c21f921923abeafcf4ad202e451c15f5",
+      "source_ref": "V2"
+    },
+    {
+      "id": "R046",
+      "question": "При включении Вики нет чека диагностики, в Windows Неизвестное USB устройство.",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "5024d170-41a9-48ea-ad43-c7269f20ef73",
+      "required_fragments": [
+        "Неизвестное USB"
+      ],
+      "source_checksum": "80b3b0076e160427d3e14a0363939a72c21f921923abeafcf4ad202e451c15f5",
+      "source_ref": "V2"
+    },
+    {
+      "id": "R047",
+      "question": "Когда рекомендуется менять яркость Вики Принт 80?",
+      "facts": {
+        "model": "Вики Принт 80"
+      },
+      "expected_document_id": "e665da58-f6da-4509-8396-d7b225d0e64f",
+      "required_fragments": [
+        "при замене печатающего механизма"
+      ],
+      "source_checksum": "fe224e83740ca07eedfd40d042dd5bce2b7eb94f6ef1e83e9fd3c0229ba0aafb",
+      "source_ref": "V3"
+    },
+    {
+      "id": "R048",
+      "question": "На Вики Принт 80 заменили печатающий механизм. Где инструкция по яркости?",
+      "facts": {
+        "model": "Вики Принт 80"
+      },
+      "expected_document_id": "e665da58-f6da-4509-8396-d7b225d0e64f",
+      "required_fragments": [
+        "при замене печатающего механизма"
+      ],
+      "source_checksum": "fe224e83740ca07eedfd40d042dd5bce2b7eb94f6ef1e83e9fd3c0229ba0aafb",
+      "source_ref": "V3"
+    },
+    {
+      "id": "R049",
+      "question": "На Вики Принт не печатается QR-код.",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "99f6b137-1e52-481c-8464-61911dab8600",
+      "required_fragments": [
+        "файл с макросом"
+      ],
+      "source_checksum": "962d1bf3d9e774ae94fadd9fbb6d0253b9026fa24ca02a86055002660ec255c5",
+      "source_ref": "V4"
+    },
+    {
+      "id": "R050",
+      "question": "Не печатает qr код вики принт, что делать?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "99f6b137-1e52-481c-8464-61911dab8600",
+      "required_fragments": [
+        "файл с макросом"
+      ],
+      "source_checksum": "962d1bf3d9e774ae94fadd9fbb6d0253b9026fa24ca02a86055002660ec255c5",
+      "source_ref": "V4"
+    },
+    {
+      "id": "R051",
+      "question": "Где найти фактический TCP-порт Вики Driver?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "db1e0281-c19d-48af-ba22-7dcdd07e732f",
+      "required_fragments": [
+        "Порты подключения"
+      ],
+      "source_checksum": "abcf638673110c0fbfc546a112c0c751c52be008eb247b7463d86675645bee5c",
+      "source_ref": "V5"
+    },
+    {
+      "id": "R052",
+      "question": "Подключаю Вики через Fito, порт 50003 не подходит. Где посмотреть правильный?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "db1e0281-c19d-48af-ba22-7dcdd07e732f",
+      "required_fragments": [
+        "Порты подключения"
+      ],
+      "source_checksum": "abcf638673110c0fbfc546a112c0c751c52be008eb247b7463d86675645bee5c",
+      "source_ref": "V5"
+    },
+    {
+      "id": "R053",
+      "question": "Fito не подключается к Вики через ComProxy. Где смотреть порты?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "db1e0281-c19d-48af-ba22-7dcdd07e732f",
+      "required_fragments": [
+        "virtual_port_out"
+      ],
+      "source_checksum": "abcf638673110c0fbfc546a112c0c751c52be008eb247b7463d86675645bee5c",
+      "source_ref": "V5"
+    },
+    {
+      "id": "R054",
+      "question": "Какие поля в ComProxy.ini отвечают за подключение Вики?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "db1e0281-c19d-48af-ba22-7dcdd07e732f",
+      "required_fragments": [
+        "virtual_port_out"
+      ],
+      "source_checksum": "abcf638673110c0fbfc546a112c0c751c52be008eb247b7463d86675645bee5c",
+      "source_ref": "V5"
+    },
+    {
+      "id": "R055",
+      "question": "Когда появляется Разница во времени в Кабинете Дримкас?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "2d6d1b40-e802-4d7f-8f2c-a2733e60091a",
+      "required_fragments": [
+        "При регистрации"
+      ],
+      "source_checksum": "255227e72e790cc043f47c93acc7163adc7b7ac28ba17c8d80acbe0fa228c740",
+      "source_ref": "V7"
+    },
+    {
+      "id": "R056",
+      "question": "Вики: ошибка времени при регистрации через Кабинет Дримкас.",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "2d6d1b40-e802-4d7f-8f2c-a2733e60091a",
+      "required_fragments": [
+        "При регистрации"
+      ],
+      "source_checksum": "255227e72e790cc043f47c93acc7163adc7b7ac28ba17c8d80acbe0fa228c740",
+      "source_ref": "V7"
+    },
+    {
+      "id": "R057",
+      "question": "Что означает Исчерпан ресурс КС при закрытии архива Вики?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "b77eb7a7-88a1-4e16-a7d8-a28816d299a4",
+      "required_fragments": [
+        "во время закрытия архива"
+      ],
+      "source_checksum": "c1845fa3cb399ce180c83d5914700c51ed020eea1462f04af053fb983451294d",
+      "source_ref": "V8"
+    },
+    {
+      "id": "R058",
+      "question": "При закрытии ФН Вики пишет Исчерпан ресурс КС.",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "b77eb7a7-88a1-4e16-a7d8-a28816d299a4",
+      "required_fragments": [
+        "во время закрытия архива"
+      ],
+      "source_checksum": "c1845fa3cb399ce180c83d5914700c51ed020eea1462f04af053fb983451294d",
+      "source_ref": "V8"
+    },
+    {
+      "id": "R059",
+      "question": "Почему Вики пишет Расхождение номеров смен в ФН и NVR?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "2d21ce10-6045-4867-99c7-0fdcea90f464",
+      "required_fragments": [
+        "После некорректного закрытия смены"
+      ],
+      "source_checksum": "5ec0193abe1885c0fa5906c0ff8eb3bccbb5e18251d61acd627f91a4011cc4f3",
+      "source_ref": "V9"
+    },
+    {
+      "id": "R060",
+      "question": "Что сказано о расхождении данных ФН после неправильного закрытия смены Вики?",
+      "facts": {
+        "model": "Вики Принт"
+      },
+      "expected_document_id": "2d21ce10-6045-4867-99c7-0fdcea90f464",
+      "required_fragments": [
+        "После некорректного закрытия смены"
+      ],
+      "source_checksum": "5ec0193abe1885c0fa5906c0ff8eb3bccbb5e18251d61acd627f91a4011cc4f3",
+      "source_ref": "V9"
+    }
+  ]
+}

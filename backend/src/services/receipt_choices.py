@@ -42,7 +42,27 @@ def choices_for(state):
         return []
     step = state.get("_receipt", {}).get("pending")
     revision = state.get("_receipt", {}).get("question_revision", 0)
+    options = state.get("_receipt", {}).get("question_options")
+    if options is not None:
+        return [
+            {"id": f"{step}:{index}:{revision}", "label": option["label"]}
+            for index, option in enumerate(options)
+        ]
     return [
         {"id": f"{step}:{key}:{revision}", "label": label}
         for key, label in OPTIONS.get(step, [])
     ]
+
+
+def choice_fact(state, choice_id):
+    options = state.get("_receipt", {}).get("question_options")
+    if options is None:
+        return None
+    choices = choices_for(state)
+    for index, choice in enumerate(choices):
+        if choice["id"] == choice_id:
+            return {
+                "field": state["_receipt"]["pending"],
+                "value": options[index]["value"],
+            }
+    return None

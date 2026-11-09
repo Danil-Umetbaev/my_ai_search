@@ -8,9 +8,8 @@ from src.services.base import BaseService
 from src.services.diagnosis import is_ready, ticket_details
 from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
-from src.services.rag import RAGService
-from src.services.receipt_choices import choices_for
-from src.services.receipt_instructions import select_instruction, PAPER_SECTIONS
+from src.services.receipt_choices import choices_for, choice_fact
+from src.services.support_knowledge import SupportKnowledgeService
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -45,7 +44,10 @@ class SupportDialogueService(BaseService):
                 entry.get("request_id") == str(data.request_id)
                 and entry.get("role") == "assistant"
             ):
-                if entry.get("question") != data.message or entry.get("choice_id") != data.choice_id:
+                if (
+                    entry.get("question") != data.message
+                    or entry.get("choice_id") != data.choice_id
+                ):
                     raise HTTPException(
                         409,
                         "Идентификатор запроса уже использован для другого сообщения",
@@ -72,11 +74,18 @@ class SupportDialogueService(BaseService):
         await self.db.commit()
         state = deepcopy(row["state"])
         message = data.message
+        selected_fact = None
         if data.choice_id:
-            choice = next((item for item in choices_for(state) if item["id"] == data.choice_id), None)
+            choice = next(
+                (item for item in choices_for(state) if item["id"] == data.choice_id),
+                None,
+            )
             if choice is None:
-                raise HTTPException(409, "Вопрос изменился. Обновите диалог и выберите ответ снова.")
+                raise HTTPException(
+                    409, "Вопрос изменился. Обновите диалог и выберите ответ снова."
+                )
             message = choice["label"]
+            selected_fact = choice_fact(state, data.choice_id)
         normalized = message.casefold().rstrip(".!?")
         create_ticket = is_ready(state) and normalized in {"да", "yes", "отправить"}
         if create_ticket:
@@ -96,24 +105,10 @@ class SupportDialogueService(BaseService):
                     for chunk in chunks
                 ]
 
+            role = await self.role(user_id)
+
             async def lookup(query, flow):
-                if flow.get("paper_missing"):
-                    prefix = PAPER_SECTIONS.get(flow["model"])
-                    sections = await self.db.documents.find_instruction_sections(prefix) if prefix else []
-                    documents = [({"title": doc.title, "url": doc.source_url}, doc.content) for doc in sections]
-                    return select_instruction({}, documents, flow)
-                if models.get("status") != "ready":
-                    return {"status": "loading", "sources": []}
-                rag = RAGService(self.db, VectorSearchService(self.db, models["embedding"]),
-                                 models["llm"], models["reranker"])
-                result = await rag.answer(query)
-                payload = result.model_dump(mode="json")
-                documents = []
-                for source in payload["sources"]:
-                    document = await self.db.documents.find_url(source["url"])
-                    if document and not document.is_archived:
-                        documents.append((source, document.content))
-                return select_instruction(payload, documents, flow)
+                return await SupportKnowledgeService(self.db).lookup(query, flow, role)
 
             try:
                 state, answer = await respond(
@@ -124,6 +119,7 @@ class SupportDialogueService(BaseService):
                     retrieve,
                     timeout=settings.SUPPORT_MODEL_TIMEOUT_SECONDS,
                     lookup=lookup,
+                    selected_fact=selected_fact,
                 )
             finally:
                 await self.db.rollback()

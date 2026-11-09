@@ -83,7 +83,14 @@ def allowed_text(content):
 
 
 async def respond(
-    state, history, message, llm=None, retrieve=None, timeout=45, lookup=None
+    state,
+    history,
+    message,
+    llm=None,
+    retrieve=None,
+    timeout=45,
+    lookup=None,
+    selected_fact=None,
 ):
     normalized = message.strip().casefold().rstrip(".!?")
     if state.get("_phase") in {"cancelled", "resolved"}:
@@ -110,7 +117,9 @@ async def respond(
         and normalized
         not in {"да", "yes", "отправить", "нет", "не отправлять", "отмена", "отменить"}
     ):
-        return await respond_receipt(state, message, lookup, timeout)
+        return await respond_receipt(
+            state, message, lookup, timeout, selected_fact=selected_fact
+        )
     if is_ready(state) or normalized in {"отмена", "отменить"}:
         updated, answer, _ = advance(state, message)
         updated["_engine"] = "system"
@@ -122,7 +131,9 @@ async def respond(
         updated["_engine"] = "system"
         return updated, answer
     if applies(state, message):
-        return await respond_receipt(state, message, lookup, timeout)
+        return await respond_receipt(
+            state, message, lookup, timeout, selected_fact=selected_fact
+        )
     if llm is None:
         return fallback(state, message, "models_unavailable")
     try:

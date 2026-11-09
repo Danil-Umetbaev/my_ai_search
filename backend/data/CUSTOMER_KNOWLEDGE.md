@@ -133,6 +133,7 @@ docker compose up -d --build
 
 ```powershell
 docker compose cp ./backend/src/. app:/backend/src/
+docker compose cp ./backend/data/receipt_procedures.json app:/backend/data/receipt_procedures.json
 docker compose exec app alembic upgrade head
 docker compose restart app
 npm --prefix frontend run build
@@ -158,5 +159,7 @@ docker compose restart frontend
 [Каталог и правила подключения](RECEIPT_PROCEDURES.md),
 [машиночитаемые данные](receipt_procedures.json).
 Каталог отделяет готовые действия от неполных материалов и очереди специалисту.
-Пока не подключён к агенту. [Эталонные диалоги шага 3](receipt_dialogues/README.md)
+На шаге 5 подключён к диагностике: известные случаи используют каталог,
+остальные — отдельный поиск с ограничением по модели. Результаты и команды проверки
+описаны в каталоге. [Эталонные диалоги шага 3](receipt_dialogues/README.md)
 подготовлены отдельно для разработки и независимой итоговой проверки.

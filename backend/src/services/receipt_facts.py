@@ -19,6 +19,7 @@ DEVICE_SETTINGS = {
     "mechanism_replaced",
 }
 SELECTION_FACTS = DEVICE_SETTINGS | {
+    "printing_stopped",
     "model",
     "symptom",
     "paper_present",
@@ -36,10 +37,10 @@ UNKNOWN = r"не знаю|неизвест\w*|не могу (?:прочитат�
 CORRECTION = r"поправлю|исправляю|ошибся|ошиблась|ошиблись|перепут\w*|уточняю|проверил.{0,30}лично|оказалось|на самом деле|все-таки"
 MODEL_PATTERNS = (
     (
-        r"(?:атол\s*)?(?:fprint|фпринт)[ -]*22\s*(?:птк)?|атол\s*[- ]?22\s*птк",
+        r"(?:атол\s*)?(?:fprint|фпринт)[ -]*22\s*птк\b|атол\s*[- ]?22\s*птк\b",
         "АТОЛ FPrint-22ПТК",
     ),
-    (r"пирит\s*2\s*[фf]", "Пирит 2Ф"),
+    (r"пирит\s*2\s*[фf]\b", "Пирит 2Ф"),
     (
         r"(?:вики\s*принт|viki\s*print)(?:\s*(57|80)(?:\s*(плюс|plus))?(?:\s*ф\b)?)?",
         "Вики Принт",
@@ -385,6 +386,24 @@ def extract_candidates(message, field):
         add("exact_error", None)
         add("error_status", "unknown")
     short = text.strip(' .!?«»"')
+    if field == "platform" and re.fullmatch(r"\d+(?:\.\d+)+", short):
+        add(field, short)
+    if field == "connection_type":
+        value = {
+            "viki driver": "viki_driver",
+            "comproxy": "comproxy",
+            "напрямую через com": "direct_com",
+            "com": "direct_com",
+        }.get(short)
+        if value:
+            add(field, value)
+    if field == "paper_indicator":
+        if re.fullmatch(r"(?:горит )?красн\w*", short):
+            add(field, "red")
+        elif re.fullmatch(r"(?:горит )?зелен\w*", short):
+            add(field, "green")
+        elif short == "не горит":
+            add(field, "off")
     if field == "exact_error" and not errors and not candidates.get("error_status"):
         if short in {"нет", "нет ошибки"}:
             add("exact_error", None)
@@ -437,11 +456,15 @@ def extract_candidates(message, field):
     return candidates
 
 
-def collect_facts(flow, message, pending=None):
+def collect_facts(flow, message, pending=None, selected_fact=None):
     facts = legacy_facts(flow)
     before = dict(facts)
     field = ALIASES.get(pending, pending)
     candidates = extract_candidates(message, field)
+    if selected_fact is not None:
+        if selected_fact["field"] != field or field == "allowed_operator":
+            raise ValueError("Choice does not belong to the current fact question")
+        candidates[field] = [(0, selected_fact["value"])]
     text = normalize(message)
     correction_positions = [
         match.end()

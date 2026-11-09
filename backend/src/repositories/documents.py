@@ -13,14 +13,16 @@ class DocumentRepository(BaseRepository):
     mapper = DocumentDataMapper
     model = DocumentORM
 
-    async def find_instruction_sections(self, title_prefix: str) -> list[DocumentSchema]:
-        rows = (await self._execute(
-            select(self.model).where(
-                self.model.is_archived.is_(False),
-                self.model.title.startswith(title_prefix, autoescape=True),
-            ).order_by(self.model.title).limit(5)
-        )).scalars().all()
-        return [self.mapper.map_to_domain_entity(row) for row in rows]
+    async def get_support_documents(self) -> list[dict]:
+        fields = (
+            "id", "title", "content", "source_url", "checksum", "manufacturer",
+            "equipment_models", "software_version", "page_number",
+        )
+        query = select(*(getattr(self.model, name) for name in fields)).where(
+            self.model.is_archived.is_(False)
+        )
+        rows = await self._execute(query)
+        return [dict(row) for row in rows.mappings().all()]
 
     async def retire_missing_sources(self, source_urls: list[str]) -> None:
         if not source_urls:
