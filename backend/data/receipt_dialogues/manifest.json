@@ -1,0 +1,3802 @@
+{
+  "schema_version": 1,
+  "catalog_version": "2026-11-09.1",
+  "sources_sha256": {
+    "receipt_procedures.json": "d9aef494afeaf488bd8d29615be0a7af4a77e608f5f25d161747b302c69b1369",
+    "RECEIPT_COVERAGE.md": "6e5ec668d531318a0ad749372cf31a7ec4ff0fb5b9dddb7f9de5f9ca27448966"
+  },
+  "units": [
+    {
+      "id": "atol-paper-80-horizontal",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "A-01"
+      ],
+      "source_refs": [
+        "A1"
+      ]
+    },
+    {
+      "id": "atol-paper-80-vertical",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "A-01"
+      ],
+      "source_refs": [
+        "A1"
+      ]
+    },
+    {
+      "id": "atol-paper-58-horizontal",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "A-01"
+      ],
+      "source_refs": [
+        "A1",
+        "A3"
+      ]
+    },
+    {
+      "id": "atol-jam-80-horizontal",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "A-03",
+        "A-06"
+      ],
+      "source_refs": [
+        "A1"
+      ]
+    },
+    {
+      "id": "atol-skew-80-horizontal",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "A-06"
+      ],
+      "source_refs": [
+        "A1"
+      ]
+    },
+    {
+      "id": "pirit-paper-load",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "P-01"
+      ],
+      "source_refs": [
+        "P1",
+        "P8"
+      ]
+    },
+    {
+      "id": "pirit-diagnostic-report",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "P-02",
+        "P-03",
+        "P-04",
+        "P-05",
+        "P-07",
+        "P-09"
+      ],
+      "source_refs": [
+        "P2"
+      ]
+    },
+    {
+      "id": "viki-connect-driver",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "V-08"
+      ],
+      "source_refs": [
+        "V5",
+        "V6"
+      ]
+    },
+    {
+      "id": "viki-connect-comproxy",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "V-08"
+      ],
+      "source_refs": [
+        "V5",
+        "V6"
+      ]
+    },
+    {
+      "id": "viki-connect-direct",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "V-08"
+      ],
+      "source_refs": [
+        "V5"
+      ]
+    },
+    {
+      "id": "viki-read-print-disabled",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "V-03"
+      ],
+      "source_refs": [
+        "V1",
+        "V2"
+      ]
+    },
+    {
+      "id": "viki-paper-presence",
+      "kind": "procedure",
+      "ready": true,
+      "case_ids": [
+        "V-01",
+        "V-02"
+      ],
+      "source_refs": [
+        "V1"
+      ]
+    },
+    {
+      "id": "atol-width-setting",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "A-01",
+        "A-05"
+      ],
+      "source_refs": [
+        "A3",
+        "A1"
+      ]
+    },
+    {
+      "id": "atol-vertical-58",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "A-01"
+      ],
+      "source_refs": [
+        "A1"
+      ]
+    },
+    {
+      "id": "atol-brightness",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "A-05"
+      ],
+      "source_refs": [
+        "A2"
+      ]
+    },
+    {
+      "id": "atol-driver-connection",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "A-08"
+      ],
+      "source_refs": [
+        "A4",
+        "A5"
+      ]
+    },
+    {
+      "id": "pirit-configure-connection",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "P-08"
+      ],
+      "source_refs": [
+        "P5",
+        "P11",
+        "P12",
+        "P13"
+      ]
+    },
+    {
+      "id": "viki-paper-load",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-01"
+      ],
+      "source_refs": [
+        "V1"
+      ]
+    },
+    {
+      "id": "viki-selftest",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-03"
+      ],
+      "source_refs": [
+        "V1"
+      ]
+    },
+    {
+      "id": "viki-qr-macro",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-07"
+      ],
+      "source_refs": [
+        "V4"
+      ]
+    },
+    {
+      "id": "viki80-brightness-service",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-05"
+      ],
+      "source_refs": [
+        "V3"
+      ]
+    },
+    {
+      "id": "viki-time-registration",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-09"
+      ],
+      "source_refs": [
+        "V7"
+      ]
+    },
+    {
+      "id": "viki-fn-resource",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-09"
+      ],
+      "source_refs": [
+        "V8"
+      ]
+    },
+    {
+      "id": "viki-shift-mismatch",
+      "kind": "procedure",
+      "ready": false,
+      "case_ids": [
+        "V-09"
+      ],
+      "source_refs": [
+        "V9"
+      ]
+    },
+    {
+      "id": "gap-A-01",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-01"
+      ],
+      "source_refs": [
+        "A1",
+        "A3"
+      ],
+      "boundary": "Не склеивать схемы; требуется подтверждение сочетания."
+    },
+    {
+      "id": "gap-A-02",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-02"
+      ],
+      "source_refs": [
+        "A2",
+        "A1"
+      ],
+      "boundary": "Нет пошаговой проверки датчика без разборки; не объявлять его неисправным."
+    },
+    {
+      "id": "gap-A-03",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-03"
+      ],
+      "source_refs": [
+        "A2",
+        "A1"
+      ],
+      "boundary": "Нет универсальной механической диагностики."
+    },
+    {
+      "id": "gap-A-04",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-04"
+      ],
+      "source_refs": [
+        "A1",
+        "A2"
+      ],
+      "boundary": "Нет проверенного пути и значения яркости; не выдавать повторную замену как диагноз."
+    },
+    {
+      "id": "gap-A-05",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-05"
+      ],
+      "source_refs": [
+        "A2",
+        "A3"
+      ],
+      "boundary": "Недостаточно данных для готовой настройки; не применять её при перегреве."
+    },
+    {
+      "id": "gap-A-06",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-06"
+      ],
+      "source_refs": [
+        "A1",
+        "A2"
+      ],
+      "boundary": "Доступное замятие не равно ремонту отрезчика."
+    },
+    {
+      "id": "gap-A-07",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-07"
+      ],
+      "source_refs": [
+        "A6"
+      ],
+      "boundary": "Нет QR-процедуры этой модели; макрос Вики не применять."
+    },
+    {
+      "id": "gap-A-08",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-08"
+      ],
+      "source_refs": [
+        "A2",
+        "A4",
+        "A5"
+      ],
+      "boundary": "Нет настройки каждой кассовой программы; не выдумывать IP."
+    },
+    {
+      "id": "gap-A-09",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "A-09"
+      ],
+      "source_refs": [
+        "A2"
+      ],
+      "boundary": "Неизвестный код нельзя сопоставлять по похожим цифрам."
+    },
+    {
+      "id": "gap-P-01",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-01"
+      ],
+      "source_refs": [
+        "P1",
+        "P8"
+      ],
+      "boundary": "Без обязательного фото не давать готовые шаги; не добавлять раздел эталонного ПО."
+    },
+    {
+      "id": "gap-P-02",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-02"
+      ],
+      "source_refs": [
+        "P2",
+        "P1"
+      ],
+      "boundary": "Нет модельной проверки датчика; факт наличия не стирать."
+    },
+    {
+      "id": "gap-P-03",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-03"
+      ],
+      "source_refs": [
+        "P4",
+        "P2",
+        "P5"
+      ],
+      "boundary": "Нет полной локализации механической неисправности; не повторять отчёт."
+    },
+    {
+      "id": "gap-P-04",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-04"
+      ],
+      "source_refs": [
+        "P1",
+        "P3",
+        "P2"
+      ],
+      "boundary": "Нет прямой процедуры пустого чека; диагностика не заменяет ремонт."
+    },
+    {
+      "id": "gap-P-05",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-05"
+      ],
+      "source_refs": [
+        "P3",
+        "P2",
+        "P8"
+      ],
+      "boundary": "Нет проверенной чистки и настройки яркости."
+    },
+    {
+      "id": "gap-P-06",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-06"
+      ],
+      "source_refs": [
+        "P4",
+        "P1"
+      ],
+      "boundary": "Нет инструкции удаления замятия/работы с ножом."
+    },
+    {
+      "id": "gap-P-07",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-07"
+      ],
+      "source_refs": [
+        "P2"
+      ],
+      "boundary": "Нет QR-файла или настройки для Пирит."
+    },
+    {
+      "id": "gap-P-08",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-08"
+      ],
+      "source_refs": [
+        "P5",
+        "P11",
+        "P12",
+        "P13"
+      ],
+      "boundary": "Нужны комплект и права; COM11 из примера не фактический порт."
+    },
+    {
+      "id": "gap-P-09",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "P-09"
+      ],
+      "source_refs": [
+        "P3",
+        "P2",
+        "P4"
+      ],
+      "boundary": "Противоречивый источник требует сверки, не выбирать число наугад."
+    },
+    {
+      "id": "gap-V-01",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-01"
+      ],
+      "source_refs": [
+        "V1"
+      ],
+      "boundary": "Нет полной модельной установки рулона."
+    },
+    {
+      "id": "gap-V-02",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-02"
+      ],
+      "source_refs": [
+        "V1"
+      ],
+      "boundary": "Нет самостоятельной калибровки, не ставить диагноз по одному индикатору."
+    },
+    {
+      "id": "gap-V-03",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-03"
+      ],
+      "source_refs": [
+        "V1",
+        "V2",
+        "V5"
+      ],
+      "boundary": "Сервисная часть и отсутствующая статья не дают готовую пользовательскую инструкцию."
+    },
+    {
+      "id": "gap-V-04",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-04"
+      ],
+      "source_refs": [
+        "V1",
+        "V3"
+      ],
+      "boundary": "Не путать отсутствие печати на бумаге с отсутствием диагностического документа."
+    },
+    {
+      "id": "gap-V-05",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-05"
+      ],
+      "source_refs": [
+        "V3",
+        "V1"
+      ],
+      "boundary": "Прошивка и перемычки Вики 80 не универсальная регулировка."
+    },
+    {
+      "id": "gap-V-06",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-06"
+      ],
+      "source_refs": [
+        "V1",
+        "V10"
+      ],
+      "boundary": "Отключение отрезчика 57 Плюс Ф с 2025 года не устранение замятия."
+    },
+    {
+      "id": "gap-V-07",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-07"
+      ],
+      "source_refs": [
+        "V4"
+      ],
+      "boundary": "Обязательный макрос не определён; никакого случайного файла."
+    },
+    {
+      "id": "gap-V-08",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-08"
+      ],
+      "source_refs": [
+        "V5",
+        "V6",
+        "V2"
+      ],
+      "boundary": "50003 не универсален; нет настройки каждой кассовой программы."
+    },
+    {
+      "id": "gap-V-09",
+      "kind": "gap",
+      "ready": false,
+      "case_ids": [
+        "V-09"
+      ],
+      "source_refs": [
+        "V7",
+        "V8",
+        "V9"
+      ],
+      "boundary": "Не переносить регистрационный сценарий на другую операцию."
+    }
+  ],
+  "required_variants": [
+    "complete",
+    "partial",
+    "buttons",
+    "free_text_typo",
+    "unknown_model",
+    "unreadable_error",
+    "correction",
+    "contradiction",
+    "helped",
+    "not_helped",
+    "unable"
+  ],
+  "actions": {
+    "offer_procedure": "Предложить только указанную ready-процедуру, после проверки условий и материалов; шаги, ограничения, источник и проверка результата обязательны.",
+    "ask_fact": "Уточнить указанный недостающий факт. Не повторять уже полученный ответ.",
+    "ask_relevant_fact": "Задать один вопрос из необходимых уточнений карточки/совместимой процедуры, ответ на который реально влияет на следующий шаг. Нельзя заново спрашивать известное или собирать данные без цели.",
+    "ask_symptom": "Уточнить, что происходит с чеком, не придумывая операцию или программу.",
+    "clarify_typo": "Одно адресное уточнение неоднозначного слова с сохранением остальных фактов. Явные опечатки можно нормализовать без вопроса.",
+    "resolve_conflict": "Уточнить именно противоречащий факт, не выбирать произвольно. Физический рулон и сообщение Нет бумаги сами по себе не противоречие.",
+    "offer_specialist": "Предложить передачу с причиной и собранными фактами. Это ещё не создание заявки.",
+    "explain_limit_and_offer_specialist": "Объяснить конкретный пробел/блокировку, не утверждать отсутствие знания во всей базе, предложить передачу. Неготовые шаги не показывать.",
+    "reselect_applicable_procedure": "Исключить target и проверить другие процедуры по текущим фактам. Пользователю — применимая другая процедура, необходимое уточнение либо предложение специалиста; молчаливый внутренний выбор не считается ответом.",
+    "verify_operator_permission": "Проверить доступ через доверенный профиль/политику, а не через самоутверждение пользователя. Если недоступно — специалист.",
+    "request_source_review": "Не выдавать устаревшие шаги; сообщить о необходимости повторной проверки источника и предложить специалиста.",
+    "close_resolved": "Завершить только после явного подтверждения устранения исходной проблемы; сохранить фактическое происхождение решения.",
+    "close_without_ticket": "Зафиксировать отказ от передачи/завершение без создания заявки.",
+    "continue_procedure": "Продолжить указанную процедуру с подтверждёнными параметрами. Не заменять фактический порт значением по умолчанию.",
+    "off_topic": "Кратко обозначить область помощи, без эскалации.",
+    "ask_rephrase": "Попросить переформулировать бессмысленный ввод, без выдуманного симптома и заявки.",
+    "explain_unknown_local_fact_and_offer_specialist": "Неизвестные адреса/номера установки не выдумывать; запросить доступный источник или предложить специалиста. Это рабочий вопрос, не off_topic.",
+    "request_handoff_consent": "Получить явное согласие до создания заявки.",
+    "create_ticket_once": "Создать одну заявку после согласия, сохранив модель, симптомы, ошибку и результаты; не объявлять неисправность устранённой.",
+    "report_ticket_saved_notification_failed": "Различить сохранённую заявку и неотправленное уведомление, не создавать дубликат.",
+    "report_handoff_failed": "Правдиво сообщить, что заявка не сохранена; не утверждать успешную передачу.",
+    "explain_source_fact_and_offer_specialist": "Дать подтверждённую справку со ссылкой; не превращать её в несуществующую пошаговую настройку.",
+    "explain_partial_check_and_offer_specialist": "Объяснить границы выполненной проверки и недостающие документы, не объявлять полной проверкой исправности.",
+    "reject_stale_choice_and_repeat_current_question": "Не применять кнопку от старого вопроса; показать актуальный вопрос без потери фактов.",
+    "acknowledge_existing_plan": "Подтвердить уточнённый смысл без повторной выдачи уже показанной применимой процедуры; допустимо только при указанном only_if."
+  },
+  "expected_semantics": {
+    "allowed_next_actions": "Хотя бы один допустимый вариант; это не список шагов, которые надо выполнить все. Параметры действия ограничивают допустимый выбор, а не формулировку ответа.",
+    "must_record": "Семантические факты после хода. null означает неизвестно и не равно false. Не сравнивать текст ответа дословно.",
+    "must_not": "Каждый запрет обязателен; нарушение проваливает ход даже при наличии допустимого действия. offer_target_procedure относится к target.id. offer_blocked_steps относится к любой не-ready записи.",
+    "initial_context": "Ранее подтверждённые факты/описание, материализуемые адаптером как история этого же обращения. Нельзя оставлять их невидимыми для проверяемой системы. Не подмешивать expect, id, target, manifest или эталонные ответы в модель.",
+    "environment": "Управляемые внешние условия: профиль прав, доступность материалов/источника, результат сохранения/уведомления. Не превращать allowed_operator из профиля в пользовательское разрешение.",
+    "button": "Семантический выбор fact/value; адаптер сопоставляет его настоящему choice_id текущего вопроса. Произвольные строки из эталона не являются действующими API choice_id.",
+    "turns": "Каждый пользовательский ход идёт после фактического допустимого действия предыдущего хода. Если оно недопустимо — диалог провален, не подставлять ожидаемый ответ вместо него.",
+    "basis": "Идентификатор основания из каталога/карточки или материала, не текст для показа пользователю."
+  },
+  "files": {
+    "development.jsonl": {
+      "sha256": "492c9fb83573490fc0216ed43961b4730693ea0c6bab543b7dd13fd1ad6fd04b",
+      "dialogs": 800,
+      "turns": 1256
+    },
+    "holdout.jsonl": {
+      "sha256": "b5005a641bdce48429ba0d581f6203a61a632ceb1616e106f5f256e88c03f693",
+      "dialogs": 53,
+      "turns": 98
+    }
+  },
+  "coverage_index": [
+    {
+      "target": "atol-paper-80-horizontal",
+      "kind": "procedure",
+      "case_ids": [
+        "A-01"
+      ],
+      "development_count": 29,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-paper-80-horizontal-buttons"
+        ],
+        "complete": [
+          "D-atol-paper-80-horizontal-complete"
+        ],
+        "contradiction": [
+          "D-atol-paper-80-horizontal-contradiction"
+        ],
+        "correction": [
+          "D-atol-paper-80-horizontal-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-paper-80-horizontal-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-paper-80-horizontal-helped"
+        ],
+        "mismatched_condition": [
+          "D-atol-paper-80-horizontal-mismatched_condition-model",
+          "D-atol-paper-80-horizontal-mismatched_condition-platform",
+          "D-atol-paper-80-horizontal-mismatched_condition-printing_stopped",
+          "D-atol-paper-80-horizontal-mismatched_condition-cover_accessible",
+          "D-atol-paper-80-horizontal-mismatched_condition-paper_compatible",
+          "D-atol-paper-80-horizontal-mismatched_condition-paper_present",
+          "D-atol-paper-80-horizontal-mismatched_condition-layout",
+          "D-atol-paper-80-horizontal-mismatched_condition-paper_width_mm"
+        ],
+        "missing_condition": [
+          "D-atol-paper-80-horizontal-missing_condition-model",
+          "D-atol-paper-80-horizontal-missing_condition-platform",
+          "D-atol-paper-80-horizontal-missing_condition-printing_stopped",
+          "D-atol-paper-80-horizontal-missing_condition-cover_accessible",
+          "D-atol-paper-80-horizontal-missing_condition-paper_compatible",
+          "D-atol-paper-80-horizontal-missing_condition-paper_present",
+          "D-atol-paper-80-horizontal-missing_condition-layout",
+          "D-atol-paper-80-horizontal-missing_condition-paper_width_mm"
+        ],
+        "missing_material": [
+          "D-atol-paper-80-horizontal-missing_material-atol_fig9"
+        ],
+        "not_helped": [
+          "D-atol-paper-80-horizontal-not_helped"
+        ],
+        "partial": [
+          "D-atol-paper-80-horizontal-partial"
+        ],
+        "source_changed": [
+          "D-atol-paper-80-horizontal-source_changed"
+        ],
+        "unable": [
+          "D-atol-paper-80-horizontal-unable"
+        ],
+        "unknown_model": [
+          "D-atol-paper-80-horizontal-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-paper-80-horizontal-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-paper-80-horizontal"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-model",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-model"
+        },
+        "platform": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-platform",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-platform"
+        },
+        "printing_stopped": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-printing_stopped",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-printing_stopped"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-cover_accessible",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-paper_compatible",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-paper_compatible"
+        },
+        "paper_present": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-paper_present",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-paper_present"
+        },
+        "layout": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-layout",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-layout"
+        },
+        "paper_width_mm": {
+          "missing_condition": "D-atol-paper-80-horizontal-missing_condition-paper_width_mm",
+          "mismatched_condition": "D-atol-paper-80-horizontal-mismatched_condition-paper_width_mm"
+        }
+      }
+    },
+    {
+      "target": "atol-paper-80-vertical",
+      "kind": "procedure",
+      "case_ids": [
+        "A-01"
+      ],
+      "development_count": 32,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-paper-80-vertical-buttons"
+        ],
+        "complete": [
+          "D-atol-paper-80-vertical-complete"
+        ],
+        "contradiction": [
+          "D-atol-paper-80-vertical-contradiction"
+        ],
+        "correction": [
+          "D-atol-paper-80-vertical-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-paper-80-vertical-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-paper-80-vertical-helped"
+        ],
+        "mismatched_condition": [
+          "D-atol-paper-80-vertical-mismatched_condition-model",
+          "D-atol-paper-80-vertical-mismatched_condition-platform",
+          "D-atol-paper-80-vertical-mismatched_condition-printing_stopped",
+          "D-atol-paper-80-vertical-mismatched_condition-cover_accessible",
+          "D-atol-paper-80-vertical-mismatched_condition-paper_compatible",
+          "D-atol-paper-80-vertical-mismatched_condition-paper_present",
+          "D-atol-paper-80-vertical-mismatched_condition-layout",
+          "D-atol-paper-80-vertical-mismatched_condition-paper_width_mm",
+          "D-atol-paper-80-vertical-mismatched_condition-axle_available"
+        ],
+        "missing_condition": [
+          "D-atol-paper-80-vertical-missing_condition-model",
+          "D-atol-paper-80-vertical-missing_condition-platform",
+          "D-atol-paper-80-vertical-missing_condition-printing_stopped",
+          "D-atol-paper-80-vertical-missing_condition-cover_accessible",
+          "D-atol-paper-80-vertical-missing_condition-paper_compatible",
+          "D-atol-paper-80-vertical-missing_condition-paper_present",
+          "D-atol-paper-80-vertical-missing_condition-layout",
+          "D-atol-paper-80-vertical-missing_condition-paper_width_mm",
+          "D-atol-paper-80-vertical-missing_condition-axle_available"
+        ],
+        "missing_material": [
+          "D-atol-paper-80-vertical-missing_material-atol_fig9",
+          "D-atol-paper-80-vertical-missing_material-atol_fig10"
+        ],
+        "not_helped": [
+          "D-atol-paper-80-vertical-not_helped"
+        ],
+        "partial": [
+          "D-atol-paper-80-vertical-partial"
+        ],
+        "source_changed": [
+          "D-atol-paper-80-vertical-source_changed"
+        ],
+        "unable": [
+          "D-atol-paper-80-vertical-unable"
+        ],
+        "unknown_model": [
+          "D-atol-paper-80-vertical-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-paper-80-vertical-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-paper-80-vertical"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-model",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-model"
+        },
+        "platform": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-platform",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-platform"
+        },
+        "printing_stopped": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-printing_stopped",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-printing_stopped"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-cover_accessible",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-paper_compatible",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-paper_compatible"
+        },
+        "paper_present": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-paper_present",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-paper_present"
+        },
+        "layout": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-layout",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-layout"
+        },
+        "paper_width_mm": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-paper_width_mm",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-paper_width_mm"
+        },
+        "axle_available": {
+          "missing_condition": "D-atol-paper-80-vertical-missing_condition-axle_available",
+          "mismatched_condition": "D-atol-paper-80-vertical-mismatched_condition-axle_available"
+        }
+      }
+    },
+    {
+      "target": "atol-paper-58-horizontal",
+      "kind": "procedure",
+      "case_ids": [
+        "A-01"
+      ],
+      "development_count": 34,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-paper-58-horizontal-buttons"
+        ],
+        "complete": [
+          "D-atol-paper-58-horizontal-complete"
+        ],
+        "contradiction": [
+          "D-atol-paper-58-horizontal-contradiction"
+        ],
+        "correction": [
+          "D-atol-paper-58-horizontal-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-paper-58-horizontal-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-paper-58-horizontal-helped"
+        ],
+        "mismatched_condition": [
+          "D-atol-paper-58-horizontal-mismatched_condition-model",
+          "D-atol-paper-58-horizontal-mismatched_condition-platform",
+          "D-atol-paper-58-horizontal-mismatched_condition-printing_stopped",
+          "D-atol-paper-58-horizontal-mismatched_condition-cover_accessible",
+          "D-atol-paper-58-horizontal-mismatched_condition-paper_compatible",
+          "D-atol-paper-58-horizontal-mismatched_condition-paper_present",
+          "D-atol-paper-58-horizontal-mismatched_condition-layout",
+          "D-atol-paper-58-horizontal-mismatched_condition-paper_width_mm",
+          "D-atol-paper-58-horizontal-mismatched_condition-limiter_available",
+          "D-atol-paper-58-horizontal-mismatched_condition-driver_width_mm"
+        ],
+        "missing_condition": [
+          "D-atol-paper-58-horizontal-missing_condition-model",
+          "D-atol-paper-58-horizontal-missing_condition-platform",
+          "D-atol-paper-58-horizontal-missing_condition-printing_stopped",
+          "D-atol-paper-58-horizontal-missing_condition-cover_accessible",
+          "D-atol-paper-58-horizontal-missing_condition-paper_compatible",
+          "D-atol-paper-58-horizontal-missing_condition-paper_present",
+          "D-atol-paper-58-horizontal-missing_condition-layout",
+          "D-atol-paper-58-horizontal-missing_condition-paper_width_mm",
+          "D-atol-paper-58-horizontal-missing_condition-limiter_available",
+          "D-atol-paper-58-horizontal-missing_condition-driver_width_mm"
+        ],
+        "missing_material": [
+          "D-atol-paper-58-horizontal-missing_material-atol_fig9",
+          "D-atol-paper-58-horizontal-missing_material-atol_fig11_12"
+        ],
+        "not_helped": [
+          "D-atol-paper-58-horizontal-not_helped"
+        ],
+        "partial": [
+          "D-atol-paper-58-horizontal-partial"
+        ],
+        "source_changed": [
+          "D-atol-paper-58-horizontal-source_changed"
+        ],
+        "unable": [
+          "D-atol-paper-58-horizontal-unable"
+        ],
+        "unknown_model": [
+          "D-atol-paper-58-horizontal-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-paper-58-horizontal-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-paper-58-horizontal"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-model",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-model"
+        },
+        "platform": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-platform",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-platform"
+        },
+        "printing_stopped": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-printing_stopped",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-printing_stopped"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-cover_accessible",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-paper_compatible",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-paper_compatible"
+        },
+        "paper_present": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-paper_present",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-paper_present"
+        },
+        "layout": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-layout",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-layout"
+        },
+        "paper_width_mm": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-paper_width_mm",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-paper_width_mm"
+        },
+        "limiter_available": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-limiter_available",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-limiter_available"
+        },
+        "driver_width_mm": {
+          "missing_condition": "D-atol-paper-58-horizontal-missing_condition-driver_width_mm",
+          "mismatched_condition": "D-atol-paper-58-horizontal-mismatched_condition-driver_width_mm"
+        }
+      }
+    },
+    {
+      "target": "atol-jam-80-horizontal",
+      "kind": "procedure",
+      "case_ids": [
+        "A-03",
+        "A-06"
+      ],
+      "development_count": 31,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-jam-80-horizontal-buttons"
+        ],
+        "complete": [
+          "D-atol-jam-80-horizontal-complete"
+        ],
+        "contradiction": [
+          "D-atol-jam-80-horizontal-contradiction"
+        ],
+        "correction": [
+          "D-atol-jam-80-horizontal-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-jam-80-horizontal-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-jam-80-horizontal-helped"
+        ],
+        "mismatched_condition": [
+          "D-atol-jam-80-horizontal-mismatched_condition-model",
+          "D-atol-jam-80-horizontal-mismatched_condition-platform",
+          "D-atol-jam-80-horizontal-mismatched_condition-printing_stopped",
+          "D-atol-jam-80-horizontal-mismatched_condition-cover_accessible",
+          "D-atol-jam-80-horizontal-mismatched_condition-paper_compatible",
+          "D-atol-jam-80-horizontal-mismatched_condition-symptom",
+          "D-atol-jam-80-horizontal-mismatched_condition-layout",
+          "D-atol-jam-80-horizontal-mismatched_condition-paper_width_mm",
+          "D-atol-jam-80-horizontal-mismatched_condition-jam_accessible"
+        ],
+        "missing_condition": [
+          "D-atol-jam-80-horizontal-missing_condition-model",
+          "D-atol-jam-80-horizontal-missing_condition-platform",
+          "D-atol-jam-80-horizontal-missing_condition-printing_stopped",
+          "D-atol-jam-80-horizontal-missing_condition-cover_accessible",
+          "D-atol-jam-80-horizontal-missing_condition-paper_compatible",
+          "D-atol-jam-80-horizontal-missing_condition-symptom",
+          "D-atol-jam-80-horizontal-missing_condition-layout",
+          "D-atol-jam-80-horizontal-missing_condition-paper_width_mm",
+          "D-atol-jam-80-horizontal-missing_condition-jam_accessible"
+        ],
+        "missing_material": [
+          "D-atol-jam-80-horizontal-missing_material-atol_fig9"
+        ],
+        "not_helped": [
+          "D-atol-jam-80-horizontal-not_helped"
+        ],
+        "partial": [
+          "D-atol-jam-80-horizontal-partial"
+        ],
+        "source_changed": [
+          "D-atol-jam-80-horizontal-source_changed"
+        ],
+        "unable": [
+          "D-atol-jam-80-horizontal-unable"
+        ],
+        "unknown_model": [
+          "D-atol-jam-80-horizontal-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-jam-80-horizontal-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-jam-80-horizontal"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-model",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-model"
+        },
+        "platform": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-platform",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-platform"
+        },
+        "printing_stopped": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-printing_stopped",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-printing_stopped"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-cover_accessible",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-paper_compatible",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-paper_compatible"
+        },
+        "symptom": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-symptom",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-symptom"
+        },
+        "layout": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-layout",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-layout"
+        },
+        "paper_width_mm": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-paper_width_mm",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-paper_width_mm"
+        },
+        "jam_accessible": {
+          "missing_condition": "D-atol-jam-80-horizontal-missing_condition-jam_accessible",
+          "mismatched_condition": "D-atol-jam-80-horizontal-mismatched_condition-jam_accessible"
+        }
+      }
+    },
+    {
+      "target": "atol-skew-80-horizontal",
+      "kind": "procedure",
+      "case_ids": [
+        "A-06"
+      ],
+      "development_count": 29,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-skew-80-horizontal-buttons"
+        ],
+        "complete": [
+          "D-atol-skew-80-horizontal-complete"
+        ],
+        "contradiction": [
+          "D-atol-skew-80-horizontal-contradiction"
+        ],
+        "correction": [
+          "D-atol-skew-80-horizontal-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-skew-80-horizontal-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-skew-80-horizontal-helped"
+        ],
+        "mismatched_condition": [
+          "D-atol-skew-80-horizontal-mismatched_condition-model",
+          "D-atol-skew-80-horizontal-mismatched_condition-platform",
+          "D-atol-skew-80-horizontal-mismatched_condition-printing_stopped",
+          "D-atol-skew-80-horizontal-mismatched_condition-cover_accessible",
+          "D-atol-skew-80-horizontal-mismatched_condition-paper_compatible",
+          "D-atol-skew-80-horizontal-mismatched_condition-symptom",
+          "D-atol-skew-80-horizontal-mismatched_condition-layout",
+          "D-atol-skew-80-horizontal-mismatched_condition-paper_width_mm"
+        ],
+        "missing_condition": [
+          "D-atol-skew-80-horizontal-missing_condition-model",
+          "D-atol-skew-80-horizontal-missing_condition-platform",
+          "D-atol-skew-80-horizontal-missing_condition-printing_stopped",
+          "D-atol-skew-80-horizontal-missing_condition-cover_accessible",
+          "D-atol-skew-80-horizontal-missing_condition-paper_compatible",
+          "D-atol-skew-80-horizontal-missing_condition-symptom",
+          "D-atol-skew-80-horizontal-missing_condition-layout",
+          "D-atol-skew-80-horizontal-missing_condition-paper_width_mm"
+        ],
+        "missing_material": [
+          "D-atol-skew-80-horizontal-missing_material-atol_fig9"
+        ],
+        "not_helped": [
+          "D-atol-skew-80-horizontal-not_helped"
+        ],
+        "partial": [
+          "D-atol-skew-80-horizontal-partial"
+        ],
+        "source_changed": [
+          "D-atol-skew-80-horizontal-source_changed"
+        ],
+        "unable": [
+          "D-atol-skew-80-horizontal-unable"
+        ],
+        "unknown_model": [
+          "D-atol-skew-80-horizontal-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-skew-80-horizontal-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-skew-80-horizontal"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-model",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-model"
+        },
+        "platform": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-platform",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-platform"
+        },
+        "printing_stopped": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-printing_stopped",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-printing_stopped"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-cover_accessible",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-paper_compatible",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-paper_compatible"
+        },
+        "symptom": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-symptom",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-symptom"
+        },
+        "layout": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-layout",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-layout"
+        },
+        "paper_width_mm": {
+          "missing_condition": "D-atol-skew-80-horizontal-missing_condition-paper_width_mm",
+          "mismatched_condition": "D-atol-skew-80-horizontal-mismatched_condition-paper_width_mm"
+        }
+      }
+    },
+    {
+      "target": "pirit-paper-load",
+      "kind": "procedure",
+      "case_ids": [
+        "P-01"
+      ],
+      "development_count": 21,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-pirit-paper-load-buttons"
+        ],
+        "complete": [
+          "D-pirit-paper-load-complete"
+        ],
+        "contradiction": [
+          "D-pirit-paper-load-contradiction"
+        ],
+        "correction": [
+          "D-pirit-paper-load-correction"
+        ],
+        "free_text_typo": [
+          "D-pirit-paper-load-free_text_typo"
+        ],
+        "helped": [
+          "D-pirit-paper-load-helped"
+        ],
+        "mismatched_condition": [
+          "D-pirit-paper-load-mismatched_condition-model",
+          "D-pirit-paper-load-mismatched_condition-paper_present",
+          "D-pirit-paper-load-mismatched_condition-cover_accessible",
+          "D-pirit-paper-load-mismatched_condition-paper_compatible"
+        ],
+        "missing_condition": [
+          "D-pirit-paper-load-missing_condition-model",
+          "D-pirit-paper-load-missing_condition-paper_present",
+          "D-pirit-paper-load-missing_condition-cover_accessible",
+          "D-pirit-paper-load-missing_condition-paper_compatible"
+        ],
+        "missing_material": [
+          "D-pirit-paper-load-missing_material-pirit_paper_photos"
+        ],
+        "not_helped": [
+          "D-pirit-paper-load-not_helped"
+        ],
+        "partial": [
+          "D-pirit-paper-load-partial"
+        ],
+        "source_changed": [
+          "D-pirit-paper-load-source_changed"
+        ],
+        "unable": [
+          "D-pirit-paper-load-unable"
+        ],
+        "unknown_model": [
+          "D-pirit-paper-load-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-pirit-paper-load-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-pirit-paper-load"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-pirit-paper-load-missing_condition-model",
+          "mismatched_condition": "D-pirit-paper-load-mismatched_condition-model"
+        },
+        "paper_present": {
+          "missing_condition": "D-pirit-paper-load-missing_condition-paper_present",
+          "mismatched_condition": "D-pirit-paper-load-mismatched_condition-paper_present"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-pirit-paper-load-missing_condition-cover_accessible",
+          "mismatched_condition": "D-pirit-paper-load-mismatched_condition-cover_accessible"
+        },
+        "paper_compatible": {
+          "missing_condition": "D-pirit-paper-load-missing_condition-paper_compatible",
+          "mismatched_condition": "D-pirit-paper-load-mismatched_condition-paper_compatible"
+        }
+      }
+    },
+    {
+      "target": "pirit-diagnostic-report",
+      "kind": "procedure",
+      "case_ids": [
+        "P-02",
+        "P-03",
+        "P-04",
+        "P-05",
+        "P-07",
+        "P-09"
+      ],
+      "development_count": 32,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-pirit-diagnostic-report-buttons"
+        ],
+        "complete": [
+          "D-pirit-diagnostic-report-complete"
+        ],
+        "contradiction": [
+          "D-pirit-diagnostic-report-contradiction"
+        ],
+        "correction": [
+          "D-pirit-diagnostic-report-correction"
+        ],
+        "diagnostic_result": [
+          "D-pirit-diagnostic-report-diagnostic_result-zero",
+          "D-pirit-diagnostic-report-diagnostic_result-nonzero",
+          "D-pirit-diagnostic-report-diagnostic_result-blank",
+          "D-pirit-diagnostic-report-diagnostic_result-no_output"
+        ],
+        "free_text_typo": [
+          "D-pirit-diagnostic-report-free_text_typo"
+        ],
+        "helped": [
+          "D-pirit-diagnostic-report-helped"
+        ],
+        "mismatched_condition": [
+          "D-pirit-diagnostic-report-mismatched_condition-model",
+          "D-pirit-diagnostic-report-mismatched_condition-paper_present",
+          "D-pirit-diagnostic-report-mismatched_condition-fito_connected",
+          "D-pirit-diagnostic-report-mismatched_condition-allowed_operator",
+          "D-pirit-diagnostic-report-mismatched_condition-symptom"
+        ],
+        "missing_condition": [
+          "D-pirit-diagnostic-report-missing_condition-model",
+          "D-pirit-diagnostic-report-missing_condition-paper_present",
+          "D-pirit-diagnostic-report-missing_condition-fito_connected",
+          "D-pirit-diagnostic-report-missing_condition-allowed_operator",
+          "D-pirit-diagnostic-report-missing_condition-symptom"
+        ],
+        "not_helped": [
+          "D-pirit-diagnostic-report-not_helped"
+        ],
+        "partial": [
+          "D-pirit-diagnostic-report-partial"
+        ],
+        "source_changed": [
+          "D-pirit-diagnostic-report-source_changed"
+        ],
+        "symptom_branch": [
+          "D-pirit-diagnostic-report-symptom_branch-no_paper_output",
+          "D-pirit-diagnostic-report-symptom_branch-blank_print",
+          "D-pirit-diagnostic-report-symptom_branch-pale_print",
+          "D-pirit-diagnostic-report-symptom_branch-partial_print",
+          "D-pirit-diagnostic-report-symptom_branch-qr_missing",
+          "D-pirit-diagnostic-report-symptom_branch-device_error"
+        ],
+        "unable": [
+          "D-pirit-diagnostic-report-unable"
+        ],
+        "unknown_model": [
+          "D-pirit-diagnostic-report-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-pirit-diagnostic-report-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-pirit-diagnostic-report"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-pirit-diagnostic-report-missing_condition-model",
+          "mismatched_condition": "D-pirit-diagnostic-report-mismatched_condition-model"
+        },
+        "paper_present": {
+          "missing_condition": "D-pirit-diagnostic-report-missing_condition-paper_present",
+          "mismatched_condition": "D-pirit-diagnostic-report-mismatched_condition-paper_present"
+        },
+        "fito_connected": {
+          "missing_condition": "D-pirit-diagnostic-report-missing_condition-fito_connected",
+          "mismatched_condition": "D-pirit-diagnostic-report-mismatched_condition-fito_connected"
+        },
+        "allowed_operator": {
+          "missing_condition": "D-pirit-diagnostic-report-missing_condition-allowed_operator",
+          "mismatched_condition": "D-pirit-diagnostic-report-mismatched_condition-allowed_operator"
+        },
+        "symptom": {
+          "missing_condition": "D-pirit-diagnostic-report-missing_condition-symptom",
+          "mismatched_condition": "D-pirit-diagnostic-report-mismatched_condition-symptom"
+        }
+      }
+    },
+    {
+      "target": "viki-connect-driver",
+      "kind": "procedure",
+      "case_ids": [
+        "V-08"
+      ],
+      "development_count": 31,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-connect-driver-buttons"
+        ],
+        "complete": [
+          "D-viki-connect-driver-complete"
+        ],
+        "contradiction": [
+          "D-viki-connect-driver-contradiction"
+        ],
+        "correction": [
+          "D-viki-connect-driver-correction"
+        ],
+        "diagnostic_result": [
+          "D-viki-connect-driver-diagnostic_result-connected_not_fixed",
+          "D-viki-connect-driver-diagnostic_result-connection_failed",
+          "D-viki-connect-driver-diagnostic_result-unclear"
+        ],
+        "free_text_typo": [
+          "D-viki-connect-driver-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-connect-driver-helped"
+        ],
+        "mismatched_condition": [
+          "D-viki-connect-driver-mismatched_condition-model",
+          "D-viki-connect-driver-mismatched_condition-os",
+          "D-viki-connect-driver-mismatched_condition-fito_installed",
+          "D-viki-connect-driver-mismatched_condition-cash_app_closed",
+          "D-viki-connect-driver-mismatched_condition-device_identified",
+          "D-viki-connect-driver-mismatched_condition-allowed_operator",
+          "D-viki-connect-driver-mismatched_condition-connection_type",
+          "D-viki-connect-driver-mismatched_condition-viki_client_available"
+        ],
+        "missing_condition": [
+          "D-viki-connect-driver-missing_condition-model",
+          "D-viki-connect-driver-missing_condition-os",
+          "D-viki-connect-driver-missing_condition-fito_installed",
+          "D-viki-connect-driver-missing_condition-cash_app_closed",
+          "D-viki-connect-driver-missing_condition-device_identified",
+          "D-viki-connect-driver-missing_condition-allowed_operator",
+          "D-viki-connect-driver-missing_condition-connection_type",
+          "D-viki-connect-driver-missing_condition-viki_client_available"
+        ],
+        "not_helped": [
+          "D-viki-connect-driver-not_helped"
+        ],
+        "partial": [
+          "D-viki-connect-driver-partial"
+        ],
+        "source_changed": [
+          "D-viki-connect-driver-source_changed"
+        ],
+        "unable": [
+          "D-viki-connect-driver-unable"
+        ],
+        "unknown_model": [
+          "D-viki-connect-driver-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-connect-driver-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-connect-driver"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-model",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-model"
+        },
+        "os": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-os",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-os"
+        },
+        "fito_installed": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-fito_installed",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-fito_installed"
+        },
+        "cash_app_closed": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-cash_app_closed",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-cash_app_closed"
+        },
+        "device_identified": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-device_identified",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-device_identified"
+        },
+        "allowed_operator": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-allowed_operator",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-allowed_operator"
+        },
+        "connection_type": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-connection_type",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-connection_type"
+        },
+        "viki_client_available": {
+          "missing_condition": "D-viki-connect-driver-missing_condition-viki_client_available",
+          "mismatched_condition": "D-viki-connect-driver-mismatched_condition-viki_client_available"
+        }
+      }
+    },
+    {
+      "target": "viki-connect-comproxy",
+      "kind": "procedure",
+      "case_ids": [
+        "V-08"
+      ],
+      "development_count": 31,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-connect-comproxy-buttons"
+        ],
+        "complete": [
+          "D-viki-connect-comproxy-complete"
+        ],
+        "contradiction": [
+          "D-viki-connect-comproxy-contradiction"
+        ],
+        "correction": [
+          "D-viki-connect-comproxy-correction"
+        ],
+        "diagnostic_result": [
+          "D-viki-connect-comproxy-diagnostic_result-connected_not_fixed",
+          "D-viki-connect-comproxy-diagnostic_result-connection_failed",
+          "D-viki-connect-comproxy-diagnostic_result-unclear"
+        ],
+        "free_text_typo": [
+          "D-viki-connect-comproxy-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-connect-comproxy-helped"
+        ],
+        "mismatched_condition": [
+          "D-viki-connect-comproxy-mismatched_condition-model",
+          "D-viki-connect-comproxy-mismatched_condition-os",
+          "D-viki-connect-comproxy-mismatched_condition-fito_installed",
+          "D-viki-connect-comproxy-mismatched_condition-cash_app_closed",
+          "D-viki-connect-comproxy-mismatched_condition-device_identified",
+          "D-viki-connect-comproxy-mismatched_condition-allowed_operator",
+          "D-viki-connect-comproxy-mismatched_condition-connection_type",
+          "D-viki-connect-comproxy-mismatched_condition-dreamkas_agent_available"
+        ],
+        "missing_condition": [
+          "D-viki-connect-comproxy-missing_condition-model",
+          "D-viki-connect-comproxy-missing_condition-os",
+          "D-viki-connect-comproxy-missing_condition-fito_installed",
+          "D-viki-connect-comproxy-missing_condition-cash_app_closed",
+          "D-viki-connect-comproxy-missing_condition-device_identified",
+          "D-viki-connect-comproxy-missing_condition-allowed_operator",
+          "D-viki-connect-comproxy-missing_condition-connection_type",
+          "D-viki-connect-comproxy-missing_condition-dreamkas_agent_available"
+        ],
+        "not_helped": [
+          "D-viki-connect-comproxy-not_helped"
+        ],
+        "partial": [
+          "D-viki-connect-comproxy-partial"
+        ],
+        "source_changed": [
+          "D-viki-connect-comproxy-source_changed"
+        ],
+        "unable": [
+          "D-viki-connect-comproxy-unable"
+        ],
+        "unknown_model": [
+          "D-viki-connect-comproxy-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-connect-comproxy-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-connect-comproxy"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-model",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-model"
+        },
+        "os": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-os",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-os"
+        },
+        "fito_installed": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-fito_installed",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-fito_installed"
+        },
+        "cash_app_closed": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-cash_app_closed",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-cash_app_closed"
+        },
+        "device_identified": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-device_identified",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-device_identified"
+        },
+        "allowed_operator": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-allowed_operator",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-allowed_operator"
+        },
+        "connection_type": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-connection_type",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-connection_type"
+        },
+        "dreamkas_agent_available": {
+          "missing_condition": "D-viki-connect-comproxy-missing_condition-dreamkas_agent_available",
+          "mismatched_condition": "D-viki-connect-comproxy-mismatched_condition-dreamkas_agent_available"
+        }
+      }
+    },
+    {
+      "target": "viki-connect-direct",
+      "kind": "procedure",
+      "case_ids": [
+        "V-08"
+      ],
+      "development_count": 31,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-connect-direct-buttons"
+        ],
+        "complete": [
+          "D-viki-connect-direct-complete"
+        ],
+        "contradiction": [
+          "D-viki-connect-direct-contradiction"
+        ],
+        "correction": [
+          "D-viki-connect-direct-correction"
+        ],
+        "diagnostic_result": [
+          "D-viki-connect-direct-diagnostic_result-connected_not_fixed",
+          "D-viki-connect-direct-diagnostic_result-connection_failed",
+          "D-viki-connect-direct-diagnostic_result-unclear"
+        ],
+        "free_text_typo": [
+          "D-viki-connect-direct-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-connect-direct-helped"
+        ],
+        "mismatched_condition": [
+          "D-viki-connect-direct-mismatched_condition-model",
+          "D-viki-connect-direct-mismatched_condition-os",
+          "D-viki-connect-direct-mismatched_condition-fito_installed",
+          "D-viki-connect-direct-mismatched_condition-cash_app_closed",
+          "D-viki-connect-direct-mismatched_condition-device_identified",
+          "D-viki-connect-direct-mismatched_condition-allowed_operator",
+          "D-viki-connect-direct-mismatched_condition-connection_type",
+          "D-viki-connect-direct-mismatched_condition-services_stopped_or_absent"
+        ],
+        "missing_condition": [
+          "D-viki-connect-direct-missing_condition-model",
+          "D-viki-connect-direct-missing_condition-os",
+          "D-viki-connect-direct-missing_condition-fito_installed",
+          "D-viki-connect-direct-missing_condition-cash_app_closed",
+          "D-viki-connect-direct-missing_condition-device_identified",
+          "D-viki-connect-direct-missing_condition-allowed_operator",
+          "D-viki-connect-direct-missing_condition-connection_type",
+          "D-viki-connect-direct-missing_condition-services_stopped_or_absent"
+        ],
+        "not_helped": [
+          "D-viki-connect-direct-not_helped"
+        ],
+        "partial": [
+          "D-viki-connect-direct-partial"
+        ],
+        "source_changed": [
+          "D-viki-connect-direct-source_changed"
+        ],
+        "unable": [
+          "D-viki-connect-direct-unable"
+        ],
+        "unknown_model": [
+          "D-viki-connect-direct-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-connect-direct-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-connect-direct"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-model",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-model"
+        },
+        "os": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-os",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-os"
+        },
+        "fito_installed": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-fito_installed",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-fito_installed"
+        },
+        "cash_app_closed": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-cash_app_closed",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-cash_app_closed"
+        },
+        "device_identified": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-device_identified",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-device_identified"
+        },
+        "allowed_operator": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-allowed_operator",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-allowed_operator"
+        },
+        "connection_type": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-connection_type",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-connection_type"
+        },
+        "services_stopped_or_absent": {
+          "missing_condition": "D-viki-connect-direct-missing_condition-services_stopped_or_absent",
+          "mismatched_condition": "D-viki-connect-direct-mismatched_condition-services_stopped_or_absent"
+        }
+      }
+    },
+    {
+      "target": "viki-read-print-disabled",
+      "kind": "procedure",
+      "case_ids": [
+        "V-03"
+      ],
+      "development_count": 25,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-read-print-disabled-buttons"
+        ],
+        "complete": [
+          "D-viki-read-print-disabled-complete"
+        ],
+        "contradiction": [
+          "D-viki-read-print-disabled-contradiction"
+        ],
+        "correction": [
+          "D-viki-read-print-disabled-correction"
+        ],
+        "diagnostic_result": [
+          "D-viki-read-print-disabled-diagnostic_result-enabled",
+          "D-viki-read-print-disabled-diagnostic_result-disabled",
+          "D-viki-read-print-disabled-diagnostic_result-unknown"
+        ],
+        "free_text_typo": [
+          "D-viki-read-print-disabled-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-read-print-disabled-helped"
+        ],
+        "mismatched_condition": [
+          "D-viki-read-print-disabled-mismatched_condition-model",
+          "D-viki-read-print-disabled-mismatched_condition-fito_connected",
+          "D-viki-read-print-disabled-mismatched_condition-allowed_operator",
+          "D-viki-read-print-disabled-mismatched_condition-symptom",
+          "D-viki-read-print-disabled-mismatched_condition-paper_present"
+        ],
+        "missing_condition": [
+          "D-viki-read-print-disabled-missing_condition-model",
+          "D-viki-read-print-disabled-missing_condition-fito_connected",
+          "D-viki-read-print-disabled-missing_condition-allowed_operator",
+          "D-viki-read-print-disabled-missing_condition-symptom",
+          "D-viki-read-print-disabled-missing_condition-paper_present"
+        ],
+        "not_helped": [
+          "D-viki-read-print-disabled-not_helped"
+        ],
+        "partial": [
+          "D-viki-read-print-disabled-partial"
+        ],
+        "source_changed": [
+          "D-viki-read-print-disabled-source_changed"
+        ],
+        "unable": [
+          "D-viki-read-print-disabled-unable"
+        ],
+        "unknown_model": [
+          "D-viki-read-print-disabled-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-read-print-disabled-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-read-print-disabled"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-viki-read-print-disabled-missing_condition-model",
+          "mismatched_condition": "D-viki-read-print-disabled-mismatched_condition-model"
+        },
+        "fito_connected": {
+          "missing_condition": "D-viki-read-print-disabled-missing_condition-fito_connected",
+          "mismatched_condition": "D-viki-read-print-disabled-mismatched_condition-fito_connected"
+        },
+        "allowed_operator": {
+          "missing_condition": "D-viki-read-print-disabled-missing_condition-allowed_operator",
+          "mismatched_condition": "D-viki-read-print-disabled-mismatched_condition-allowed_operator"
+        },
+        "symptom": {
+          "missing_condition": "D-viki-read-print-disabled-missing_condition-symptom",
+          "mismatched_condition": "D-viki-read-print-disabled-mismatched_condition-symptom"
+        },
+        "paper_present": {
+          "missing_condition": "D-viki-read-print-disabled-missing_condition-paper_present",
+          "mismatched_condition": "D-viki-read-print-disabled-mismatched_condition-paper_present"
+        }
+      }
+    },
+    {
+      "target": "viki-paper-presence",
+      "kind": "procedure",
+      "case_ids": [
+        "V-01",
+        "V-02"
+      ],
+      "development_count": 21,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-paper-presence-buttons"
+        ],
+        "complete": [
+          "D-viki-paper-presence-complete"
+        ],
+        "contradiction": [
+          "D-viki-paper-presence-contradiction"
+        ],
+        "correction": [
+          "D-viki-paper-presence-correction"
+        ],
+        "diagnostic_result": [
+          "D-viki-paper-presence-diagnostic_result-absent",
+          "D-viki-paper-presence-diagnostic_result-present",
+          "D-viki-paper-presence-diagnostic_result-unknown"
+        ],
+        "free_text_typo": [
+          "D-viki-paper-presence-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-paper-presence-helped"
+        ],
+        "mismatched_condition": [
+          "D-viki-paper-presence-mismatched_condition-model",
+          "D-viki-paper-presence-mismatched_condition-paper_indicator",
+          "D-viki-paper-presence-mismatched_condition-cover_accessible"
+        ],
+        "missing_condition": [
+          "D-viki-paper-presence-missing_condition-model",
+          "D-viki-paper-presence-missing_condition-paper_indicator",
+          "D-viki-paper-presence-missing_condition-cover_accessible"
+        ],
+        "not_helped": [
+          "D-viki-paper-presence-not_helped"
+        ],
+        "partial": [
+          "D-viki-paper-presence-partial"
+        ],
+        "source_changed": [
+          "D-viki-paper-presence-source_changed"
+        ],
+        "unable": [
+          "D-viki-paper-presence-unable"
+        ],
+        "unknown_model": [
+          "D-viki-paper-presence-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-paper-presence-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-paper-presence"
+      ],
+      "required_condition_coverage": {
+        "model": {
+          "missing_condition": "D-viki-paper-presence-missing_condition-model",
+          "mismatched_condition": "D-viki-paper-presence-mismatched_condition-model"
+        },
+        "paper_indicator": {
+          "missing_condition": "D-viki-paper-presence-missing_condition-paper_indicator",
+          "mismatched_condition": "D-viki-paper-presence-mismatched_condition-paper_indicator"
+        },
+        "cover_accessible": {
+          "missing_condition": "D-viki-paper-presence-missing_condition-cover_accessible",
+          "mismatched_condition": "D-viki-paper-presence-mismatched_condition-cover_accessible"
+        }
+      }
+    },
+    {
+      "target": "atol-width-setting",
+      "kind": "procedure",
+      "case_ids": [
+        "A-01",
+        "A-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-width-setting-buttons"
+        ],
+        "complete": [
+          "D-atol-width-setting-complete"
+        ],
+        "contradiction": [
+          "D-atol-width-setting-contradiction"
+        ],
+        "correction": [
+          "D-atol-width-setting-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-width-setting-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-width-setting-helped"
+        ],
+        "not_helped": [
+          "D-atol-width-setting-not_helped"
+        ],
+        "partial": [
+          "D-atol-width-setting-partial"
+        ],
+        "unable": [
+          "D-atol-width-setting-unable"
+        ],
+        "unknown_model": [
+          "D-atol-width-setting-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-width-setting-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-width-setting"
+      ]
+    },
+    {
+      "target": "atol-vertical-58",
+      "kind": "procedure",
+      "case_ids": [
+        "A-01"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-vertical-58-buttons"
+        ],
+        "complete": [
+          "D-atol-vertical-58-complete"
+        ],
+        "contradiction": [
+          "D-atol-vertical-58-contradiction"
+        ],
+        "correction": [
+          "D-atol-vertical-58-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-vertical-58-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-vertical-58-helped"
+        ],
+        "not_helped": [
+          "D-atol-vertical-58-not_helped"
+        ],
+        "partial": [
+          "D-atol-vertical-58-partial"
+        ],
+        "unable": [
+          "D-atol-vertical-58-unable"
+        ],
+        "unknown_model": [
+          "D-atol-vertical-58-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-vertical-58-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-vertical-58"
+      ]
+    },
+    {
+      "target": "atol-brightness",
+      "kind": "procedure",
+      "case_ids": [
+        "A-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-brightness-buttons"
+        ],
+        "complete": [
+          "D-atol-brightness-complete"
+        ],
+        "contradiction": [
+          "D-atol-brightness-contradiction"
+        ],
+        "correction": [
+          "D-atol-brightness-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-brightness-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-brightness-helped"
+        ],
+        "not_helped": [
+          "D-atol-brightness-not_helped"
+        ],
+        "partial": [
+          "D-atol-brightness-partial"
+        ],
+        "unable": [
+          "D-atol-brightness-unable"
+        ],
+        "unknown_model": [
+          "D-atol-brightness-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-brightness-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-brightness"
+      ]
+    },
+    {
+      "target": "atol-driver-connection",
+      "kind": "procedure",
+      "case_ids": [
+        "A-08"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-atol-driver-connection-buttons"
+        ],
+        "complete": [
+          "D-atol-driver-connection-complete"
+        ],
+        "contradiction": [
+          "D-atol-driver-connection-contradiction"
+        ],
+        "correction": [
+          "D-atol-driver-connection-correction"
+        ],
+        "free_text_typo": [
+          "D-atol-driver-connection-free_text_typo"
+        ],
+        "helped": [
+          "D-atol-driver-connection-helped"
+        ],
+        "not_helped": [
+          "D-atol-driver-connection-not_helped"
+        ],
+        "partial": [
+          "D-atol-driver-connection-partial"
+        ],
+        "unable": [
+          "D-atol-driver-connection-unable"
+        ],
+        "unknown_model": [
+          "D-atol-driver-connection-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-atol-driver-connection-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-atol-driver-connection"
+      ]
+    },
+    {
+      "target": "pirit-configure-connection",
+      "kind": "procedure",
+      "case_ids": [
+        "P-08"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-pirit-configure-connection-buttons"
+        ],
+        "complete": [
+          "D-pirit-configure-connection-complete"
+        ],
+        "contradiction": [
+          "D-pirit-configure-connection-contradiction"
+        ],
+        "correction": [
+          "D-pirit-configure-connection-correction"
+        ],
+        "free_text_typo": [
+          "D-pirit-configure-connection-free_text_typo"
+        ],
+        "helped": [
+          "D-pirit-configure-connection-helped"
+        ],
+        "not_helped": [
+          "D-pirit-configure-connection-not_helped"
+        ],
+        "partial": [
+          "D-pirit-configure-connection-partial"
+        ],
+        "unable": [
+          "D-pirit-configure-connection-unable"
+        ],
+        "unknown_model": [
+          "D-pirit-configure-connection-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-pirit-configure-connection-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-pirit-configure-connection"
+      ]
+    },
+    {
+      "target": "viki-paper-load",
+      "kind": "procedure",
+      "case_ids": [
+        "V-01"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-paper-load-buttons"
+        ],
+        "complete": [
+          "D-viki-paper-load-complete"
+        ],
+        "contradiction": [
+          "D-viki-paper-load-contradiction"
+        ],
+        "correction": [
+          "D-viki-paper-load-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-paper-load-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-paper-load-helped"
+        ],
+        "not_helped": [
+          "D-viki-paper-load-not_helped"
+        ],
+        "partial": [
+          "D-viki-paper-load-partial"
+        ],
+        "unable": [
+          "D-viki-paper-load-unable"
+        ],
+        "unknown_model": [
+          "D-viki-paper-load-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-paper-load-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-paper-load"
+      ]
+    },
+    {
+      "target": "viki-selftest",
+      "kind": "procedure",
+      "case_ids": [
+        "V-03"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-selftest-buttons"
+        ],
+        "complete": [
+          "D-viki-selftest-complete"
+        ],
+        "contradiction": [
+          "D-viki-selftest-contradiction"
+        ],
+        "correction": [
+          "D-viki-selftest-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-selftest-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-selftest-helped"
+        ],
+        "not_helped": [
+          "D-viki-selftest-not_helped"
+        ],
+        "partial": [
+          "D-viki-selftest-partial"
+        ],
+        "unable": [
+          "D-viki-selftest-unable"
+        ],
+        "unknown_model": [
+          "D-viki-selftest-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-selftest-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-selftest"
+      ]
+    },
+    {
+      "target": "viki-qr-macro",
+      "kind": "procedure",
+      "case_ids": [
+        "V-07"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-qr-macro-buttons"
+        ],
+        "complete": [
+          "D-viki-qr-macro-complete"
+        ],
+        "contradiction": [
+          "D-viki-qr-macro-contradiction"
+        ],
+        "correction": [
+          "D-viki-qr-macro-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-qr-macro-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-qr-macro-helped"
+        ],
+        "not_helped": [
+          "D-viki-qr-macro-not_helped"
+        ],
+        "partial": [
+          "D-viki-qr-macro-partial"
+        ],
+        "unable": [
+          "D-viki-qr-macro-unable"
+        ],
+        "unknown_model": [
+          "D-viki-qr-macro-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-qr-macro-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-qr-macro"
+      ]
+    },
+    {
+      "target": "viki80-brightness-service",
+      "kind": "procedure",
+      "case_ids": [
+        "V-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki80-brightness-service-buttons"
+        ],
+        "complete": [
+          "D-viki80-brightness-service-complete"
+        ],
+        "contradiction": [
+          "D-viki80-brightness-service-contradiction"
+        ],
+        "correction": [
+          "D-viki80-brightness-service-correction"
+        ],
+        "free_text_typo": [
+          "D-viki80-brightness-service-free_text_typo"
+        ],
+        "helped": [
+          "D-viki80-brightness-service-helped"
+        ],
+        "not_helped": [
+          "D-viki80-brightness-service-not_helped"
+        ],
+        "partial": [
+          "D-viki80-brightness-service-partial"
+        ],
+        "unable": [
+          "D-viki80-brightness-service-unable"
+        ],
+        "unknown_model": [
+          "D-viki80-brightness-service-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki80-brightness-service-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki80-brightness-service"
+      ]
+    },
+    {
+      "target": "viki-time-registration",
+      "kind": "procedure",
+      "case_ids": [
+        "V-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-time-registration-buttons"
+        ],
+        "complete": [
+          "D-viki-time-registration-complete"
+        ],
+        "contradiction": [
+          "D-viki-time-registration-contradiction"
+        ],
+        "correction": [
+          "D-viki-time-registration-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-time-registration-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-time-registration-helped"
+        ],
+        "not_helped": [
+          "D-viki-time-registration-not_helped"
+        ],
+        "partial": [
+          "D-viki-time-registration-partial"
+        ],
+        "unable": [
+          "D-viki-time-registration-unable"
+        ],
+        "unknown_model": [
+          "D-viki-time-registration-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-time-registration-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-time-registration"
+      ]
+    },
+    {
+      "target": "viki-fn-resource",
+      "kind": "procedure",
+      "case_ids": [
+        "V-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-fn-resource-buttons"
+        ],
+        "complete": [
+          "D-viki-fn-resource-complete"
+        ],
+        "contradiction": [
+          "D-viki-fn-resource-contradiction"
+        ],
+        "correction": [
+          "D-viki-fn-resource-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-fn-resource-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-fn-resource-helped"
+        ],
+        "not_helped": [
+          "D-viki-fn-resource-not_helped"
+        ],
+        "partial": [
+          "D-viki-fn-resource-partial"
+        ],
+        "unable": [
+          "D-viki-fn-resource-unable"
+        ],
+        "unknown_model": [
+          "D-viki-fn-resource-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-fn-resource-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-fn-resource"
+      ]
+    },
+    {
+      "target": "viki-shift-mismatch",
+      "kind": "procedure",
+      "case_ids": [
+        "V-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-viki-shift-mismatch-buttons"
+        ],
+        "complete": [
+          "D-viki-shift-mismatch-complete"
+        ],
+        "contradiction": [
+          "D-viki-shift-mismatch-contradiction"
+        ],
+        "correction": [
+          "D-viki-shift-mismatch-correction"
+        ],
+        "free_text_typo": [
+          "D-viki-shift-mismatch-free_text_typo"
+        ],
+        "helped": [
+          "D-viki-shift-mismatch-helped"
+        ],
+        "not_helped": [
+          "D-viki-shift-mismatch-not_helped"
+        ],
+        "partial": [
+          "D-viki-shift-mismatch-partial"
+        ],
+        "unable": [
+          "D-viki-shift-mismatch-unable"
+        ],
+        "unknown_model": [
+          "D-viki-shift-mismatch-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-viki-shift-mismatch-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-viki-shift-mismatch"
+      ]
+    },
+    {
+      "target": "gap-A-01",
+      "kind": "gap",
+      "case_ids": [
+        "A-01"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-01-buttons"
+        ],
+        "complete": [
+          "D-gap-A-01-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-01-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-01-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-01-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-01-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-01-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-01-partial"
+        ],
+        "unable": [
+          "D-gap-A-01-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-01-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-01-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-01"
+      ]
+    },
+    {
+      "target": "gap-A-02",
+      "kind": "gap",
+      "case_ids": [
+        "A-02"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-02-buttons"
+        ],
+        "complete": [
+          "D-gap-A-02-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-02-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-02-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-02-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-02-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-02-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-02-partial"
+        ],
+        "unable": [
+          "D-gap-A-02-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-02-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-02-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-02"
+      ]
+    },
+    {
+      "target": "gap-A-03",
+      "kind": "gap",
+      "case_ids": [
+        "A-03"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-03-buttons"
+        ],
+        "complete": [
+          "D-gap-A-03-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-03-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-03-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-03-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-03-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-03-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-03-partial"
+        ],
+        "unable": [
+          "D-gap-A-03-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-03-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-03-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-03"
+      ]
+    },
+    {
+      "target": "gap-A-04",
+      "kind": "gap",
+      "case_ids": [
+        "A-04"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-04-buttons"
+        ],
+        "complete": [
+          "D-gap-A-04-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-04-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-04-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-04-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-04-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-04-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-04-partial"
+        ],
+        "unable": [
+          "D-gap-A-04-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-04-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-04-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-04"
+      ]
+    },
+    {
+      "target": "gap-A-05",
+      "kind": "gap",
+      "case_ids": [
+        "A-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-05-buttons"
+        ],
+        "complete": [
+          "D-gap-A-05-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-05-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-05-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-05-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-05-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-05-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-05-partial"
+        ],
+        "unable": [
+          "D-gap-A-05-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-05-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-05-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-05"
+      ]
+    },
+    {
+      "target": "gap-A-06",
+      "kind": "gap",
+      "case_ids": [
+        "A-06"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-06-buttons"
+        ],
+        "complete": [
+          "D-gap-A-06-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-06-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-06-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-06-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-06-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-06-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-06-partial"
+        ],
+        "unable": [
+          "D-gap-A-06-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-06-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-06-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-06"
+      ]
+    },
+    {
+      "target": "gap-A-07",
+      "kind": "gap",
+      "case_ids": [
+        "A-07"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-07-buttons"
+        ],
+        "complete": [
+          "D-gap-A-07-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-07-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-07-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-07-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-07-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-07-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-07-partial"
+        ],
+        "unable": [
+          "D-gap-A-07-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-07-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-07-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-07"
+      ]
+    },
+    {
+      "target": "gap-A-08",
+      "kind": "gap",
+      "case_ids": [
+        "A-08"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-08-buttons"
+        ],
+        "complete": [
+          "D-gap-A-08-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-08-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-08-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-08-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-08-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-08-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-08-partial"
+        ],
+        "unable": [
+          "D-gap-A-08-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-08-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-08-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-08"
+      ]
+    },
+    {
+      "target": "gap-A-09",
+      "kind": "gap",
+      "case_ids": [
+        "A-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-A-09-buttons"
+        ],
+        "complete": [
+          "D-gap-A-09-complete"
+        ],
+        "contradiction": [
+          "D-gap-A-09-contradiction"
+        ],
+        "correction": [
+          "D-gap-A-09-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-A-09-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-A-09-helped"
+        ],
+        "not_helped": [
+          "D-gap-A-09-not_helped"
+        ],
+        "partial": [
+          "D-gap-A-09-partial"
+        ],
+        "unable": [
+          "D-gap-A-09-unable"
+        ],
+        "unknown_model": [
+          "D-gap-A-09-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-A-09-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-A-09"
+      ]
+    },
+    {
+      "target": "gap-P-01",
+      "kind": "gap",
+      "case_ids": [
+        "P-01"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-01-buttons"
+        ],
+        "complete": [
+          "D-gap-P-01-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-01-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-01-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-01-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-01-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-01-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-01-partial"
+        ],
+        "unable": [
+          "D-gap-P-01-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-01-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-01-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-01"
+      ]
+    },
+    {
+      "target": "gap-P-02",
+      "kind": "gap",
+      "case_ids": [
+        "P-02"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-02-buttons"
+        ],
+        "complete": [
+          "D-gap-P-02-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-02-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-02-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-02-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-02-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-02-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-02-partial"
+        ],
+        "unable": [
+          "D-gap-P-02-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-02-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-02-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-02"
+      ]
+    },
+    {
+      "target": "gap-P-03",
+      "kind": "gap",
+      "case_ids": [
+        "P-03"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-03-buttons"
+        ],
+        "complete": [
+          "D-gap-P-03-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-03-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-03-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-03-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-03-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-03-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-03-partial"
+        ],
+        "unable": [
+          "D-gap-P-03-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-03-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-03-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-03"
+      ]
+    },
+    {
+      "target": "gap-P-04",
+      "kind": "gap",
+      "case_ids": [
+        "P-04"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-04-buttons"
+        ],
+        "complete": [
+          "D-gap-P-04-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-04-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-04-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-04-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-04-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-04-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-04-partial"
+        ],
+        "unable": [
+          "D-gap-P-04-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-04-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-04-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-04"
+      ]
+    },
+    {
+      "target": "gap-P-05",
+      "kind": "gap",
+      "case_ids": [
+        "P-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-05-buttons"
+        ],
+        "complete": [
+          "D-gap-P-05-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-05-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-05-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-05-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-05-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-05-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-05-partial"
+        ],
+        "unable": [
+          "D-gap-P-05-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-05-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-05-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-05"
+      ]
+    },
+    {
+      "target": "gap-P-06",
+      "kind": "gap",
+      "case_ids": [
+        "P-06"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-06-buttons"
+        ],
+        "complete": [
+          "D-gap-P-06-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-06-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-06-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-06-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-06-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-06-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-06-partial"
+        ],
+        "unable": [
+          "D-gap-P-06-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-06-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-06-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-06"
+      ]
+    },
+    {
+      "target": "gap-P-07",
+      "kind": "gap",
+      "case_ids": [
+        "P-07"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-07-buttons"
+        ],
+        "complete": [
+          "D-gap-P-07-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-07-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-07-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-07-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-07-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-07-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-07-partial"
+        ],
+        "unable": [
+          "D-gap-P-07-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-07-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-07-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-07"
+      ]
+    },
+    {
+      "target": "gap-P-08",
+      "kind": "gap",
+      "case_ids": [
+        "P-08"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-08-buttons"
+        ],
+        "complete": [
+          "D-gap-P-08-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-08-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-08-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-08-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-08-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-08-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-08-partial"
+        ],
+        "unable": [
+          "D-gap-P-08-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-08-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-08-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-08"
+      ]
+    },
+    {
+      "target": "gap-P-09",
+      "kind": "gap",
+      "case_ids": [
+        "P-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-P-09-buttons"
+        ],
+        "complete": [
+          "D-gap-P-09-complete"
+        ],
+        "contradiction": [
+          "D-gap-P-09-contradiction"
+        ],
+        "correction": [
+          "D-gap-P-09-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-P-09-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-P-09-helped"
+        ],
+        "not_helped": [
+          "D-gap-P-09-not_helped"
+        ],
+        "partial": [
+          "D-gap-P-09-partial"
+        ],
+        "unable": [
+          "D-gap-P-09-unable"
+        ],
+        "unknown_model": [
+          "D-gap-P-09-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-P-09-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-P-09"
+      ]
+    },
+    {
+      "target": "gap-V-01",
+      "kind": "gap",
+      "case_ids": [
+        "V-01"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-01-buttons"
+        ],
+        "complete": [
+          "D-gap-V-01-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-01-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-01-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-01-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-01-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-01-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-01-partial"
+        ],
+        "unable": [
+          "D-gap-V-01-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-01-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-01-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-01"
+      ]
+    },
+    {
+      "target": "gap-V-02",
+      "kind": "gap",
+      "case_ids": [
+        "V-02"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-02-buttons"
+        ],
+        "complete": [
+          "D-gap-V-02-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-02-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-02-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-02-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-02-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-02-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-02-partial"
+        ],
+        "unable": [
+          "D-gap-V-02-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-02-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-02-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-02"
+      ]
+    },
+    {
+      "target": "gap-V-03",
+      "kind": "gap",
+      "case_ids": [
+        "V-03"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-03-buttons"
+        ],
+        "complete": [
+          "D-gap-V-03-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-03-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-03-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-03-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-03-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-03-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-03-partial"
+        ],
+        "unable": [
+          "D-gap-V-03-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-03-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-03-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-03"
+      ]
+    },
+    {
+      "target": "gap-V-04",
+      "kind": "gap",
+      "case_ids": [
+        "V-04"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-04-buttons"
+        ],
+        "complete": [
+          "D-gap-V-04-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-04-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-04-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-04-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-04-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-04-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-04-partial"
+        ],
+        "unable": [
+          "D-gap-V-04-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-04-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-04-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-04"
+      ]
+    },
+    {
+      "target": "gap-V-05",
+      "kind": "gap",
+      "case_ids": [
+        "V-05"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-05-buttons"
+        ],
+        "complete": [
+          "D-gap-V-05-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-05-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-05-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-05-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-05-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-05-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-05-partial"
+        ],
+        "unable": [
+          "D-gap-V-05-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-05-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-05-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-05"
+      ]
+    },
+    {
+      "target": "gap-V-06",
+      "kind": "gap",
+      "case_ids": [
+        "V-06"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-06-buttons"
+        ],
+        "complete": [
+          "D-gap-V-06-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-06-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-06-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-06-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-06-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-06-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-06-partial"
+        ],
+        "unable": [
+          "D-gap-V-06-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-06-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-06-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-06"
+      ]
+    },
+    {
+      "target": "gap-V-07",
+      "kind": "gap",
+      "case_ids": [
+        "V-07"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-07-buttons"
+        ],
+        "complete": [
+          "D-gap-V-07-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-07-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-07-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-07-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-07-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-07-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-07-partial"
+        ],
+        "unable": [
+          "D-gap-V-07-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-07-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-07-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-07"
+      ]
+    },
+    {
+      "target": "gap-V-08",
+      "kind": "gap",
+      "case_ids": [
+        "V-08"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-08-buttons"
+        ],
+        "complete": [
+          "D-gap-V-08-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-08-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-08-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-08-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-08-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-08-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-08-partial"
+        ],
+        "unable": [
+          "D-gap-V-08-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-08-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-08-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-08"
+      ]
+    },
+    {
+      "target": "gap-V-09",
+      "kind": "gap",
+      "case_ids": [
+        "V-09"
+      ],
+      "development_count": 11,
+      "holdout_count": 1,
+      "variants": {
+        "buttons": [
+          "D-gap-V-09-buttons"
+        ],
+        "complete": [
+          "D-gap-V-09-complete"
+        ],
+        "contradiction": [
+          "D-gap-V-09-contradiction"
+        ],
+        "correction": [
+          "D-gap-V-09-correction"
+        ],
+        "free_text_typo": [
+          "D-gap-V-09-free_text_typo"
+        ],
+        "helped": [
+          "D-gap-V-09-helped"
+        ],
+        "not_helped": [
+          "D-gap-V-09-not_helped"
+        ],
+        "partial": [
+          "D-gap-V-09-partial"
+        ],
+        "unable": [
+          "D-gap-V-09-unable"
+        ],
+        "unknown_model": [
+          "D-gap-V-09-unknown_model"
+        ],
+        "unreadable_error": [
+          "D-gap-V-09-unreadable_error"
+        ]
+      },
+      "holdout_ids": [
+        "H-gap-V-09"
+      ]
+    }
+  ],
+  "holdout_policy": {
+    "purpose": "Независимая от настройки итоговая проверка; не независимая экспертная сертификация.",
+    "tuning_allowed": false,
+    "runtime_or_prompt_input_allowed": false,
+    "status": "reserved_not_run",
+    "release_gate": "Зафиксировать версию кода/каталога до первого прогона. Не использовать ошибки holdout для настройки и повторного заявления независимого результата на том же наборе; после раскрытия нужны новые резервные случаи.",
+    "authorship": "Составлен отдельно вручную по тем же источникам; не получен из ответов приложения. Внешний специалист ещё не проверял эталоны."
+  },
+  "execution_status": "Data validated only; no application or hardware run."
+}
