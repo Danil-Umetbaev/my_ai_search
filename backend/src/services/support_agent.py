@@ -82,7 +82,9 @@ def allowed_text(content):
     return not re.search(prohibited, content, re.I)
 
 
-async def respond(state, history, message, llm=None, retrieve=None, timeout=45, lookup=None):
+async def respond(
+    state, history, message, llm=None, retrieve=None, timeout=45, lookup=None
+):
     normalized = message.strip().casefold().rstrip(".!?")
     if state.get("_phase") in {"cancelled", "resolved"}:
         updated, answer, _ = advance(state, message)
@@ -102,6 +104,13 @@ async def respond(state, history, message, llm=None, retrieve=None, timeout=45, 
         updated = deepcopy(state)
         updated.update(_phase="confirm", _engine="system")
         return updated, summary(updated)
+    if (
+        is_ready(state)
+        and state.get("_receipt")
+        and normalized
+        not in {"да", "yes", "отправить", "нет", "не отправлять", "отмена", "отменить"}
+    ):
+        return await respond_receipt(state, message, lookup, timeout)
     if is_ready(state) or normalized in {"отмена", "отменить"}:
         updated, answer, _ = advance(state, message)
         updated["_engine"] = "system"

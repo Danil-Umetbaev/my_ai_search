@@ -696,7 +696,7 @@
   },
   "files": {
     "development.jsonl": {
-      "sha256": "492c9fb83573490fc0216ed43961b4730693ea0c6bab543b7dd13fd1ad6fd04b",
+      "sha256": "3c1651623786fd6e20a600173c14965c3783ff4d033e70addf79f9a7b98a7b5e",
       "dialogs": 800,
       "turns": 1256
     },
@@ -3798,5 +3798,12 @@
     "release_gate": "Зафиксировать версию кода/каталога до первого прогона. Не использовать ошибки holdout для настройки и повторного заявления независимого результата на том же наборе; после раскрытия нужны новые резервные случаи.",
     "authorship": "Составлен отдельно вручную по тем же источникам; не получен из ответов приложения. Внешний специалист ещё не проверял эталоны."
   },
-  "execution_status": "Data validated only; no application or hardware run."
+  "execution_status": "Data validated only; no application or hardware run.",
+  "errata": [
+    {
+      "scope": "development only",
+      "records": 17,
+      "reason": "Unknown model/platform placeholders normalized to null, as required by the existing unknown-value contract. Holdout unchanged."
+    }
+  ]
 }

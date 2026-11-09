@@ -105,9 +105,24 @@ class SupportAgentTests(unittest.IsolatedAsyncioTestCase):
                 "facts": {"environment": "магазин 999"},
             }
         )
-        state, answer = await respond({}, [], "Не печатает чек", llm)
+        state, answer = await respond({}, [], "Ошибка приложения", llm)
+        self.assertTrue(hasattr(llm, "payload"))
         self.assertNotEqual(state.get("environment"), "магазин 999")
         self.assertIn("резервным", answer)
+
+    async def test_receipt_correction_after_handoff_updates_facts(self):
+        state = {
+            "_phase": "confirm",
+            "problem": "Не печатает чек",
+            "_receipt": {
+                "model": "Пирит 2Ф",
+                "paper": "present",
+                "symptom": "чек не печатается",
+            },
+        }
+        state, _ = await respond(state, [], "Ошибся, бумаги нет")
+        self.assertIs(state["receipt_facts"]["paper_present"], False)
+        self.assertNotEqual(state["_phase"], "confirm")
 
     async def test_fallback_never_replaces_original_problem(self):
         original = {
