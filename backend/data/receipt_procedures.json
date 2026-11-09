@@ -1,0 +1,3280 @@
+{
+  "schema_version": 1,
+  "catalog_version": "2026-11-09.1",
+  "scope": "Печать чеков: процедуры из аудита текущего корпуса, не подключены к исполнителю приложения.",
+  "coverage_fingerprint": "dcdc51b172bfac6f4c7e59dd158c2f9d937e7251f786dfe5897737208c6f768a",
+  "selection_contract": {
+    "eligible_status": "ready",
+    "conditions": "all_of: сравнение equals с точным типом; неизвестно не равно false; model=Вики Принт обозначает семейство только для общесемейных статей V1/V5. Модельные сервисные процедуры требуют точной модели. Для one_of факт должен совпасть с одним из перечисленных значений. При противоречащих ответах уточнить факт до выбора шагов.",
+    "missing_fact": "Уточнить необходимый факт; если его нельзя установить — предложить специалиста.",
+    "materials": "До выдачи шагов проверить доступность и показать все mandatory_display материалы. Если недоступны — не выдавать как готовую инструкцию.",
+    "source_change": "При изменении checksum источника процедуру отправить на повторную проверку.",
+    "repeat": "Не повторять выполненную неуспешную процедуру без новых фактов; передать результаты специалисту.",
+    "separate_facts": [
+      "paper_present",
+      "exact_error",
+      "symptom"
+    ],
+    "operator_policy": "allowed_operator и разрешённые действия кассира/ИТ должен определить заказчик до подключения каталога. Это проектное ограничение, не цитата из руководства.",
+    "handoff": "Заявку создавать только после подтверждения пользователя.",
+    "unknown_error": "Не сопоставлять неизвестный код по похожим цифрам; уточнение, затем специалист.",
+    "not_found": "Отсутствие применимой процедуры каталога не доказывает отсутствие знания во всей документации."
+  },
+  "outcomes": {
+    "confirm_resolution": "Уточнить, устранена ли исходная проблема. Только явное подтверждение завершает обращение; нет/не знаю — специалист. Не просить создавать фиктивную продажу.",
+    "specialist": "Объяснить причину и запросить согласие на передачу фактов, ошибки, модели и выполненных действий.",
+    "clarify_or_specialist": "Уточнение; если ответ неизвестен и обязателен, предложить специалиста.",
+    "collect_diagnostic_result": "Сохранить отчёт/ошибку/факт отсутствия печати. Если исходная проблема не решена — специалист; статус 0 не равен успешной печати из кассового ПО.",
+    "collect_connection_result": "Сохранить результат связи. Успешная связь не равна исправности кассовой программы; дальнейший шаг только по применимой процедуре.",
+    "collect_print_setting": "Сохранить значение. При включённом запрете нужна проверенная процедура изменения специалистом; при выключенном продолжить только применимую диагностику, иначе специалист.",
+    "collect_paper_presence": "Сохранить наличие рулона отдельно от индикатора. Нет бумаги — нужна модельная процедура замены; при её отсутствии специалист. Рулон есть — не объявлять неисправность датчика."
+  },
+  "sources": {
+    "A1": {
+      "title": "FPrint-22ПТК — Заправка бумаги",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=27",
+      "document_id": "4d9a20e3-363d-47e2-9c49-69c30eab59c0",
+      "checksum": "36cb69f02a47287763233a745902fc99d090238cb766fabed0de10dee137d71d"
+    },
+    "A2": {
+      "title": "FPrint-22ПТК — Неполадки и их устранение",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=78",
+      "document_id": "105f2b6c-6f62-4b62-9abb-b9adf87d0ce2",
+      "checksum": "ae67dc8154a7a7ba6641952bd045fd6cf84eca3bbfa58f4cc280403b1092e6ca"
+    },
+    "A3": {
+      "title": "FPrint-22ПТК — Группа параметров «Основные»",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=32",
+      "document_id": "959daa06-eecd-44dc-a3b0-24e07750d075",
+      "checksum": "2e088eeb5978c2bd301738376613d6077e2c04c5fa1ef38e5e3cf91f52974bce"
+    },
+    "A4": {
+      "title": "FPrint-22ПТК — Настройка связи с ККТ",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=120",
+      "document_id": "0ceed379-0feb-4924-8c45-a399684b9e48",
+      "checksum": "9decf7f8fae5353d57859b0d59d6aa3d941238ca856576ccbe38bd8d091fb9bd"
+    },
+    "A5": {
+      "title": "FPrint-22ПТК — Поиск оборудования",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=122",
+      "document_id": "fd524963-6679-47e2-8fce-e6d5f9fcb95d",
+      "checksum": "1ee6960635cfbd9a90e3b6634302e009f81630507491dbfe0b327eca98906d93"
+    },
+    "A6": {
+      "title": "FPrint-22ПТК — Блок реквизитов кассового чека",
+      "url": "https://725920.selcdn.ru/upload_portkkm/iblock/32f/32fe0621e9e12d1e8688f9bad9af3fe4/ATOL-FPrint_22PTK.-Rukovodstvo-po-ekspluatatsii.-Platforma-5.0.pdf#page=112",
+      "document_id": "b809d232-1e2c-451c-904e-7467acff7d84",
+      "checksum": "57526f45f7a76ef09616f7196a2309fd3061394838e3bf583338388afcbca1f2"
+    },
+    "P1": {
+      "title": "Пирит 2Ф — Порядок замены (установки) термобумаги в ККТ; Эталонное ПО",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9",
+      "document_id": "7072bf94-f937-45b0-a687-d2b82a98f062",
+      "checksum": "1976059a26db02abe1a6ac8f6386c77a391d915c59006dea2905662f8fba1428"
+    },
+    "P2": {
+      "title": "Пирит 2Ф — Проверка исправности ККТ; Индикаторы состояния; Хранение, транспортирование и утилизация",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66",
+      "document_id": "45cd6748-93b9-43f8-b16c-8dff3bec5a28",
+      "checksum": "d30c9c39e49bb76d8a17f09048cde08b34e3ceeb155401483ba8d0ba7173ff58"
+    },
+    "P3": {
+      "title": "Пирит 2Ф — Меры безопасности; Перечень возможных сообщений об ошибках на",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65",
+      "document_id": "2b1d6de4-3c0b-4a2f-b2e3-9d51b3458acb",
+      "checksum": "1b1e97e3bed2e709ea08d38596fa9687dddd46abdedd60d41a4f15f096f04905"
+    },
+    "P4": {
+      "title": "Пирит 2Ф — руководство, страница 64",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64",
+      "document_id": "3d2de392-2697-499f-a1e0-539c82d05fce",
+      "checksum": "2e3ee5d0813efce97aeb89247cde708bf09abf4273818726dbbca01eac9ca0fc"
+    },
+    "P5": {
+      "title": "Пирит 2Ф — Включение устройства; Настройка подключения Пирит 2Ф к Windows",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10",
+      "document_id": "354c2938-45b2-47eb-a848-ddcecfafb619",
+      "checksum": "895dac015f48dbd92b1bfcd78a4264a5b390e0eeb6bc85cf928c8a83c6054d04"
+    },
+    "P11": {
+      "title": "Пирит 2Ф — руководство, страница 11",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=11",
+      "document_id": "010273fe-02a1-45e5-a656-97e41987de3e",
+      "checksum": "f5c92e0232dbe6f7cb59be77827e85e95e264d17228a495fc53a01eec05b2e49"
+    },
+    "P12": {
+      "title": "Пирит 2Ф — руководство, страница 12",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12",
+      "document_id": "0bcc97e8-1249-4adb-9509-466abea9e722",
+      "checksum": "8a494c482f450a8ad19ac66016936771efca1a349fecd8b5c62dcf93b02d3eca"
+    },
+    "P13": {
+      "title": "Пирит 2Ф — руководство, страница 13",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13",
+      "document_id": "a23aa622-9358-4f69-9d7e-4f4d1fc87147",
+      "checksum": "540979b415d4c3231174dc07b66361967f0a052e3bac93a7d4d5a8568ed4552c"
+    },
+    "P8": {
+      "title": "Пирит 2Ф — руководство, страница 8",
+      "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8",
+      "document_id": "ed0d446a-c071-41e0-8717-6d5e82fb3d2f",
+      "checksum": "e1fe98a11064eac7ed02442fe2180f7e6e6a144772ff0c5080bf9ec29d88b744"
+    },
+    "V1": {
+      "title": "Вики Принт не печатает документы",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/",
+      "document_id": "f31cf1e7-9574-46bd-bf76-9919aaf0db48",
+      "checksum": "cb79cc81e7ac8e749ba8c129f101744f8801b4bc558e94e465eb1155b10e95b2"
+    },
+    "V2": {
+      "title": "Вики Принт при включении не выдает чек диагностики",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-pri-vklyuchenii-ne-vydaet-chek-diagnostiki/",
+      "document_id": "5024d170-41a9-48ea-ad43-c7269f20ef73",
+      "checksum": "80b3b0076e160427d3e14a0363939a72c21f921923abeafcf4ad202e451c15f5"
+    },
+    "V3": {
+      "title": "Изменить яркость на Вики Принт 80",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/",
+      "document_id": "e665da58-f6da-4509-8396-d7b225d0e64f",
+      "checksum": "fe224e83740ca07eedfd40d042dd5bce2b7eb94f6ef1e83e9fd3c0229ba0aafb"
+    },
+    "V4": {
+      "title": "Не печатается QR-код",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ne-pechataetsya-qr-kod-viki-print/",
+      "document_id": "99f6b137-1e52-481c-8464-61911dab8600",
+      "checksum": "962d1bf3d9e774ae94fadd9fbb6d0253b9026fa24ca02a86055002660ec255c5"
+    },
+    "V5": {
+      "title": "Подключиться к Вики Принт с помощью утилиты Fito",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/podgotovka-k-rabote-viki-print/podklyuchitsya-k-viki-print-s-pomoshchyu-utility-fito/",
+      "document_id": "db1e0281-c19d-48af-ba22-7dcdd07e732f",
+      "checksum": "abcf638673110c0fbfc546a112c0c751c52be008eb247b7463d86675645bee5c"
+    },
+    "V6": {
+      "title": "Подключить Вики Принт к Windows",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/podgotovka-k-rabote-viki-print/podklyuchit-viki-print-k-windows/",
+      "document_id": "b8d98193-c5a1-4a5b-afc2-189b94f43884",
+      "checksum": "7cacf663d112ce46246935a8bdef484c76979d00d79b41dd2cecaf53c5d01104"
+    },
+    "V7": {
+      "title": "Ошибка «Разница во времени»",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/",
+      "document_id": "2d6d1b40-e802-4d7f-8f2c-a2733e60091a",
+      "checksum": "255227e72e790cc043f47c93acc7163adc7b7ac28ba17c8d80acbe0fa228c740"
+    },
+    "V8": {
+      "title": "Исчерпан ресурс КС. Истек срок работы фискального накопителя",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ischerpan-resurs-ks-istek-srok-raboty-fiskalnogo-nakopitelya-viki-print/",
+      "document_id": "b77eb7a7-88a1-4e16-a7d8-a28816d299a4",
+      "checksum": "c1845fa3cb399ce180c83d5914700c51ed020eea1462f04af053fb983451294d"
+    },
+    "V9": {
+      "title": "Расхождение номеров смен в ФН и NVR (Расхождение данных ФН)",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/raskhozhdenie-nomerov-smen-v-fn-i-nvr-raskhozhdenie-dannykh-fn/",
+      "document_id": "2d21ce10-6045-4867-99c7-0fdcea90f464",
+      "checksum": "5ec0193abe1885c0fa5906c0ff8eb3bccbb5e18251d61acd627f91a4011cc4f3"
+    },
+    "V10": {
+      "title": "Отключить отрезчик на Вики Принт 57 Плюс",
+      "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/otklyuchit-otrezchik-na-viki-print-57-plyus/",
+      "document_id": "fce4c693-fdc9-4ec8-bb7d-83a971df1c1f",
+      "checksum": "63e1696c8f10b82b971b4171fed8ee3e44396167bfe1652b296cb878f63239ea"
+    }
+  },
+  "materials": {
+    "atol_fig9": {
+      "source": "A1",
+      "local_file": "knowledge_assets/cc17e6a85892bc06be4ecc1f707b398fab27f7c58db081588c176f456815bb40.pdf",
+      "pages": [
+        27
+      ],
+      "description": "Рисунок 9: крышка, рулон, конец ленты, кнопка промотки",
+      "mandatory_display": true
+    },
+    "atol_fig10": {
+      "source": "A1",
+      "local_file": "knowledge_assets/cc17e6a85892bc06be4ecc1f707b398fab27f7c58db081588c176f456815bb40.pdf",
+      "pages": [
+        28
+      ],
+      "description": "Рисунок 10: ось и паз при вертикальной установке",
+      "mandatory_display": true
+    },
+    "atol_fig11_12": {
+      "source": "A1",
+      "local_file": "knowledge_assets/cc17e6a85892bc06be4ecc1f707b398fab27f7c58db081588c176f456815bb40.pdf",
+      "pages": [
+        28,
+        29
+      ],
+      "description": "Рисунки 11–12: ограничитель и рулон 58 мм",
+      "mandatory_display": true
+    },
+    "pirit_paper_photos": {
+      "source": "P1",
+      "local_file": "knowledge_assets/pirit-2f-manual.pdf",
+      "pages": [
+        9
+      ],
+      "description": "Фото открытия крышки и направления намотки",
+      "mandatory_display": true
+    }
+  },
+  "procedures": [
+    {
+      "id": "atol-paper-80-horizontal",
+      "title": "Установка бумаги 80 мм: горизонтально",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "printing_stopped",
+            "equals": true
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          },
+          {
+            "fact": "paper_present",
+            "equals": false
+          },
+          {
+            "fact": "layout",
+            "equals": "horizontal"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 80
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "printing_stopped",
+          "question": "Печать сейчас завершена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Нажмите кнопку открытия крышки и откиньте крышку (рисунок 9).",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Установите рулон в лоток: термочувствительный слой с внешней стороны ленты. Вытяните свободный конец.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Закройте крышку, оставив свободный конец ленты в прорези.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Нажмите кнопку промотки и проверьте свободный ход ленты.",
+          "source_refs": [
+            "A1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Не открывать крышку во время печати.",
+        "Не вытягивать ленту вручную при закрытой крышке.",
+        "Не устанавливать неплотно намотанный рулон."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента свободно подаётся при промотке. Это ещё не подтверждение печати кассового чека.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1"
+      ],
+      "required_materials": [
+        "atol_fig9"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-paper-80-vertical",
+      "title": "Установка бумаги 80 мм: вертикально",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "printing_stopped",
+            "equals": true
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          },
+          {
+            "fact": "paper_present",
+            "equals": false
+          },
+          {
+            "fact": "layout",
+            "equals": "vertical"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 80
+          },
+          {
+            "fact": "axle_available",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "printing_stopped",
+          "question": "Печать сейчас завершена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "axle_available",
+          "question": "Есть ось для рулона, показанная на рисунке 10?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте крышку бумажного отсека штатной кнопкой (рисунок 9).",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Вставьте ось в рулон (рисунок 10), соблюдая показанное направление ленты.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Установите ось с рулоном в паз (рисунок 10).",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Закройте крышку, оставив свободный конец ленты в прорези.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 5,
+          "action": "Нажмите кнопку промотки и проверьте свободный ход ленты.",
+          "source_refs": [
+            "A1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Не открывать крышку во время печати.",
+        "Не вытягивать ленту вручную при закрытой крышке.",
+        "Не устанавливать неплотно намотанный рулон."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента свободно подаётся при промотке.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1"
+      ],
+      "required_materials": [
+        "atol_fig9",
+        "atol_fig10"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-paper-58-horizontal",
+      "title": "Установка бумаги 58 мм: горизонтально, драйвер уже настроен",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "printing_stopped",
+            "equals": true
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          },
+          {
+            "fact": "paper_present",
+            "equals": false
+          },
+          {
+            "fact": "layout",
+            "equals": "horizontal"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 58
+          },
+          {
+            "fact": "limiter_available",
+            "equals": true
+          },
+          {
+            "fact": "driver_width_mm",
+            "equals": 58
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "printing_stopped",
+          "question": "Печать сейчас завершена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "limiter_available",
+          "question": "Есть ограничитель для 58 мм, показанный на рисунке 11?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "driver_width_mm",
+          "question": "Подтверждена ли настройка ширины 58 мм в драйвере?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте крышку штатной кнопкой (рисунок 9).",
+          "source_refs": [
+            "A1",
+            "A3"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Установите ограничитель по рисунку 11.",
+          "source_refs": [
+            "A1",
+            "A3"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Установите рулон по рисунку 12.",
+          "source_refs": [
+            "A1",
+            "A3"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Закройте крышку, оставив конец ленты в прорези.",
+          "source_refs": [
+            "A1",
+            "A3"
+          ]
+        },
+        {
+          "order": 5,
+          "action": "Нажмите кнопку промотки и проверьте свободный ход ленты.",
+          "source_refs": [
+            "A1",
+            "A3"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Не открывать крышку во время печати.",
+        "Не вытягивать ленту вручную при закрытой крышке.",
+        "Не устанавливать неплотно намотанный рулон.",
+        "При 58 мм обязательна настройка ширины в драйвере; эта процедура её не выполняет."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента свободно подаётся. Отдельно подтвердить, что при обычной работе строка не обрезается.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1",
+        "A3"
+      ],
+      "required_materials": [
+        "atol_fig9",
+        "atol_fig11_12"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-jam-80-horizontal",
+      "title": "Доступное замятие: 80 мм, горизонтально",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "printing_stopped",
+            "equals": true
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          },
+          {
+            "fact": "symptom",
+            "equals": "paper_jam"
+          },
+          {
+            "fact": "layout",
+            "equals": "horizontal"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 80
+          },
+          {
+            "fact": "jam_accessible",
+            "equals": true
+          }
+        ],
+        "scope": "Только доступная бумага. Не заклинивший нож, не разборка. Другие ширины и положения отдельно требуют своего варианта."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "printing_stopped",
+          "question": "Печать сейчас завершена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "jam_accessible",
+          "question": "Смятая бумага доступна через крышку, без разборки механизма?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте крышку бумажного отсека.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Удалите доступные смятые кусочки бумаги.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Обрежьте замятый конец ленты.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Установите рулон в лоток: термочувствительный слой с внешней стороны ленты. Вытяните свободный конец.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 5,
+          "action": "Закройте крышку, оставив свободный конец ленты в прорези.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 6,
+          "action": "Нажмите кнопку промотки и проверьте свободный ход ленты.",
+          "source_refs": [
+            "A1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Не открывать крышку во время печати.",
+        "Не вытягивать ленту вручную при закрытой крышке.",
+        "Не устанавливать неплотно намотанный рулон."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента свободно подаётся после повторной заправки.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1"
+      ],
+      "required_materials": [
+        "atol_fig9"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-skew-80-horizontal",
+      "title": "Перекос ленты: 80 мм, горизонтально",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "printing_stopped",
+            "equals": true
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          },
+          {
+            "fact": "symptom",
+            "equals": "paper_skew"
+          },
+          {
+            "fact": "layout",
+            "equals": "horizontal"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 80
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "printing_stopped",
+          "question": "Печать сейчас завершена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте крышку бумажного отсека.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Верните ленту в положение, показанное на рисунке 9.",
+          "source_refs": [
+            "A1"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Закройте крышку, оставив свободный конец ленты в прорези.",
+          "source_refs": [
+            "A1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Не открывать крышку во время печати.",
+        "Не вытягивать ленту вручную при закрытой крышке.",
+        "Не устанавливать неплотно намотанный рулон."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента установлена без перекоса; результат печати подтверждает пользователь.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1"
+      ],
+      "required_materials": [
+        "atol_fig9"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "pirit-paper-load",
+      "title": "Замена рулона Пирит 2Ф",
+      "status": "ready",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Пирит 2Ф"
+          },
+          {
+            "fact": "paper_present",
+            "equals": false
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          },
+          {
+            "fact": "paper_compatible",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_compatible",
+          "question": "Есть подходящий для этой кассы рулон термобумаги?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте крышку бумажного отсека, как показано на фото на странице 9.",
+          "source_refs": [
+            "P1",
+            "P8"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Удалите использованный рулон и установите новый, соблюдая направление намотки на фото.",
+          "source_refs": [
+            "P1",
+            "P8"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Закройте крышку до щелчка и оторвите излишки бумаги.",
+          "source_refs": [
+            "P1",
+            "P8"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Проверьте: светодиод на лицевой панели должен постоянно гореть зелёным.",
+          "source_refs": [
+            "P1",
+            "P8"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Использовать термобумагу шириной 80 или 57 ±0,5 мм, толщиной 0,055–0,088 мм; диаметр рулона не более 90 мм, втулки не менее 10 мм (стр.8)."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Постоянный зелёный индикатор означает готовность к дальнейшему использованию. Уточнить, восстановилась ли печать.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "P1",
+        "P8"
+      ],
+      "required_materials": [
+        "pirit_paper_photos"
+      ],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "pirit-diagnostic-report",
+      "title": "Получить диагностический отчёт Пирит",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Пирит 2Ф"
+          },
+          {
+            "fact": "paper_present",
+            "equals": true
+          },
+          {
+            "fact": "fito_connected",
+            "equals": true
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          },
+          {
+            "fact": "symptom",
+            "one_of": [
+              "no_paper_output",
+              "blank_print",
+              "pale_print",
+              "partial_print",
+              "qr_missing",
+              "device_error"
+            ]
+          }
+        ],
+        "scope": "Только получение отчёта, без полной аттестации исправности; не повторять попытку, если бумага не выходит или есть замятие."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_connected",
+          "question": "Fito уже подключена именно к этой кассе?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "exact_error",
+          "question": "Каков полный текст ошибки?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": false
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "В Fito откройте «Сервис» → «Печать диагностического отчёта».",
+          "source_refs": [
+            "P2"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Нажмите «Выполнить».",
+          "source_refs": [
+            "P2"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Если отчёт напечатался, сохраните его для специалиста; зафиксируйте статус фатальных ошибок, статус ФН и код последней ошибки.",
+          "source_refs": [
+            "P2"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Для полной проверки руководство требует сверить заводской номер, номер ФН и прошивку с шильдом, паспортом ФН и документом о версии ПО. Получение отчёта не заменяет эту проверку."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Получен отчёт с диагностическими сведениями; статус фатальных ошибок по руководству должен быть 0. Отчёт не доказывает устранение исходной проблемы.",
+      "on_success": "collect_diagnostic_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "P2"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-connect-driver",
+      "title": "Fito через уже установленный Viki Driver",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "os",
+            "equals": "Windows"
+          },
+          {
+            "fact": "fito_installed",
+            "equals": true
+          },
+          {
+            "fact": "cash_app_closed",
+            "equals": true
+          },
+          {
+            "fact": "device_identified",
+            "equals": true
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          },
+          {
+            "fact": "connection_type",
+            "equals": "viki_driver"
+          },
+          {
+            "fact": "viki_client_available",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "os",
+          "question": "На компьютере Windows?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_installed",
+          "question": "Утилита Fito уже установлена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cash_app_closed",
+          "question": "Кассовая программа закрыта?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "device_identified",
+          "question": "Можете однозначно выбрать именно эту кассу среди подключённых устройств?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "connection_type",
+          "question": "Используется Viki Driver, ComProxy или прямое подключение COM?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "viki_client_available",
+          "question": "Доступно окно VikiClient?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте VikiClient через ярлык или двойным щелчком по значку VikiDriver в трее Windows.",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Выберите нужную кассу. В сведениях об устройстве найдите TCP-порт в строке «Порты подключения».",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "В Fito откройте «Функции» → «Параметры связи», выберите IP.",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Укажите IP 127.0.0.1 и порт, прочитанный для выбранной кассы. Нажмите «Установить».",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Перед Fito закрыть кассовую программу.",
+        "50003 — значение по умолчанию, а не обязательный порт.",
+        "Не устанавливать одновременно Viki Driver и ComProxy."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Fito устанавливает связь с выбранной кассой. Если кассовая программа по-прежнему не видит её, нужна диагностика интеграции.",
+      "on_success": "collect_connection_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V5",
+        "V6"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-connect-comproxy",
+      "title": "Fito через уже установленный ComProxy",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "os",
+            "equals": "Windows"
+          },
+          {
+            "fact": "fito_installed",
+            "equals": true
+          },
+          {
+            "fact": "cash_app_closed",
+            "equals": true
+          },
+          {
+            "fact": "device_identified",
+            "equals": true
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          },
+          {
+            "fact": "connection_type",
+            "equals": "comproxy"
+          },
+          {
+            "fact": "dreamkas_agent_available",
+            "equals": true
+          }
+        ],
+        "scope": "Без изменения ComProxy.ini и переустановки службы."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "os",
+          "question": "На компьютере Windows?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_installed",
+          "question": "Утилита Fito уже установлена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cash_app_closed",
+          "question": "Кассовая программа закрыта?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "device_identified",
+          "question": "Можете однозначно выбрать именно эту кассу среди подключённых устройств?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "connection_type",
+          "question": "Используется Viki Driver, ComProxy или прямое подключение COM?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "dreamkas_agent_available",
+          "question": "Доступен Дримкас Агент?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Нажмите правой кнопкой по значку Дримкас Агент → «Об устройстве».",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Запишите порт из строки «Подключение».",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "В Fito откройте «Функции» → «Параметры связи», выберите COM.",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        },
+        {
+          "order": 4,
+          "action": "Укажите прочитанный порт службы ComProxy и нажмите «Установить».",
+          "source_refs": [
+            "V5",
+            "V6"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Кассовая программа должна быть закрыта.",
+        "Не устанавливать одновременно Viki Driver и ComProxy."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Fito устанавливает связь с выбранной кассой.",
+      "on_success": "collect_connection_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V5",
+        "V6"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-connect-direct",
+      "title": "Fito напрямую через COM",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "os",
+            "equals": "Windows"
+          },
+          {
+            "fact": "fito_installed",
+            "equals": true
+          },
+          {
+            "fact": "cash_app_closed",
+            "equals": true
+          },
+          {
+            "fact": "device_identified",
+            "equals": true
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          },
+          {
+            "fact": "connection_type",
+            "equals": "direct_com"
+          },
+          {
+            "fact": "services_stopped_or_absent",
+            "equals": true
+          }
+        ],
+        "scope": "Если устройство нельзя однозначно определить, остановиться; не угадывать номер COM."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "os",
+          "question": "На компьютере Windows?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_installed",
+          "question": "Утилита Fito уже установлена?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cash_app_closed",
+          "question": "Кассовая программа закрыта?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "device_identified",
+          "question": "Можете однозначно выбрать именно эту кассу среди подключённых устройств?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "connection_type",
+          "question": "Используется Viki Driver, ComProxy или прямое подключение COM?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "services_stopped_or_absent",
+          "question": "Viki Driver и ComProxy отсутствуют или не запущены?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Откройте «Диспетчер устройств» → «Порты (COM и LPT)». Найдите STMicroelectronics Virtual COM Port, соответствующий нужной кассе.",
+          "source_refs": [
+            "V5"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "В Fito откройте «Функции» → «Параметры связи».",
+          "source_refs": [
+            "V5"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Выберите найденный COM-порт и нажмите «Установить».",
+          "source_refs": [
+            "V5"
+          ]
+        }
+      ],
+      "documentation_restrictions": [
+        "Прямой COM применяется, когда Viki Driver и ComProxy не установлены или не запущены.",
+        "Кассовая программа должна быть закрыта."
+      ],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Fito устанавливает связь с выбранной кассой.",
+      "on_success": "collect_connection_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V5"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-read-print-disabled",
+      "title": "Прочитать запрет печати в Fito",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "fito_connected",
+            "equals": true
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          },
+          {
+            "fact": "symptom",
+            "equals": "no_paper_output"
+          },
+          {
+            "fact": "paper_present",
+            "equals": true
+          }
+        ],
+        "scope": "Это чтение настройки, не исправление. При выключенном запрете не объявлять конкретную аппаратную неисправность."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_connected",
+          "question": "Fito уже подключена именно к этой кассе?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "В Fito откройте «Установка Параметров» → «Установка параметров кассы, часть 2».",
+          "source_refs": [
+            "V1",
+            "V2"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Нажмите «Считать».",
+          "source_refs": [
+            "V1",
+            "V2"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Сообщите, установлена ли галочка «Не печатать документы на чековой ленте». Не меняйте параметр.",
+          "source_refs": [
+            "V1",
+            "V2"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Получено значение параметра. Включённый запрет отключает печать документов, включая диагностический чек при включении.",
+      "on_success": "collect_print_setting",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V1",
+        "V2"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-paper-presence",
+      "title": "Уточнить наличие бумаги при красном индикаторе",
+      "status": "ready",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "paper_indicator",
+            "equals": "red"
+          },
+          {
+            "fact": "cover_accessible",
+            "equals": true
+          }
+        ],
+        "scope": "Не повторять, если пользователь уже однозначно сообщил наличие или отсутствие рулона."
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_indicator",
+          "question": "Какой индикатор бумаги горит?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "cover_accessible",
+          "question": "Крышка бумажного отсека открывается штатно?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": false
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Убедитесь, находится ли бумага в доступном бумажном отсеке. Сообщите результат, не разбирая механизм.",
+          "source_refs": [
+            "V1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Установлен физический факт наличия бумаги. Это не инструкция замены и не диагноз датчика.",
+      "on_success": "collect_paper_presence",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V1"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": false,
+        "status": "not_requested",
+        "questions": []
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-width-setting",
+      "title": "Настройка ширины ленты в драйвере",
+      "status": "blocked_missing_materials",
+      "kind": "configuration",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 58
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "В группе «Основные» установить ширину бумаги 58 мм.",
+          "source_refs": [
+            "A3",
+            "A1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Настройка соответствует рулону, строка не обрезается.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A3",
+        "A1"
+      ],
+      "required_materials": [],
+      "missing_materials": [
+        "Полный проверенный путь открытия параметра и применения изменения для версии драйвера клиента."
+      ],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Подтвердить путь, сохранение и права оператора."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-vertical-58",
+      "title": "Установка 58 мм при вертикальном положении",
+      "status": "needs_specialist_review",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "layout",
+            "equals": "vertical"
+          },
+          {
+            "fact": "paper_width_mm",
+            "equals": 58
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "layout",
+          "question": "Касса стоит горизонтально или вертикально?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_width_mm",
+          "question": "Какая ширина ленты указана на упаковке: 58 или 80 мм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Лента установлена по проверенной схеме.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A1"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Подтвердить совместное использование оси и ограничителя; дать отдельную последовательность и схему. Не склеивать два варианта."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-brightness",
+      "title": "Настройка яркости АТОЛ при подтверждённой недостаточности",
+      "status": "blocked_missing_materials",
+      "kind": "configuration",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "symptom",
+            "equals": "pale_print"
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Повысить яркость только при подтверждённой недостаточной настройке.",
+          "source_refs": [
+            "A2"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Читаемая печать без перегрева.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A2"
+      ],
+      "required_materials": [],
+      "missing_materials": [
+        "Путь, диапазон и порядок изменения яркости для драйвера клиента."
+      ],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Отделить недостаточную яркость от неисправности головки, прижима и перегрева."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "atol-driver-connection",
+      "title": "Проверка связи тестом драйвера АТОЛ v10",
+      "status": "needs_specialist_review",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "АТОЛ FPrint-22ПТК"
+          },
+          {
+            "fact": "platform",
+            "equals": "5.0"
+          },
+          {
+            "fact": "os",
+            "equals": "Windows"
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "platform",
+          "question": "Какая платформа АТОЛ указана в сведениях об устройстве?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "os",
+          "question": "На компьютере Windows?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Открыть «Пуск» → «Все программы» → «АТОЛ Драйвер ККТ v10» → «Тест драйвера».",
+          "source_refs": [
+            "A4",
+            "A5"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "В свойствах выбрать модель и канал подключения.",
+          "source_refs": [
+            "A4",
+            "A5"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Выполнить проверку связи и сопоставить модель и заводской номер с нужной кассой.",
+          "source_refs": [
+            "A4",
+            "A5"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Устройство определяется либо получена ошибка связи.",
+      "on_success": "collect_connection_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "A4",
+        "A5"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Уточнить канал, все обязательные параметры и порядок поиска для конфигурации клиента; не выдавать этот общий план как готовую настройку."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "pirit-configure-connection",
+      "title": "Подключение Пирит к Fito через ComProxy",
+      "status": "needs_specialist_review",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Пирит 2Ф"
+          },
+          {
+            "fact": "os",
+            "equals": "Windows"
+          },
+          {
+            "fact": "allowed_operator",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "os",
+          "question": "На компьютере Windows?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "allowed_operator",
+          "question": "Есть согласованный доступ к сервисной утилите?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "В параметрах связи Fito выбрать фактический COMZ.",
+          "source_refs": [
+            "P5",
+            "P11",
+            "P12",
+            "P13"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Нажать «Установить», запросить статус.",
+          "source_refs": [
+            "P5",
+            "P11",
+            "P12",
+            "P13"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Получен статус кассы.",
+      "on_success": "collect_connection_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "P5",
+        "P11",
+        "P12",
+        "P13"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Подтвердить способ определения COMZ на компьютере клиента и совместимость установленной Fito (в руководстве 2.3.2+). COM11 — лишь пример."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-paper-load",
+      "title": "Замена рулона Вики: модельная инструкция отсутствует",
+      "status": "blocked_missing_materials",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "paper_present",
+            "equals": false
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Рулон установлен, подача и печать восстановлены.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V1"
+      ],
+      "required_materials": [],
+      "missing_materials": [
+        "Руководство точной модели/ревизии с типом ленты, открытием крышки и направлением намотки."
+      ],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Указать модель клиента и проверить инструкцию замены."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-selftest",
+      "title": "SelfTest Вики без переноса сервисной разборки",
+      "status": "needs_specialist_review",
+      "kind": "diagnostic_check",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "paper_present",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "paper_present",
+          "question": "Рулон физически находится в отсеке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "Выключить кассу.",
+          "source_refs": [
+            "V1"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Зажать кнопку промотки, включить кассу.",
+          "source_refs": [
+            "V1"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Через пару секунд отпустить кнопку; ожидается длинный SelfTest.",
+          "source_refs": [
+            "V1"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Напечатан SelfTest либо зафиксировано отсутствие печати.",
+      "on_success": "collect_diagnostic_result",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V1"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Источник ставит перед тестом осмотр плат/шлейфов. Подтвердить допустимость самостоятельного теста, модель/ревизию и условия запуска без разборки."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-qr-macro",
+      "title": "Восстановление QR макросом Fito",
+      "status": "blocked_missing_materials",
+      "kind": "instruction",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "symptom",
+            "equals": "qr_missing"
+          },
+          {
+            "fact": "fito_connected",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "symptom",
+          "question": "Что происходит: бумаги нет, лента не выходит, выходит пустой или плохо напечатанный чек?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "fito_connected",
+          "question": "Fito уже подключена именно к этой кассе?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "action": "В Fito открыть «Тестирование» → «Запуск».",
+          "source_refs": [
+            "V4"
+          ]
+        },
+        {
+          "order": 2,
+          "action": "Выбрать подтверждённый файл макроса; дождаться сообщения об успешном выполнении.",
+          "source_refs": [
+            "V4"
+          ]
+        },
+        {
+          "order": 3,
+          "action": "Открыть «Сервис» → «Рестарт ККТ» → «Выполнить».",
+          "source_refs": [
+            "V4"
+          ]
+        }
+      ],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "QR снова печатается на соответствующем документе.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V4"
+      ],
+      "required_materials": [],
+      "missing_materials": [
+        "Имя, содержимое, проверенная ссылка и контрольная сумма нужного макроса.",
+        "Подтверждённая применимость макроса к модели и версии прошивки."
+      ],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Проверить макрос и его побочные эффекты; определить допустимого исполнителя."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki80-brightness-service",
+      "title": "Яркость Вики Принт 80 после замены механизма",
+      "status": "blocked_missing_materials",
+      "kind": "service",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт 80"
+          },
+          {
+            "fact": "mechanism_replaced",
+            "equals": true
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "mechanism_replaced",
+          "question": "Меняли печатающий механизм?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Настройка печати проверена специалистом.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V3"
+      ],
+      "required_materials": [],
+      "missing_materials": [
+        "Проверенный комплект прошивки/утилит и схема перемычек для нужной ревизии."
+      ],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Сервисная операция с перемычками и прошивкой. Подготовить полную карту для специалиста; кассиру не выдавать."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-time-registration",
+      "title": "Разница во времени при регистрации",
+      "status": "needs_specialist_review",
+      "kind": "service",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "operation",
+            "equals": "registration"
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "operation",
+          "question": "При какой операции возникает ошибка?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "exact_error",
+          "question": "Каков полный текст ошибки?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": false
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Специалист проверил сообщение и устранил причину в подходящей конфигурации.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V7"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Нужен полный текст ошибки, версия и состояние смены. Изменения времени, ФН или NVR — только по проверенной сервисной карте."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-fn-resource",
+      "title": "Ресурс КС при закрытии архива ФН",
+      "status": "needs_specialist_review",
+      "kind": "service",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "operation",
+            "equals": "close_fn_archive"
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "operation",
+          "question": "При какой операции возникает ошибка?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "exact_error",
+          "question": "Каков полный текст ошибки?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": false
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Специалист проверил сообщение и устранил причину в подходящей конфигурации.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V8"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Нужен полный текст ошибки, версия и состояние смены. Изменения времени, ФН или NVR — только по проверенной сервисной карте."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    },
+    {
+      "id": "viki-shift-mismatch",
+      "title": "Расхождение смен ФН и NVR",
+      "status": "needs_specialist_review",
+      "kind": "service",
+      "applicability": {
+        "all_of": [
+          {
+            "fact": "model",
+            "equals": "Вики Принт"
+          },
+          {
+            "fact": "operation",
+            "equals": "shift_close"
+          }
+        ],
+        "scope": ""
+      },
+      "clarifications": [
+        {
+          "fact": "model",
+          "question": "Какая точная модель указана на наклейке?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "operation",
+          "question": "При какой операции возникает ошибка?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": true
+        },
+        {
+          "fact": "exact_error",
+          "question": "Каков полный текст ошибки?",
+          "on_unknown": "clarify_or_specialist",
+          "required_before_steps": false
+        }
+      ],
+      "steps": [],
+      "documentation_restrictions": [],
+      "product_limits": [
+        "Не выполнять сервисную разборку и не менять фискальные данные в рамках этой процедуры."
+      ],
+      "expected_result": "Специалист проверил сообщение и устранил причину в подходящей конфигурации.",
+      "on_success": "confirm_resolution",
+      "on_failure": "specialist",
+      "source_refs": [
+        "V9"
+      ],
+      "required_materials": [],
+      "missing_materials": [],
+      "specialist_review": {
+        "required": true,
+        "status": "pending",
+        "questions": [
+          "Нужен полный текст ошибки, версия и состояние смены. Изменения времени, ФН или NVR — только по проверенной сервисной карте."
+        ]
+      },
+      "verification": {
+        "method": "source_review",
+        "date": "2026-11-09",
+        "hardware_tested": false
+      }
+    }
+  ],
+  "coverage": [
+    {
+      "case_id": "A-01",
+      "title": "Бумага закончилась",
+      "procedure_ids": [
+        "atol-paper-80-horizontal",
+        "atol-paper-80-vertical",
+        "atol-paper-58-horizontal",
+        "atol-width-setting",
+        "atol-vertical-58"
+      ],
+      "source_refs": [
+        "A1",
+        "A3"
+      ],
+      "known_information": "Есть отдельные варианты для 80/58 мм и горизонтальной/вертикальной установки. Для 58 мм нужен ограничитель и настройка ширины.",
+      "required_clarifications": "Ширина ленты; положение устройства; наличие ограничителя; доступ к настройке ширины.",
+      "gap": "Рисунки 9–12 содержат номера деталей: текст без схем неудобен. Комбинацию вертикального положения и 58 мм нельзя выдавать простым склеиванием двух списков без проверки процедуры.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-02",
+      "title": "Рулон установлен, ошибка «Нет бумаги»",
+      "procedure_ids": [],
+      "source_refs": [
+        "A2",
+        "A1"
+      ],
+      "known_information": "Раздел неполадок различает закончившуюся бумагу и неисправность датчика.",
+      "required_clarifications": "Точный текст; установлен ли рулон и правильно ли выведен конец; индикаторы; появилось ли после замены.",
+      "gap": "Нет пошаговой проверки датчика без разборки и критериев её результата. Нельзя утверждать неисправность датчика только по сообщению.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-03",
+      "title": "Бумага совсем не выходит",
+      "procedure_ids": [
+        "atol-jam-80-horizontal"
+      ],
+      "source_refs": [
+        "A2",
+        "A1"
+      ],
+      "known_information": "Для отсутствия реакции на кнопку указаны текущая операция, замятие, поломка; для отсутствия ответа ПК — питание и кабель.",
+      "required_clarifications": "Работает ли промотка; есть ли бумага; слышен ли механизм; выполняется ли команда; есть ли ошибка; реагирует ли на ПК.",
+      "gap": "Один симптом не выбирает причину. Нет единой готовой процедуры для всех вариантов; сервисную часть нельзя превращать в пользовательские шаги.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-04",
+      "title": "Выходит пустой чек",
+      "procedure_ids": [],
+      "source_refs": [
+        "A1",
+        "A2"
+      ],
+      "known_information": "A1 задаёт направление термослоя; A2 содержит причины «Отсутствует печать»: головка, прижим, недостаточная яркость.",
+      "required_clarifications": "Совсем пустой или бледный; началось ли после смены рулона; направление ленты; есть ли доступ к драйверу.",
+      "gap": "Буквальная процедура «пустой чек» не найдена. Нет проверенного в этих разделах пути и значения настройки яркости. Причины из A2 — альтернативы, не установленный диагноз.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-05",
+      "title": "Бледная или частичная печать",
+      "procedure_ids": [
+        "atol-width-setting",
+        "atol-brightness"
+      ],
+      "source_refs": [
+        "A2",
+        "A3"
+      ],
+      "known_information": "Пропуск точек связан в руководстве с печатающей головкой; низкая яркость — отдельная причина. Для 58 мм неверная ширина обрезает строку (A1/A3).",
+      "required_clarifications": "Вся строка бледная, полосы или обрезан край; ширина рулона и настройка; перегрев; когда началось.",
+      "gap": "Нет полного пользовательского пути изменения яркости в выбранных разделах. Нельзя использовать увеличение яркости для перегрева: там A2 рекомендует охлаждение и снижение яркости.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-06",
+      "title": "Бумага замялась",
+      "procedure_ids": [
+        "atol-jam-80-horizontal",
+        "atol-skew-80-horizontal"
+      ],
+      "source_refs": [
+        "A1",
+        "A2"
+      ],
+      "known_information": "Есть отдельные последовательности для заедания и перекоса ленты.",
+      "required_clarifications": "Замятие или перекос; завершена ли печать; ширина и положение устройства; повторяется ли проблема.",
+      "gap": "Сохранить запреты из A1. Глубокая разборка, заклинивший отрезчик и повторное замятие этим разделом не покрываются.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-07",
+      "title": "Не печатается QR-код",
+      "procedure_ids": [],
+      "source_refs": [
+        "A6"
+      ],
+      "known_information": "Есть описание содержимого QR и примеры реквизитов, но это не устранение отсутствия QR.",
+      "required_clarifications": "QR отсутствует целиком или не читается; вид документа; остальной текст печатается; версия ПО/шаблона.",
+      "gap": "В активном тексте не найдена процедура восстановления QR для АТОЛ. Нужна инструкция производителя по конкретной версии/шаблону.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-08",
+      "title": "Касса не отвечает программе",
+      "procedure_ids": [
+        "atol-driver-connection"
+      ],
+      "source_refs": [
+        "A2",
+        "A4",
+        "A5"
+      ],
+      "known_information": "Есть проверка питания/кабеля и проверка связи через тест драйвера v.10; описан поиск портов.",
+      "required_clarifications": "Программа/ОС; интерфейс; модель драйвера; ошибка; видит ли устройство тест драйвера; доступ к настройкам.",
+      "gap": "Нет инструкции для каждой кассовой программы клиента. Wi-Fi зависит от установленного модуля; нельзя подставлять выдуманные IP/порт.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "A-09",
+      "title": "Конкретный код или текст ошибки",
+      "procedure_ids": [],
+      "source_refs": [
+        "A2"
+      ],
+      "known_information": "Есть разбор «Смена превысила 24 часа», «Нет бумаги», перегрева головки, прерванного закрытия смены, проблем ФН/ОФД и других сообщений.",
+      "required_clarifications": "Полный текст/код; в какой программе и операции; индикаторы; версия; что уже делали.",
+      "gap": "Нет универсальной полной таблицы всех числовых кодов драйвера/ПО. Неизвестный код не сопоставлять по похожим цифрам.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-01",
+      "title": "Бумага закончилась",
+      "procedure_ids": [
+        "pirit-paper-load"
+      ],
+      "source_refs": [
+        "P1",
+        "P8"
+      ],
+      "known_information": "На стр.9 есть четыре шага замены с фотографиями; стр.8 задаёт параметры термобумаги 80/57 мм.",
+      "required_clarifications": "Модель; действительно отсутствует рулон; подходящая лента; доступ к крышке.",
+      "gap": "Направление намотки понятнее по фото; нельзя добавлять в инструкцию следующий раздел об эталонном ПО.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-02",
+      "title": "Рулон установлен, ошибка «Нет бумаги»",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P2",
+        "P1"
+      ],
+      "known_information": "Индикатор БУМАГА описан как отсутствие бумаги. Есть установка рулона и общий диагностический отчёт.",
+      "required_clarifications": "Физическое наличие рулона отдельно от текста ошибки; правильность установки; индикатор; печатается ли диагностика.",
+      "gap": "Нет модельной процедуры проверки датчика при установленном рулоне. Нельзя переносить диагноз датчика из Вики.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-03",
+      "title": "Бумага совсем не выходит",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P4",
+        "P2",
+        "P5"
+      ],
+      "known_information": "Стр.64 описывает блокировку при отсутствии ленты и аварии печатающего устройства; стр.66 даёт диагностический отчёт.",
+      "required_clarifications": "Есть ли питание и индикаторы; бумага; сообщение; доступ к Fito; выходит ли диагностический отчёт.",
+      "gap": "Нет полной последовательности локализации механической неисправности. Проверка соединений/ФН и ремонт — не самостоятельная инструкция кассиру.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-04",
+      "title": "Выходит пустой чек",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P1",
+        "P3",
+        "P2"
+      ],
+      "known_information": "Есть требование проверить читаемость, точки, полосы и затемнения диагностического чека; при дефекте руководство направляет в сервис.",
+      "required_clarifications": "Пустой весь чек или отдельная зона; замена рулона; вид диагностического чека; индикаторы.",
+      "gap": "Прямой процедуры «пустой чек» и регулировки яркости в текстовом корпусе не найдено. Установка рулона не доказывает причину дефекта.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-05",
+      "title": "Бледная или частичная печать",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P3",
+        "P2",
+        "P8"
+      ],
+      "known_information": "На стр.65 требуется читаемость символов, все точки и отсутствие полос/затемнений; при неисправности указан сервис.",
+      "required_clarifications": "Весь чек или полосы/пропуски; тип бумаги; началось ли после замены; качество диагностики.",
+      "gap": "Пользовательская настройка яркости и чистка головки для этой модели в корпусе не найдены.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-06",
+      "title": "Бумага замялась",
+      "procedure_ids": [],
+      "source_refs": [
+        "P4",
+        "P1"
+      ],
+      "known_information": "Есть общая проверка посторонних предметов в печатающем устройстве и замена рулона.",
+      "required_clarifications": "Доступна ли крышка; где замятие; выходит ли бумага; требуется ли разборка.",
+      "gap": "Пошаговой процедуры удаления замятия и работы с отрезчиком в активном тексте нет. Общая фраза не разрешает извлекать детали или разбирать механизм.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-07",
+      "title": "Не печатается QR-код",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P2"
+      ],
+      "known_information": "Есть только общий путь диагностического отчёта; отдельной текстовой процедуры QR в руководстве не обнаружено.",
+      "required_clarifications": "QR отсутствует или не читается; какой документ; печатается ли остальной текст; версия ПО.",
+      "gap": "Нет применимой QR-инструкции и файла/настройки для Пирит. Возможное изображение QR в образце чека не является инструкцией восстановления.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-08",
+      "title": "Касса не отвечает программе",
+      "procedure_ids": [
+        "pirit-configure-connection"
+      ],
+      "source_refs": [
+        "P5",
+        "P11",
+        "P12",
+        "P13"
+      ],
+      "known_information": "Разделы 9–10 описывают питание, кабель, ComProxy, Fito 2.3.2+, выбор COMZ, проверку статуса и повторную проверку настроек при отсутствии связи.",
+      "required_clarifications": "Windows или другая ОС; COM/USB; установлен ли ComProxy; фактические COMX/COMY/COMZ; ошибка/статус; доступ администратора.",
+      "gap": "Установка/удаление службы требует прав и дистрибутива; номер COM11 в примере нельзя считать фактическим. Другая ОС/кассовая программа не покрыта этими шагами.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "P-09",
+      "title": "Конкретный код или текст ошибки",
+      "procedure_ids": [
+        "pirit-diagnostic-report"
+      ],
+      "source_refs": [
+        "P3",
+        "P2",
+        "P4"
+      ],
+      "known_information": "Стр.65–66 перечисляют сообщения диагностики: батарея, авторизация, ОЗУ, модуль/связь ФН, регистрация, закрытый ФН, расхождение смен. Стр.64 описывает условия блокировки.",
+      "required_clarifications": "Точный текст; чек диагностики или кассовая программа; операция; статус/последний код; версия ПО.",
+      "gap": "Полного справочника кодов всех программ нет. В тексте стр.7 есть противоречивые описания сроков ресурса ФН — не использовать их как эталон без отдельной сверки.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-01",
+      "title": "Бумага закончилась",
+      "procedure_ids": [
+        "viki-paper-presence",
+        "viki-paper-load"
+      ],
+      "source_refs": [
+        "V1"
+      ],
+      "known_information": "Статья связывает красный индикатор с датчиком бумаги и предлагает убедиться в наличии бумаги в отсеке.",
+      "required_clarifications": "Точная модель 57/57 Плюс/80/80 Плюс и ревизия; есть ли рулон; индикатор.",
+      "gap": "В загруженных статьях нет полноценной процедуры установки рулона с направлением и подходящей лентой для каждой модели.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-02",
+      "title": "Рулон установлен, ошибка «Нет бумаги»",
+      "procedure_ids": [
+        "viki-paper-presence"
+      ],
+      "source_refs": [
+        "V1"
+      ],
+      "known_information": "Статья прямо описывает: бумага вставлена, датчик не реагирует — указание на неисправность датчика. Это условие, а не диагноз по одной фразе пользователя.",
+      "required_clarifications": "Точная модель; индикатор/текст; правильность установки; началось ли после замены.",
+      "gap": "Нет процедуры ремонта/калибровки датчика для сотрудника; применимость к конкретной ревизии не размечена.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-03",
+      "title": "Бумага совсем не выходит",
+      "procedure_ids": [
+        "viki-read-print-disabled",
+        "viki-selftest"
+      ],
+      "source_refs": [
+        "V1",
+        "V2",
+        "V5"
+      ],
+      "known_information": "Есть ветви: отсутствие бумаги, износ ролика/шестерни, запрет печати, связь и аппаратная неисправность; описан SelfTest.",
+      "required_clarifications": "Модель; промотка; бумага; чек при включении; связь с Fito; включён ли запрет печати.",
+      "gap": "Статья смешивает пользовательские и сервисные действия; упомянутой в V1 статьи «Кассовая программа не видит Вики Принт» нет среди 47 активных HTML-документов. Нельзя перескакивать к плате/прошивке или выдавать всю статью сразу.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-04",
+      "title": "Выходит пустой чек",
+      "procedure_ids": [],
+      "source_refs": [
+        "V1",
+        "V3"
+      ],
+      "known_information": "Общая статья описывает проблемы механизма; отдельная яркость — только Вики Принт 80 и сервисное вмешательство.",
+      "required_clarifications": "Пустой весь рулон или текст бледный; чек диагностики; модель; замена ленты; промотка.",
+      "gap": "Прямая пользовательская процедура пустой печати и направления ленты в активных статьях не найдена. V3 не универсальна и требует доступа к плате.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-05",
+      "title": "Бледная или частичная печать",
+      "procedure_ids": [
+        "viki80-brightness-service"
+      ],
+      "source_refs": [
+        "V3",
+        "V1"
+      ],
+      "known_information": "V3 относится к Вики Принт 80, рекомендует процедуру при замене механизма: джамперы, прошивка, Set Darkness. V1 описывает наложение печати при проблеме ролика.",
+      "required_clarifications": "Точная модель/ревизия; бледность или полосы/наложение; меняли ли механизм; есть ли SelfTest.",
+      "gap": "Нет универсальной настройки яркости для всех Вики; архив/инструменты и визуальная схема нужны специалисту.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-06",
+      "title": "Бумага замялась",
+      "procedure_ids": [],
+      "source_refs": [
+        "V1",
+        "V10"
+      ],
+      "known_information": "Есть сведения о механизме и отдельная процедура отключения отрезчика только для 57 Плюс Ф с 2025 года.",
+      "required_clarifications": "Замята лента или заклинил нож; модель и год; повторяемость; требуется ли разборка.",
+      "gap": "Самостоятельное устранение замятия в активном тексте не найдено. Отключение отрезчика — изменение оборудования с разборкой, не эквивалент устранению замятия.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-07",
+      "title": "Не печатается QR-код",
+      "procedure_ids": [
+        "viki-qr-macro"
+      ],
+      "source_refs": [
+        "V4"
+      ],
+      "known_information": "Есть специальная статья: макрос в Fito и рестарт ККТ.",
+      "required_clarifications": "Точная модель/версия; QR отсутствует или не читается; есть ли нужный файл и доступ к Fito.",
+      "gap": "В индексированном тексте нет имени/содержимого/ссылки на файл макроса. Ссылка могла быть потеряна при извлечении HTML: отсутствие в тексте не доказывает отсутствия на сайте.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-08",
+      "title": "Касса не отвечает программе",
+      "procedure_ids": [
+        "viki-connect-driver",
+        "viki-connect-comproxy",
+        "viki-connect-direct"
+      ],
+      "source_refs": [
+        "V5",
+        "V6",
+        "V2"
+      ],
+      "known_information": "Есть раздельные подключения через Viki Driver, ComProxy и прямой COM. V6 предупреждает о конфликте одновременно установленных служб.",
+      "required_clarifications": "ОС/кассовое ПО; тип службы; физический интерфейс; ошибка; фактический порт; одно или несколько устройств.",
+      "gap": "50003 — значение по умолчанию, не гарантированное; конкретная кассовая программа может требовать отдельной настройки. Переустановка/прошивка не первый универсальный шаг.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    },
+    {
+      "case_id": "V-09",
+      "title": "Конкретный код или текст ошибки",
+      "procedure_ids": [
+        "viki-time-registration",
+        "viki-fn-resource",
+        "viki-shift-mismatch"
+      ],
+      "source_refs": [
+        "V7",
+        "V8",
+        "V9"
+      ],
+      "known_information": "Есть отдельные статьи про разницу времени, исчерпание ресурса КС при закрытии архива, расхождение номеров смен. У каждой собственные предусловия.",
+      "required_clarifications": "Полный текст; операция; модель/версия; статус смены; программа; уже выполненные действия.",
+      "gap": "Нет единой полной таблицы всех ошибок. «Разница во времени» в V7 относится к регистрации; нельзя обобщать её на любую ошибку времени.",
+      "when_no_applicable_ready_procedure": "specialist",
+      "routing_note": "Связь с карточкой не означает применимость: проверить все условия процедуры. Диагностический отчёт — не исправление. Не заменять физическое наличие бумаги сообщением устройства."
+    }
+  ]
+}
