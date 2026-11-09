@@ -47,3 +47,7 @@
 .support-composer textarea { border: 0; min-height: 64px; margin: 0; resize: vertical; }
 .support-composer .support-actions { margin: 8px 0 0; }
 @media (max-width: 600px) { .support-panel { padding: 16px; } .support-panel nav { top: -16px; } .support-message { max-width: 95%; padding: 12px; } .support-panel h2 { font-size: 22px; } .support-actions button { flex: 1 1 auto; } }
+
+.support-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.support-choices button { border-color: #9acdb9; color: #087f68; background: #edf8f1; }
+.support-choices button:hover:not(:disabled) { background: #d7eee2; }

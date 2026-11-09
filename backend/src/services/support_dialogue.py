@@ -9,6 +9,8 @@ from src.services.diagnosis import is_ready, ticket_details
 from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
 from src.services.rag import RAGService
+from src.services.receipt_choices import choices_for
+from src.services.receipt_instructions import select_instruction
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -28,14 +30,14 @@ class SupportDialogueService(BaseService):
         await self.role(user_id)
         row = await self.db.support.create_session(user_id)
         await self.db.commit()
-        return {**row, "answer": WELCOME}
+        return {**row, "answer": WELCOME, "choices": choices_for(row["state"])}
 
     async def get(self, session_id, user_id, lock=False):
         await self.role(user_id)
         row = await self.db.support.get_session(session_id, user_id, lock=lock)
         if row is None:
             raise HTTPException(404, "Диалог не найден")
-        return row
+        return {**row, "choices": choices_for(row["state"])}
 
     def replay(self, history, data):
         for entry in history:
@@ -43,7 +45,7 @@ class SupportDialogueService(BaseService):
                 entry.get("request_id") == str(data.request_id)
                 and entry.get("role") == "assistant"
             ):
-                if entry.get("question") != data.message:
+                if entry.get("question") != data.message or entry.get("choice_id") != data.choice_id:
                     raise HTTPException(
                         409,
                         "Идентификатор запроса уже использован для другого сообщения",
@@ -69,7 +71,13 @@ class SupportDialogueService(BaseService):
             raise HTTPException(409, "Диалог достиг лимита. Начните новое обращение.")
         await self.db.commit()
         state = deepcopy(row["state"])
-        normalized = data.message.casefold().rstrip(".!?")
+        message = data.message
+        if data.choice_id:
+            choice = next((item for item in choices_for(state) if item["id"] == data.choice_id), None)
+            if choice is None:
+                raise HTTPException(409, "Вопрос изменился. Обновите диалог и выберите ответ снова.")
+            message = choice["label"]
+        normalized = message.casefold().rstrip(".!?")
         create_ticket = is_ready(state) and normalized in {"да", "yes", "отправить"}
         if create_ticket:
             answer = ""
@@ -88,17 +96,23 @@ class SupportDialogueService(BaseService):
                     for chunk in chunks
                 ]
 
-            async def lookup(query):
+            async def lookup(query, flow):
                 rag = RAGService(self.db, VectorSearchService(self.db, models["embedding"]),
                                  models["llm"], models["reranker"])
                 result = await rag.answer(query)
-                return result.model_dump(mode="json")
+                payload = result.model_dump(mode="json")
+                documents = []
+                for source in payload["sources"]:
+                    document = await self.db.documents.find_url(source["url"])
+                    if document and not document.is_archived:
+                        documents.append((source, document.content))
+                return select_instruction(payload, documents, flow)
 
             try:
                 state, answer = await respond(
                     state,
                     row["history"],
-                    data.message,
+                    message,
                     models.get("llm") if models.get("status") == "ready" else None,
                     retrieve,
                     timeout=settings.SUPPORT_MODEL_TIMEOUT_SECONDS,
@@ -131,6 +145,7 @@ class SupportDialogueService(BaseService):
             answer = f"Заявка {ticket_id} зарегистрирована. Статус и решение будут доступны в разделе «Мои заявки»."
         reply = SupportReply(
             answer=answer,
+            choices=choices_for(state),
             ticket_id=ticket_id,
             request_id=data.request_id,
             version=current["version"] + 1,
@@ -140,7 +155,7 @@ class SupportDialogueService(BaseService):
         history = current["history"] + [
             {
                 "role": "user",
-                "content": data.message,
+                "content": message,
                 "request_id": str(data.request_id),
             },
             {
@@ -148,6 +163,7 @@ class SupportDialogueService(BaseService):
                 "content": answer,
                 "request_id": str(data.request_id),
                 "question": data.message,
+                "choice_id": data.choice_id,
                 "response": reply.model_dump(mode="json"),
             },
         ]

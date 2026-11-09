@@ -11,6 +11,7 @@ class SupportMessage(BaseModel):
     model_config = ConfigDict(extra="forbid")
     message: str = Field(min_length=1, max_length=4000)
     request_id: UUID = Field(default_factory=uuid4)
+    choice_id: str | None = Field(default=None, max_length=80)
 
     @field_validator("message")
     @classmethod
@@ -20,7 +21,13 @@ class SupportMessage(BaseModel):
         return value.strip()
 
 
+class SupportChoice(BaseModel):
+    id: str
+    label: str
+
+
 class SupportReply(BaseModel):
+    choices: list[SupportChoice] = Field(default_factory=list)
     answer: str
     ticket_id: UUID | None = None
     request_id: UUID

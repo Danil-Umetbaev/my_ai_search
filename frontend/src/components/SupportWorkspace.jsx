@@ -40,6 +40,7 @@ export default function SupportWorkspace({ user, onClose }) {
   const sendingRef = useRef(false);
   const [session, setSession] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [choices, setChoices] = useState([]);
   const [phase, setPhase] = useState("collect");
   const [input, setInput] = useState("");
   const [mode, setMode] = useState(null);
@@ -63,6 +64,7 @@ export default function SupportWorkspace({ user, onClose }) {
 
   function restore(data) {
     setSession(data.id);
+    setChoices(data.choices || []);
     setPhase(data.ticket_id ? "ticket_created" : data.state?._phase || "collect");
     setMessages(data.history?.length ? data.history : [{ role: "assistant", content: data.answer || "Опишите неисправность и текст ошибки. Не отправляйте пароли и коды подтверждения." }]);
   }
@@ -118,15 +120,15 @@ export default function SupportWorkspace({ user, onClose }) {
     else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) { event.preventDefault(); first.focus(); }
   }
 
-  async function send(text) {
+  async function send(text, choiceId = null) {
     const message = text.trim();
     if (!message || !session || busy) return;
     await run(async () => {
       const pending = readStorage(pendingKey);
-      const requestId = pending?.session === session && pending.message === message ? pending.id : crypto.randomUUID();
-      writeStorage(pendingKey, { id: requestId, session, message });
+      const requestId = pending?.session === session && pending.message === message && pending.choiceId === choiceId ? pending.id : crypto.randomUUID();
+      writeStorage(pendingKey, { id: requestId, session, message, choiceId });
       try {
-        const result = await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message, request_id: requestId }), signal: AbortSignal.timeout(65000) });
+        const result = await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message, request_id: requestId, choice_id: choiceId }), signal: AbortSignal.timeout(65000) });
         const data = await request(`/support/sessions/${session}`);
         restore(data); setPhase(result.phase); setInput(""); writeStorage(pendingKey, null);
       } catch (err) {
@@ -159,6 +161,7 @@ export default function SupportWorkspace({ user, onClose }) {
       {view === "diagnosis" ? <>
 
         <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
+        {!terminal && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
         {!terminal && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input); }}>
           <textarea id="support-message" aria-label="Ваш ответ" maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder="Опишите симптомы или результат проверки" />
           <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>Отправить</button>{phase === "confirm" && <button type="button" disabled={busy} onClick={() => send("да")}>Подтвердить заявку</button>}<button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button><button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>

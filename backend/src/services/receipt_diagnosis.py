@@ -7,6 +7,8 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 QUESTIONS = {
+    "layout": "Как расположена касса: горизонтально или вертикально?",
+    "width": "Какая ширина чековой ленты: 80 или 58 мм?",
     "model": "Какая модель указана на кассе: Вики Принт, Пирит 2Ф или АТОЛ FPrint-22ПТК? Если не можете посмотреть, так и напишите.",
     "symptom": "Что происходит: бумага совсем не выходит, выходит пустой чек или на чеке нет только QR-кода?",
     "paper": "Бумага в кассе есть? Посмотрите также, горит ли индикатор «Бумага». Ничего разбирать не нужно.",
@@ -16,7 +18,7 @@ QUESTIONS = {
 
 def applies(state, message):
     return bool(state.get("_receipt") or re.search(
-        r"не\s*печат|не\s*выходит.*(?:чек|бумаг)|касс\w*.*(?:слом|не работает)|ничего.*не работает", message, re.I,
+        r"\bчек\b|пуст\w* чек|не\s*печат|не\s*выходит.*(?:чек|бумаг)|касс\w*.*(?:слом|не работает)|ничего.*не работает", message, re.I,
     ))
 
 
@@ -39,6 +41,7 @@ async def respond_receipt(state, message, lookup, timeout=45):
     state = deepcopy(state)
     flow = state.setdefault("_receipt", {})
     text = message.strip().casefold().replace("ё", "е")
+    text = re.sub(r"бамаг", "бумаг", text)
     state.setdefault("problem", message)
     state.update(_engine="rules", _phase="diagnosing")
     observations = state.setdefault("observations", [])
@@ -51,9 +54,12 @@ async def respond_receipt(state, message, lookup, timeout=45):
         state["environment"] = message
     if re.search(r"перезагруз|перезапус|пробовал|проверял", text):
         state["attempts"] = message
-    if re.search(r"нет бумаги|бумага закончилась|бумага есть", text):
-        flow["paper"] = message
-        flow["paper_missing"] = bool(re.search(r"нет бумаги|бумага закончилась", text))
+    # Device error text does not replace a physical observation.
+    if pending != "error" and not re.search(r"ошибк|пишет|сообщение", text):
+        if re.search(r"бумаг\w* нет|нет бумаг|бумага закончилась", text):
+            flow.update(paper="absent", paper_missing=True)
+        elif re.search(r"бумага есть|рулон установлен", text):
+            flow.update(paper="present", paper_missing=False)
     if re.search(r"qr|куар", text):
         flow["symptom"] = "не печатается QR-код"
     elif re.search(r"пуст\w* (?:чек|бумаг)|бел\w* (?:чек|бумаг)", text):
@@ -76,19 +82,36 @@ async def respond_receipt(state, message, lookup, timeout=45):
             return state, question
         return handoff(state, "Не удалось определить модель или характер неисправности. Специалисту понадобится уточнение.")
     if pending == "paper":
-        flow["paper"] = message
-        state["check_result"] = message
-        flow["paper_missing"] = bool(re.search(r"бумаг\w* нет|нет бумаг|закончилась|^нет[.! ]*$", text))
-    if pending == "error" and re.search(r"не понимаю|не могу|не знаю", text):
-        return handoff(state, "Без сообщения об ошибке или состояния индикаторов пока нельзя выбрать подходящую инструкцию. Не будем предлагать случайные настройки кассы.")
+        if re.search(r"не могу|не знаю|не понимаю", text):
+            return handoff(state, "Не удалось проверить наличие рулона.")
+        if re.fullmatch(r"(?:да|есть)[.! ]*", text):
+            flow.update(paper="present", paper_missing=False)
+        elif re.fullmatch(r"нет[.! ]*", text):
+            flow.update(paper="absent", paper_missing=True)
+        if not flow.get("paper"):
+            flow.update(pending="paper", question=QUESTIONS["paper"])
+            return state, "Не понял, установлен ли рулон. Выберите вариант ниже или уточните ответ."
     if pending == "error":
+        if "введу текст" in text:
+            flow.update(pending="error", question=QUESTIONS["error"])
+            return state, "Напишите сообщение или код ошибки так, как он показан на экране."
         flow["error"] = message
-        state["check_result"] = (state.get("check_result", "") + "\nОшибка/индикаторы: " + message).strip()
+        state["check_result"] = "Рулон: " + flow.get("paper", "unknown") + "\nСообщение устройства: " + message
+    if pending in {"layout", "width"}:
+        if "не знаю" in text:
+            return handoff(state, "Для выбора варианта установки бумаги нужно определить расположение кассы и ширину ленты.")
+        if pending == "layout":
+            if "горизонт" in text: flow["layout"] = "horizontal"
+            elif "вертик" in text: flow["layout"] = "vertical"
+        elif re.search(r"\b(58|80)\b", text):
+            flow["width"] = re.search(r"\b(58|80)\b", text)[1]
     required = ["model", "symptom"]
     if flow.get("symptom") != "не печатается QR-код":
         required.append("paper")
         if not flow.get("paper_missing"):
             required.append("error")
+    if flow.get("paper_missing") and flow.get("model") == "АТОЛ FPrint-22ПТК":
+        required.extend(["layout", "width"])
     for field in required:
         if not flow.get(field):
             flow.update(pending=field, question=QUESTIONS[field])
@@ -97,10 +120,10 @@ async def respond_receipt(state, message, lookup, timeout=45):
         return state, "Поиск по инструкциям пока загружается. Данные сохранены; напишите «продолжить» через минуту."
     query = (
         f"Как заправить чековую ленту в {flow['model']}?" if flow.get("paper_missing") else
-        f"{flow['model']}: {flow['symptom']}. {flow.get('error', '')} Какие проверки описаны в инструкции?"
+        f"{flow['model']}: {flow['symptom']}. Рулон: {flow.get('paper', 'unknown')}. Сообщение устройства: {flow.get('error', '')}. Какие проверки описаны в инструкции?"
     )
     try:
-        result = await asyncio.wait_for(lookup(query), timeout=timeout)
+        result = await asyncio.wait_for(lookup(query, flow), timeout=timeout)
     except Exception:
         logger.exception("Receipt knowledge lookup failed")
         return state, "Не удалось получить инструкцию. Данные сохранены; попробуйте «продолжить» или выберите специалиста."
