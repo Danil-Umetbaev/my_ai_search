@@ -1,9 +1,12 @@
 """Explicit live check: PYTHONPATH=. python tests/support_app_check.py.
 
 Creates isolated temporary users; removes their sessions and tickets in finally.
-Uses the running nginx/API, never starts models or rebuilds containers.
+Uses the running API; SUPPORT_CHECK_URL selects nginx if required.
+Fault injection runs in a separate ASGI process against temporary test sessions.
+Speed checks are opt-in (--load); never starts models or rebuilds containers.
 """
 
+import argparse
 import asyncio
 import json
 import math
@@ -137,6 +140,44 @@ async def load(clients):
     assert result["clarifications"]["p95"] <= 1.5
 
 
+
+async def isolation(clients):
+    sessions = await asyncio.gather(*(new_session(c) for c in clients))
+    await asyncio.gather(*(send(c, sid, f"Не печатает чек, магазин {i+100}") for i, (c, sid) in enumerate(zip(clients, sessions))))
+    for i, (client, sid) in enumerate(zip(clients, sessions)):
+        row = await call(client, "GET", f"/support/sessions/{sid}")
+        assert len(row["history"]) == 2
+        assert str(i+100) in row["history"][0]["content"]
+        await call(clients[(i+1)%len(clients)], "GET", f"/support/sessions/{sid}", expected=404)
+    print("Five simultaneous users: isolated histories PASS", flush=True)
+
+
+async def failures(authenticated):
+    from unittest.mock import patch, AsyncMock
+    from src.main import app
+    from src.services.support_knowledge import SupportKnowledgeService
+    app.state.models = {"status": "loading"}
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://app/api/v1",
+                                cookies=authenticated.cookies, headers={"Origin": "http://localhost:18081"}) as client:
+        status = await call(client, "GET", "/support/status")
+        assert status["models"] == "loading"
+        sid = await new_session(client)
+        reply = await send(client, sid, "Не печатает чек")
+        assert reply["choices"]
+        sid = await new_session(client)
+        with patch.object(SupportKnowledgeService, "lookup", AsyncMock(side_effect=RuntimeError("Injected search outage"))):
+            reply = await send(client, sid, "Пирит 2Ф: БАТАРЕЯ РАЗРЯЖЕНА, что означает?")
+        row = await call(client, "GET", f"/support/sessions/{sid}")
+        assert row["state"]["next_action"] == "retry_search"
+        assert "временно недоступен" in reply["answer"]
+        assert row["state"]["receipt_facts"]["model"] == "Пирит 2Ф"
+        reply = await send(client, sid, "Повтори поиск")
+        row = await call(client, "GET", f"/support/sessions/{sid}")
+        assert row["state"].get("search_status") != "unavailable", row["state"]
+        assert len(row["history"]) == 4
+    print("API fault injection: loading, outage, preserved facts, retry PASS", flush=True)
+
+
 async def main():
     db = await connection()
     ids, clients = [], []
@@ -146,12 +187,15 @@ async def main():
         for index in range(5):
             email = f"support-check-{uuid4()}@example.com"
             ids.append(await db.fetchval("INSERT INTO users(email,role,hashed_password) VALUES($1,'kassir',$2) RETURNING id", email, hashed))
-            client = httpx.AsyncClient(base_url=os.getenv("SUPPORT_CHECK_URL", "http://frontend/api/v1"),
+            client = httpx.AsyncClient(base_url=os.getenv("SUPPORT_CHECK_URL", "http://app:8000/api/v1"),
                                        headers={"Origin": "http://localhost:18081"}, timeout=70)
             clients.append(client)
             await call(client, "POST", "/auth/login", {"email": email, "password": password})
         await lifecycle(clients)
-        await load(clients)
+        await isolation(clients)
+        await failures(clients[0])
+        if args.load:
+            await load(clients)
     finally:
         for client in clients:
             await client.aclose()
@@ -161,5 +205,8 @@ async def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--load", action="store_true")
+    args = parser.parse_args()
     asyncio.run(main())
 
