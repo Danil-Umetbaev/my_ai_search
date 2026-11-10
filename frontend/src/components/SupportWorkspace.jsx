@@ -6,7 +6,7 @@ import { pendingForSession, outgoingMessage } from "./supportPending";
 import "./SupportWorkspace.css";
 
 const STATUS = { open: "Новая", in_progress: "В работе", resolved: "Решена" };
-const LABELS = { performed_checks: "Выполненные проверки", receipt_facts: "Факты о кассе", completed_procedures: "Пройденные процедуры", problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
+const LABELS = { paper_facts: "Условия работы с бумагой", diagnostic_facts: "Уточнённые данные", problem_changes: "Изменения проблемы", performed_checks: "Выполненные проверки", receipt_facts: "Факты о кассе", completed_procedures: "Пройденные процедуры", problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
 
 function readStorage(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -35,7 +35,7 @@ function FactValue({ value }) {
   if (typeof value === "boolean") return value ? "Да" : "Нет";
   if (typeof value !== "object") return String(value);
   if (Array.isArray(value)) return <ul>{value.map((entry, index) => <li key={index}><FactValue value={entry} /></li>)}</ul>;
-  const labels = { model: "Модель", symptom: "Симптом", paper_present: "Рулон установлен", paper_width_mm: "Ширина ленты, мм", layout: "Расположение", error_text: "Сообщение устройства", error_status: "Наличие ошибки", problem_resolved: "Проблема решена", cover_opens: "Крышка открывается", suitable_roll_available: "Есть подходящий рулон", question: "Вопрос", answer: "Ответ", field: "Факт", before: "Раньше", after: "Теперь", text: "Сообщение пользователя", reason: "Причина изменения" };
+  const labels = { selected_answer: "Понятый ответ", previous: "Раньше", current: "Теперь", value: "Новое значение", invalidated: "Нужно уточнить заново", previous_facts: "Прежние условия бумаги", previous_diagnostic_facts: "Прежние данные", instruction: "Инструкция", result: "Результат", sources: "Источники", title: "Документ", url: "Ссылка", model: "Модель", symptom: "Симптом", paper_present: "Рулон установлен", paper_width_mm: "Ширина ленты, мм", layout: "Расположение", error_text: "Сообщение устройства", error_status: "Наличие ошибки", problem_resolved: "Проблема решена", cover_opens: "Крышка открывается", suitable_roll_available: "Есть подходящий рулон", question: "Вопрос", answer: "Ответ", field: "Факт", before: "Раньше", after: "Теперь", text: "Сообщение пользователя", reason: "Причина изменения" };
   return <dl>{Object.entries(value).map(([key, entry]) => <div key={key}><dt>{labels[key] || key}</dt><dd><FactValue value={entry} /></dd></div>)}</dl>;
 }
 

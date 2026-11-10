@@ -80,6 +80,19 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(state["diagnostic_facts"]["Выключенный интерфейс"], "Wi-Fi")
         self.assertNotIn("paper_facts", updated)
 
+    async def test_explicit_negative_result_overrides_an_incorrect_model_guess(self):
+        for node, message, target in (
+            ("pc", "Программа не видит кассу", "handoff"),
+            ("pc_details", "Связи с кассой нет", "handoff"),
+            ("ofd_settings", "Подтверждения от ОФД нет", "handoff"),
+            ("ofd", "Разбудил компьютер, подтверждения нет", "ofd_lock"),
+        ):
+            model = SimpleNamespace(route_support=Mock(return_value=json.dumps({"question": node, "choice": "Да, помогло"})))
+            updated, _ = await advance(self.states[node], message, [], model)
+            self.assertEqual(updated["_atol_tree"]["node"], target)
+            self.assertEqual(updated["check_result"], "Не помогло")
+            model.route_support.assert_not_called()
+
     def test_inheritance_does_not_mutate_shared_policies(self):
         first = policy("pc_details")
         first["evidence"]["0"].append("injected")
