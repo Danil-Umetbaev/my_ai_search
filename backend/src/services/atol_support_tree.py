@@ -98,9 +98,11 @@ def advance(state, message):
         state.setdefault("problem_changes", []).append({
             "previous": state.get("problem"), "current": proposal["description"],
             "previous_facts": state.get("paper_facts", {}),
+            "previous_diagnostic_facts": state.get("diagnostic_facts", {}),
         })
         flow.pop("answers", None)
         state.pop("paper_facts", None)
+        state.pop("diagnostic_facts", None)
         state.pop("check_result", None)
     if flow["node"] == "model" and target in {"menu", "categories"}:
         state["environment"] = "АТОЛ FPrint-22ПТК"

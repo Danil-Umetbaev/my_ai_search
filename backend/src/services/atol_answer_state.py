@@ -25,5 +25,11 @@ def record(state, node_id, choice_index):
             "field": binding["field"], "previous": removed[0]["value"],
             "value": value, "invalidated": [item["field"] for item in removed[1:]],
         })
-    answers[index:] = [{"node": node_id, "field": binding["field"], "value": value}]
-    state["paper_facts"] = {item["field"]: item["value"] for item in answers}
+    answers[index:] = [{"node": node_id, "field": binding["field"], "value": value,
+                       "storage": binding.get("storage", "paper_facts")}]
+    for storage in {item.get("storage", "paper_facts") for item in answers + removed}:
+        values = {item["field"]: item["value"] for item in answers if item.get("storage", "paper_facts") == storage}
+        if values:
+            state[storage] = values
+        else:
+            state.pop(storage, None)

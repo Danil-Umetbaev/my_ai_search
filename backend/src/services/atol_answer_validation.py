@@ -1,6 +1,7 @@
 """Require explicit evidence for facts that the model must not guess."""
 
 import re
+from copy import deepcopy
 
 from src.services.atol_answer_state import configuration
 
@@ -8,7 +9,29 @@ from src.services.atol_answer_state import configuration
 def policy(node_id):
     data = configuration()
     group = data["validation_groups"].get(node_id, node_id)
-    return data["validation"].get(group, {})
+    return resolve_policy(data["validation"], group)
+
+
+def resolve_policy(policies, name, visited=()):
+    if name in visited:
+        raise ValueError("Cyclic answer validation policy")
+    own = policies.get(name, {})
+    parent = own.get("extends")
+    if parent and parent not in policies:
+        raise ValueError("Unknown parent answer validation policy")
+    result = resolve_policy(policies, parent, (*visited, name)) if parent else {}
+    for key, value in own.items():
+        if key == "extends":
+            continue
+        if isinstance(value, dict):
+            section = result.setdefault(key, {})
+            for index, patterns in value.items():
+                section[index] = section.get(index, []) + patterns
+        elif isinstance(value, list):
+            result[key] = result.get(key, []) + value
+        else:
+            result[key] = deepcopy(value)
+    return result
 
 
 def matches(patterns, message):

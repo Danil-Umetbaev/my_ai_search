@@ -70,7 +70,7 @@ async def advance(state, message, history, llm=None, timeout=15):
         and matches(correction["symptoms"], message)
     ):
         selection = deepcopy(state)
-        selection["_atol_tree"]["node"] = "group_print"
+        selection["_atol_tree"]["node"] = "categories"
         updated, _ = await advance(selection, message, history, llm, timeout)
         proposal = updated["_atol_tree"].get("proposal")
         if proposal is not None:
