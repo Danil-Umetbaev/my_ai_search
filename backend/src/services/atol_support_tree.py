@@ -65,7 +65,7 @@ def advance(state, message):
             return state, "Заявка не отправлена. Можно подтвердить передачу или отменить обращение."
         else:
             state["additional_context"] = message
-            return state, "Передать обращение специалисту? Нажмите «Подтвердить заявку» или отмените обращение."
+            return state, "Передать обращение специалисту? Выберите отправку с дополнением или без него либо отмените обращение."
     if not target:
         return state, "Выберите подходящую кнопку ниже. Если варианта нет, можно обратиться к специалисту."
     state.setdefault("observations", []).append({"question": current["text"], "answer": message})

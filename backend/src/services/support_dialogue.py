@@ -52,6 +52,7 @@ class SupportDialogueService(BaseService):
                 if (
                     entry.get("question") != data.message
                     or entry.get("choice_id") != data.choice_id
+                    or entry.get("action") != data.action
                 ):
                     raise HTTPException(
                         409,
@@ -92,8 +93,17 @@ class SupportDialogueService(BaseService):
             message = choice["label"]
             selected_fact = choice_fact(state, data.choice_id)
         normalized = message.casefold().rstrip(".!?")
-        create_ticket = is_ready(state) and normalized in {"да", "yes", "отправить"}
+        if data.action and (not is_ready(state) or data.choice_id):
+            raise HTTPException(409, "Передача специалисту ещё не предложена. Обновите диалог.")
+        create_ticket = is_ready(state) and (
+            data.action is not None or normalized in {"да", "yes", "отправить"}
+        )
         if create_ticket:
+            if data.action == "send_with_details":
+                previous = state.get("additional_context", "")
+                state["additional_context"] = "\n\n".join(
+                    part for part in (previous, message) if part
+                )
             answer = ""
         elif "_atol_tree" in state:
             state, answer = atol_support_tree.advance(state, message)
@@ -145,7 +155,7 @@ class SupportDialogueService(BaseService):
             details["transcript"] = [
                 {"role": entry["role"], "content": entry["content"]}
                 for entry in current["history"]
-            ]
+            ] + [{"role": "user", "content": message}]
             ticket = await self.db.support.create_ticket(session_id, user_id, details)
             ticket_id = ticket["id"]
             await self.db.support.add_event(
@@ -174,6 +184,7 @@ class SupportDialogueService(BaseService):
                 "request_id": str(data.request_id),
                 "question": data.message,
                 "choice_id": data.choice_id,
+                "action": data.action,
                 "response": reply.model_dump(mode="json"),
             },
         ]

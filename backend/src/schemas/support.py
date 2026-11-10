@@ -12,6 +12,7 @@ class SupportMessage(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     request_id: UUID = Field(default_factory=uuid4)
     choice_id: str | None = Field(default=None, max_length=80)
+    action: Literal["send_with_details", "send_without_details"] | None = None
 
     @field_validator("message")
     @classmethod

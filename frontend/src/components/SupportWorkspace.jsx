@@ -129,11 +129,12 @@ export default function SupportWorkspace({ user, onClose }) {
     else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) { event.preventDefault(); first.focus(); }
   }
 
-  async function send(text, choiceId = null) {
+  async function send(text, choiceId = null, action = null) {
     const message = text.trim();
     if (!message || !session || busy) return;
     await run(async () => {
       const outgoing = outgoingMessage(pendingSend, session, message, choiceId, () => crypto.randomUUID());
+      if (!pendingSend) outgoing.action = action;
       const requestId = outgoing.id;
       writeStorage(pendingKey, outgoing);
       setPendingSend(outgoing);
@@ -142,7 +143,7 @@ export default function SupportWorkspace({ user, onClose }) {
         setPendingSend(null);
       };
       try {
-        await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message: outgoing.message, request_id: requestId, choice_id: outgoing.choiceId }), signal: AbortSignal.timeout(65000) });
+        await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message: outgoing.message, request_id: requestId, choice_id: outgoing.choiceId, action: outgoing.action || null }), signal: AbortSignal.timeout(65000) });
         const data = await request(`/support/sessions/${session}`);
         restore(data); setInput(""); clearPending();
       } catch (err) {
@@ -176,10 +177,11 @@ export default function SupportWorkspace({ user, onClose }) {
 
         <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
         {!terminal && !pendingSend && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
-        {pendingSend && <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" disabled={busy} onClick={() => send(pendingSend.message, pendingSend.choiceId)}>Повторить отправку</button></div>}
-        {!terminal && !pendingSend && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input); }}>
-          <textarea id="support-message" aria-label="Ваш ответ" maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder="Опишите симптомы или результат проверки" />
-          <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>Отправить</button>{phase === "confirm" && <button type="button" disabled={busy} onClick={() => send("да")}>Подтвердить заявку</button>}<button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button><button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>
+        {pendingSend && <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" disabled={busy} onClick={() => send(pendingSend.message, pendingSend.choiceId, pendingSend.action)}>Повторить отправку</button></div>}
+        {!terminal && !pendingSend && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input, null, phase === "confirm" ? "send_with_details" : null); }}>
+          {phase === "confirm" && <label htmlFor="support-message">Что ещё стоит знать специалисту? Необязательно.</label>}
+          <textarea id="support-message" aria-label={phase === "confirm" ? "Дополнение для специалиста" : "Ваш ответ"} maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder={phase === "confirm" ? "Когда началось, что видно на экране или что уже пробовали. Уже отправленное повторять не нужно." : "Опишите симптомы или результат проверки"} />
+          <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>{phase === "confirm" ? "Отправить с дополнением" : "Отправить"}</button>{phase === "confirm" ? <button type="button" disabled={busy || !session} onClick={() => send("Отправить без дополнения", null, "send_without_details")}>Отправить без дополнения</button> : <button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button>}<button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>
         </form>}
         <button type="button" disabled={busy} onClick={() => run(async () => { const data = await request("/support/sessions", { method: "POST" }); restore(data); writeStorage(storageKey, data.id); writeStorage(pendingKey, null); setPendingSend(null); setInput(""); })}>Новое обращение</button>
       </> : detail ? <>
