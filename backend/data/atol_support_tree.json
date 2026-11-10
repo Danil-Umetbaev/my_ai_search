@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "initial": "model",
   "nodes": {
     "model": {
@@ -8,7 +8,7 @@
       "choices": [
         {
           "label": "АТОЛ FPrint-22ПТК",
-          "next": "menu"
+          "next": "categories"
         },
         {
           "label": "Другая касса / не знаю",
@@ -1327,6 +1327,212 @@
         {
           "title": "Руководство АТОЛ, стр. 81",
           "url": "/api/v1/knowledge-assets/cc17e6a85892bc06be4ecc1f707b398fab27f7c58db081588c176f456815bb40.pdf#page=81"
+        }
+      ]
+    },
+    "categories": {
+      "text": "С чем возникла проблема?",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Бумага и печать",
+          "next": "group_print"
+        },
+        {
+          "label": "Касса не реагирует",
+          "next": "group_response"
+        },
+        {
+          "label": "Ошибка на экране или в чеке",
+          "next": "group_errors"
+        },
+        {
+          "label": "Лампочки и связь с ОФД",
+          "next": "group_indicators"
+        },
+        {
+          "label": "Не знаю, что выбрать",
+          "next": "choose_help"
+        },
+        {
+          "label": "Назад",
+          "next": "model"
+        }
+      ]
+    },
+    "group_print": {
+      "text": "Бумага и печать. Что происходит?",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Зажевало бумагу",
+          "next": "jam",
+          "action": "select_problem"
+        },
+        {
+          "label": "Красная лампочка и «Нет бумаги»",
+          "next": "paper",
+          "action": "select_problem"
+        },
+        {
+          "label": "Бумага выходит без печати",
+          "next": "blank",
+          "action": "select_problem"
+        },
+        {
+          "label": "На чеке пропадают точки",
+          "next": "dots",
+          "action": "select_problem"
+        },
+        {
+          "label": "Перегрев принтера / тёмный след",
+          "next": "heat",
+          "action": "select_problem"
+        },
+        {
+          "label": "Не знаю, что выбрать",
+          "next": "choose_help"
+        },
+        {
+          "label": "Назад",
+          "next": "categories"
+        }
+      ]
+    },
+    "group_response": {
+      "text": "Касса не реагирует. Что происходит?",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Кнопка на кассе не работает",
+          "next": "button",
+          "action": "select_problem"
+        },
+        {
+          "label": "Программа не видит кассу",
+          "next": "pc",
+          "action": "select_problem"
+        },
+        {
+          "label": "Касса не выполняет операцию",
+          "next": "commands",
+          "action": "select_problem"
+        },
+        {
+          "label": "Не знаю, что выбрать",
+          "next": "choose_help"
+        },
+        {
+          "label": "Назад",
+          "next": "categories"
+        }
+      ]
+    },
+    "group_errors": {
+      "text": "Ошибка на экране или в чеке. Что происходит?",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Ошибка даты — касса заблокирована",
+          "next": "date_lock",
+          "action": "select_problem"
+        },
+        {
+          "label": "ФН заполнен или требует замены",
+          "next": "fn",
+          "action": "select_problem"
+        },
+        {
+          "label": "Ошибка при чеке: ФН закрыт",
+          "next": "fn_closed",
+          "action": "select_problem"
+        },
+        {
+          "label": "«Переполнение буфера ЭЖ»",
+          "next": "overflow",
+          "action": "select_problem"
+        },
+        {
+          "label": "«Снятие отчёта прервалось»",
+          "next": "shift",
+          "action": "select_problem"
+        },
+        {
+          "label": "«Лицензия истекла»",
+          "next": "license",
+          "action": "select_problem"
+        },
+        {
+          "label": "Неверные дата или время в ФН",
+          "next": "date",
+          "action": "select_problem"
+        },
+        {
+          "label": "Нет транспортного соединения ФН",
+          "next": "fn_link",
+          "action": "select_problem"
+        },
+        {
+          "label": "Не знаю, что выбрать",
+          "next": "choose_help"
+        },
+        {
+          "label": "Назад",
+          "next": "categories"
+        }
+      ]
+    },
+    "group_indicators": {
+      "text": "Лампочки и связь с ОФД. Что происходит?",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Зелёная горит, красная мигает",
+          "next": "cover",
+          "action": "select_problem"
+        },
+        {
+          "label": "Два красных мигания, два зелёных",
+          "next": "selftest",
+          "action": "select_problem"
+        },
+        {
+          "label": "«Выключен интерфейс»",
+          "next": "interface",
+          "action": "select_problem"
+        },
+        {
+          "label": "Касса заблокирована: нет ответа ОФД",
+          "next": "ofd_lock",
+          "action": "select_problem"
+        },
+        {
+          "label": "ОФД не подтверждает получение чеков",
+          "next": "ofd",
+          "action": "select_problem"
+        },
+        {
+          "label": "Не знаю, что выбрать",
+          "next": "choose_help"
+        },
+        {
+          "label": "Назад",
+          "next": "categories"
+        }
+      ]
+    },
+    "choose_help": {
+      "text": "Можно вернуться к разделам или описать проблему для специалиста.",
+      "kind": "question",
+      "choices": [
+        {
+          "label": "Описать проблему",
+          "next": "other",
+          "action": "select_problem"
+        },
+        {
+          "label": "Назад",
+          "next": "categories"
         }
       ]
     }

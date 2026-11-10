@@ -6,7 +6,7 @@ from src.services.atol_support_tree import advance, catalog, choices, initial_st
 
 class AtolTreeTests(unittest.TestCase):
     def states(self):
-        queue = deque([initial_state()])
+        queue = deque([initial_state(), {"_atol_tree": {"node": "menu", "revision": 0}, "_phase": "diagnosing"}])
         seen = {}
         while queue:
             state = queue.popleft()
@@ -42,6 +42,35 @@ class AtolTreeTests(unittest.TestCase):
                 if choice.get("action") in {"details", "continue"}:
                     updated, _ = advance(state, choice["label"])
                     self.assertEqual(state.get("performed_checks"), updated.get("performed_checks"))
+
+    def test_groups_cover_old_problems_without_changing_routes(self):
+        nodes = catalog()["nodes"]
+        expected = {c["next"]: c["label"] for c in nodes["menu"]["choices"] if c["next"] != "other"}
+        actual = {}
+        for option in nodes["categories"]["choices"]:
+            if not option["next"].startswith("group_"):
+                continue
+            state, _ = advance(self.states()["categories"], option["label"])
+            self.assertNotIn("problem", state)
+            for choice in nodes[option["next"]]["choices"]:
+                if choice.get("action") == "select_problem":
+                    actual[choice["next"]] = choice["label"]
+                    selected, answer = advance(state, choice["label"])
+                    self.assertEqual(selected["problem"], choice["label"])
+                    self.assertIn(nodes[choice["next"]]["text"], answer)
+            back, _ = advance(state, "Назад")
+            self.assertEqual(back["_atol_tree"]["node"], "categories")
+            self.assertNotIn("problem", back)
+        self.assertEqual(actual, expected)
+
+    def test_unknown_selection_can_return_or_describe_problem(self):
+        state = self.states()["choose_help"]
+        back, _ = advance(state, "Назад")
+        self.assertEqual(back["_atol_tree"]["node"], "categories")
+        described, _ = advance(state, "Описать проблему")
+        described, _ = advance(described, "Непонятный звук")
+        self.assertEqual(described["additional_context"], "Непонятный звук")
+        self.assertEqual(described["_phase"], "confirm")
 
     def test_paper_failure_needs_actual_error_before_sensor(self):
         for key in ("paper80h", "paper80v", "paper58h", "paper58v", "width_settings"):

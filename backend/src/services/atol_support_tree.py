@@ -69,9 +69,9 @@ def advance(state, message):
     if not target:
         return state, "Выберите подходящую кнопку ниже. Если варианта нет, можно обратиться к специалисту."
     state.setdefault("observations", []).append({"question": current["text"], "answer": message})
-    if flow["node"] == "model" and target == "menu":
+    if flow["node"] == "model" and target in {"menu", "categories"}:
         state["environment"] = "АТОЛ FPrint-22ПТК"
-    if flow["node"] == "menu":
+    if flow["node"] == "menu" or (selected and selected.get("action") == "select_problem"):
         state["problem"] = message
     if current["kind"] == "instruction" and selected and selected.get("action") == "outcome":
         state.setdefault("performed_checks", []).append({"instruction": current["text"], "result": message, "sources": current.get("sources", [])})
