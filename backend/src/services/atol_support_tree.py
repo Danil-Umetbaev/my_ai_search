@@ -5,6 +5,8 @@ from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
 
+from src.services import atol_problem_router
+
 
 @lru_cache(maxsize=1)
 def catalog():
@@ -20,16 +22,27 @@ def choices(state):
     flow = state["_atol_tree"]
     if state.get("_phase") in {"confirm", "resolved", "cancelled", "ticket_created"}:
         return []
-    node = catalog()["nodes"][flow["node"]]
     return [
         {"id": f"atol:{flow['revision']}:{index}", "label": item["label"]}
-        for index, item in enumerate(node.get("choices", []))
+        for index, item in enumerate(available_options(flow))
     ]
 
 
+def available_options(flow):
+    nodes = catalog()["nodes"]
+    if flow.get("proposal") is not None:
+        return atol_problem_router.proposal_options(flow, nodes)
+    return nodes[flow["node"]].get("choices", [])
+
+
 def render(state):
-    node = catalog()["nodes"][state["_atol_tree"]["node"]]
+    flow = state["_atol_tree"]
+    if flow.get("proposal") is not None:
+        return atol_problem_router.proposal_text(flow)
+    node = catalog()["nodes"][flow["node"]]
     parts = [node["text"]]
+    if atol_problem_router.can_suggest(flow["node"]):
+        parts.append("Можно выбрать кнопку или описать проблему своими словами.")
     for image in node.get("images", []):
         parts.append(f"![{image['title']}]({image['url']})")
     for source in node.get("sources", []):
@@ -49,7 +62,14 @@ def advance(state, message):
     if normalized in {"отмена", "отменить"}:
         state["_phase"] = "cancelled"
         return state, "Обращение отменено. Заявка не создана."
-    selected = next((c for c in current.get("choices", []) if c["label"].casefold() == normalized), None)
+    options = available_options(flow)
+    proposal = flow.get("proposal")
+    selected = next((c for c in options if c["label"].casefold() == normalized), None)
+    if proposal is not None and not selected:
+        if normalized in {"да", "верно", "правильно"} and len(proposal["targets"]) == 1:
+            selected = options[0]
+        elif normalized in {"нет", "назад"}:
+            selected = options[-1]
     target = selected["next"] if selected else None
     if not target and current["kind"] == "instruction":
         outcomes = {"да": "Да, помогло", "помогло": "Да, помогло", "нет": "Не помогло", "не получилось": "Не помогло", "не могу": "Не могу выполнить"}
@@ -67,12 +87,21 @@ def advance(state, message):
             state["additional_context"] = message
             return state, "Передать обращение специалисту? Выберите отправку с дополнением или без него либо отмените обращение."
     if not target:
+        if atol_problem_router.can_suggest(flow["node"]):
+            flow["proposal"] = {"targets": atol_problem_router.suggest(message), "description": message}
+            flow["revision"] += 1
+            state.setdefault("observations", []).append({"question": "Описание проблемы", "answer": message})
+            return state, render(state)
         return state, "Выберите подходящую кнопку ниже. Если варианта нет, можно обратиться к специалисту."
     state.setdefault("observations", []).append({"question": current["text"], "answer": message})
     if flow["node"] == "model" and target in {"menu", "categories"}:
         state["environment"] = "АТОЛ FPrint-22ПТК"
     if flow["node"] == "menu" or (selected and selected.get("action") == "select_problem"):
         state["problem"] = message
+    if proposal is not None:
+        if selected and selected.get("action") == "select_problem":
+            state["problem"] = proposal["description"]
+        flow.pop("proposal", None)
     if current["kind"] == "instruction" and selected and selected.get("action") == "outcome":
         state.setdefault("performed_checks", []).append({"instruction": current["text"], "result": message, "sources": current.get("sources", [])})
         state["check_result"] = message
