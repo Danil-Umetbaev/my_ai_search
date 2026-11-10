@@ -56,13 +56,14 @@ class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(state["_atol_tree"]["node"], "categories")
             self.assertEqual(state["_atol_tree"]["proposal"]["targets"], [])
 
-    async def test_current_message_and_recent_history_sent_separately(self):
+    async def test_previous_description_cannot_override_current_message(self):
         history = [{"role": "user", "content": "касса заблокирована"}]
         llm = SimpleNamespace(route_support=Mock(return_value='{"targets":["group_print"]}'))
         state, _ = await router.advance(self.selected_model(), "нет, с печатью непонятки", history, llm)
         payload = json.loads(llm.route_support.call_args.args[1])
         self.assertEqual(payload["message"], "нет, с печатью непонятки")
-        self.assertEqual(payload["history"], history)
+        self.assertNotIn("history", payload)
+        self.assertNotIn("касса заблокирована", payload["question"] + payload["message"])
         self.assertEqual(state["_atol_tree"]["proposal"]["description"], payload["message"])
 
     async def test_explicit_other_model_cannot_enter_atol_branch(self):
