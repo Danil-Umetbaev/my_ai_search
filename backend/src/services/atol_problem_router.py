@@ -50,6 +50,8 @@ def proposal_options(flow, nodes):
 
 
 def proposal_text(flow):
+    if flow["proposal"].get("other_model"):
+        return "Сейчас выбрана АТОЛ FPrint-22ПТК, а в описании указана другая касса. Для другой модели обратитесь к специалисту или вернитесь к выбору кассы."
     targets = flow["proposal"]["targets"]
     if not targets:
         return "Не удалось уверенно подобрать вариант. Опишите, что происходит с кассой, или выберите проблему по кнопкам."

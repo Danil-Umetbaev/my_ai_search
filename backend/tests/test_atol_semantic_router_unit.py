@@ -65,6 +65,14 @@ class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(payload["history"], history)
         self.assertEqual(state["_atol_tree"]["proposal"]["description"], payload["message"])
 
+    async def test_explicit_other_model_cannot_enter_atol_branch(self):
+        llm = SimpleNamespace(route_support=Mock(return_value='{"targets":["group_print"]}'))
+        for message in ("Вики Принт не печатает", "Пирит жует ленту", "АТОЛ 55 не печатает"):
+            state, answer = await router.advance(self.selected_model(), message, [], llm)
+            self.assertEqual(state["_atol_tree"]["proposal"]["targets"], [])
+            self.assertIn("другая касса", answer)
+        llm.route_support.assert_not_called()
+
     def test_response_schema_rejects_mixed_or_invalid_targets(self):
         for targets in ("jam", [True], [{}], ["jam", "jam"], ["group_print", "jam"], ["pc"] * 4):
             with self.assertRaises(ValueError):

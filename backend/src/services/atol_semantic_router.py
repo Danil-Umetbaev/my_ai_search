@@ -6,6 +6,7 @@ import re
 
 from src.middleware.ai_capacity import run_support_model
 from src.services import atol_support_tree
+from src.services.atol_problem_router import routing_catalog
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,11 @@ async def advance(state, message, history, llm=None, timeout=15):
         or updated.get("_phase") in {"confirm", "resolved", "cancelled", "ticket_created"}
     ):
         return updated, answer
+    updated["_engine"] = "rules"
+    if any(re.search(pattern, message.casefold()) for pattern in routing_catalog()["other_models"]):
+        proposal["targets"] = []
+        proposal["other_model"] = True
+        return updated, atol_support_tree.render(updated)
     if llm is None:
         return updated, answer
     payload = json.dumps(
