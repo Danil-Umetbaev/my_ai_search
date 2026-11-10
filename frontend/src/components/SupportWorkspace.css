@@ -51,3 +51,5 @@
 .support-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
 .support-choices button { border-color: #9acdb9; color: #087f68; background: #edf8f1; }
 .support-choices button:hover:not(:disabled) { background: #d7eee2; }
+
+.support-manual-image { display: block; max-width: 100%; width: 620px; height: auto; border-radius: 12px; border: 1px solid #d6e5df; margin: 12px 0; }

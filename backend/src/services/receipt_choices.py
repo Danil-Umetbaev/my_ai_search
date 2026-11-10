@@ -38,6 +38,9 @@ OPTIONS = {
 
 
 def choices_for(state):
+    if "_atol_tree" in state:
+        from src.services.atol_support_tree import choices
+        return choices(state)
     if state.get("_phase") in {"confirm", "resolved", "cancelled", "ticket_created"}:
         return []
     step = state.get("_receipt", {}).get("pending")

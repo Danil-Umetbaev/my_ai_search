@@ -10,6 +10,7 @@ from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
 from src.services.receipt_choices import choices_for, choice_fact
 from src.services.support_knowledge import SupportKnowledgeService
+from src.services import atol_support_tree
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -28,8 +29,12 @@ class SupportDialogueService(BaseService):
     async def create(self, user_id):
         await self.role(user_id)
         row = await self.db.support.create_session(user_id)
+        state = atol_support_tree.initial_state()
+        answer = atol_support_tree.render(state)
+        history = [{"role": "assistant", "content": answer}]
+        await self.db.support.save_session(row["id"], state, history, None)
         await self.db.commit()
-        return {**row, "answer": WELCOME, "choices": choices_for(row["state"])}
+        return await self.get(row["id"], user_id)
 
     async def get(self, session_id, user_id, lock=False):
         await self.role(user_id)
@@ -90,6 +95,8 @@ class SupportDialogueService(BaseService):
         create_ticket = is_ready(state) and normalized in {"да", "yes", "отправить"}
         if create_ticket:
             answer = ""
+        elif "_atol_tree" in state:
+            state, answer = atol_support_tree.advance(state, message)
         else:
 
             async def retrieve(query):

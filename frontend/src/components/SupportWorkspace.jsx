@@ -6,7 +6,7 @@ import { pendingForSession, outgoingMessage } from "./supportPending";
 import "./SupportWorkspace.css";
 
 const STATUS = { open: "Новая", in_progress: "В работе", resolved: "Решена" };
-const LABELS = { receipt_facts: "Факты о кассе", completed_procedures: "Пройденные процедуры", problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
+const LABELS = { performed_checks: "Выполненные проверки", receipt_facts: "Факты о кассе", completed_procedures: "Пройденные процедуры", problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
 
 function readStorage(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -22,6 +22,8 @@ function Sources({ sources = [] }) {
 
 function ReplyText({ text }) {
   return <div className="support-reply">{text.split("\n").filter(line => line.trim()).map((line, index) => {
+    const picture = line.match(/^!\[([^\]]*)\]\((\/api\/v1\/knowledge-assets\/[a-f0-9]{64}\.png)\)$/);
+    if (picture) return <a key={index} href={picture[2]} target="_blank" rel="noreferrer"><img className="support-manual-image" src={picture[2]} alt={picture[1]} loading="lazy" /></a>;
     const match = line.match(/^(.*?):\s*((?:https?:\/\/|\/api\/)[^\s]+)$/);
     if (match && isSourceUrl(match[2])) return <a className="support-source-link" key={index} href={match[2]} target="_blank" rel="noreferrer">{match[1]} ↗</a>;
     return <p key={index}>{line}</p>;
