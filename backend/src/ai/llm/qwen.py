@@ -115,6 +115,9 @@ OFF_TOPIC — общение, бессмыслица, развлечения, и
     def plan_support(self, system, payload):
         return self._generate_text(system, payload, max_new_tokens=768, max_time=35, max_input_tokens=8192)
 
+    def route_support(self, system, payload):
+        return self._generate_text(system, payload, max_new_tokens=72, max_time=10, max_input_tokens=4096)
+
     def _complete(self, system, question, max_new_tokens=8):
         text = self._generate_text(system, question, max_new_tokens).upper().strip(' .!"\'')
         label = re.match(r'^(WORK|LOCAL_FACT|OFF_TOPIC|OBSERVED|DOCUMENTATION|VALID|INVALID)\b', text)

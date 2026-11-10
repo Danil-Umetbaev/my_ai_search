@@ -10,7 +10,7 @@ from src.services.support_agent import respond
 from src.services.vector_search import VectorSearchService
 from src.services.receipt_choices import choices_for, choice_fact
 from src.services.support_knowledge import SupportKnowledgeService
-from src.services import atol_support_tree
+from src.services import atol_support_tree, atol_semantic_router
 
 WELCOME = (
     "Опишите неисправность и текст ошибки. Не отправляйте пароли и персональные данные."
@@ -106,7 +106,10 @@ class SupportDialogueService(BaseService):
                 )
             answer = ""
         elif "_atol_tree" in state:
-            state, answer = atol_support_tree.advance(state, message)
+            state, answer = await atol_semantic_router.advance(
+                state, message, row["history"],
+                llm=models.get("llm") if models.get("status") == "ready" else None,
+            )
         else:
 
             async def retrieve(query):
