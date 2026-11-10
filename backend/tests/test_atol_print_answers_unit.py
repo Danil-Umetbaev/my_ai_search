@@ -7,6 +7,7 @@ from unittest.mock import Mock
 from src.services import atol_support_tree as tree
 from src.services.atol_semantic_router import advance
 from src.services.atol_answer_state import configuration
+from src.services.atol_answer_router import parse_answer, questions
 
 
 class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
@@ -104,6 +105,15 @@ class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
             policy = data["validation"].get(data["validation_groups"].get(node, node), {})
             for section in ("explicit", "evidence", "negated"):
                 self.assertTrue(all(0 <= int(i) < len(choices) for i in policy.get(section, {})), node)
+
+    def test_named_model_choices_follow_the_current_question(self):
+        for node in ("jam", "blank", "blank_details", "heat", "heat_details", "dots"):
+            allowed = questions(self.state(node))
+            for index, choice in enumerate(tree.catalog()["nodes"][node]["choices"]):
+                raw = json.dumps({"question": node, "choice": choice["label"]})
+                self.assertEqual(parse_answer(raw, allowed), (node, index))
+            with self.assertRaises(ValueError):
+                parse_answer(json.dumps({"question": node, "choice": "Придуманная инструкция"}), allowed)
 
 
 if __name__ == "__main__":
