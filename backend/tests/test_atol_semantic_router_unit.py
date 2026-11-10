@@ -28,7 +28,7 @@ class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(confirmed["_atol_tree"]["node"], target)
                 llm.route_support.assert_called_once()
 
-    async def test_buttons_and_instruction_steps_never_call_model(self):
+    async def test_buttons_never_call_model(self):
         llm = SimpleNamespace(route_support=Mock(side_effect=AssertionError("Model called for button")))
         state = initial_state()
         for label in ("АТОЛ FPrint-22ПТК", "Бумага и печать", "Зажевало бумагу"):

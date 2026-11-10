@@ -99,6 +99,7 @@ async def interpret(state, message, llm, timeout=15):
         try:
             raw = await run_support_model(llm.route_support, PROMPT, payload, timeout=timeout)
             selection = parse_answer(raw, allowed)
+            logger.info("ATOL answer interpreted | node=%s | selection=%s", current_id, selection)
             updated["_engine"] = "llm"
         except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:
             logger.warning("ATOL answer fallback | reason=%s", type(error).__name__)

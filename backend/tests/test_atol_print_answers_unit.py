@@ -115,6 +115,10 @@ class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(ValueError):
                 parse_answer(json.dumps({"question": node, "choice": "Придуманная инструкция"}), allowed)
 
+    def test_optional_details_do_not_replace_the_result_question(self):
+        for node in ("blank", "heat", "blank_details", "heat_details"):
+            self.assertEqual(questions(self.state(node))[node]["text"], "Помогло после выполнения инструкции?")
+
 
 if __name__ == "__main__":
     unittest.main()
