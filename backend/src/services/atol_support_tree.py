@@ -94,6 +94,14 @@ def advance(state, message):
             return state, render(state)
         return state, "Выберите подходящую кнопку ниже. Если варианта нет, можно обратиться к специалисту."
     state.setdefault("observations", []).append({"question": current["text"], "answer": message})
+    if proposal and proposal.get("return_node") and selected and selected.get("action") == "select_problem":
+        state.setdefault("problem_changes", []).append({
+            "previous": state.get("problem"), "current": proposal["description"],
+            "previous_facts": state.get("paper_facts", {}),
+        })
+        flow.pop("answers", None)
+        state.pop("paper_facts", None)
+        state.pop("check_result", None)
     if flow["node"] == "model" and target in {"menu", "categories"}:
         state["environment"] = "АТОЛ FPrint-22ПТК"
     if flow["node"] == "menu" or (selected and selected.get("action") == "select_problem"):

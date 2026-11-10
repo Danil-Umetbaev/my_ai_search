@@ -3,10 +3,13 @@
 import json
 import logging
 import re
+from copy import deepcopy
 
 from src.middleware.ai_capacity import run_support_model
 from src.services import atol_support_tree, atol_answer_router
 from src.services.atol_problem_router import routing_catalog
+from src.services.atol_answer_state import configuration
+from src.services.atol_answer_validation import matches
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,23 @@ def parse_targets(raw):
 
 
 async def advance(state, message, history, llm=None, timeout=15):
+    correction = configuration().get("problem_correction", {})
+    previous_flow = state["_atol_tree"]
+    if (
+        previous_flow["node"] in correction.get("nodes", [])
+        and not previous_flow.get("proposal")
+        and state.get("_phase") not in {"confirm", "resolved", "cancelled", "ticket_created"}
+        and matches(correction["markers"], message)
+        and matches(correction["symptoms"], message)
+    ):
+        selection = deepcopy(state)
+        selection["_atol_tree"]["node"] = "group_print"
+        updated, _ = await advance(selection, message, history, llm, timeout)
+        proposal = updated["_atol_tree"].get("proposal")
+        if proposal is not None:
+            proposal["return_node"] = previous_flow["node"]
+            return updated, atol_support_tree.render(updated)
+        return state, "Уточните новую проблему или продолжите текущую проверку кнопками."
     updated, answer = atol_support_tree.advance(state, message)
     if updated == state:
         interpreted = await atol_answer_router.interpret(state, message, llm, timeout)
@@ -65,8 +85,11 @@ async def advance(state, message, history, llm=None, timeout=15):
     flow = updated["_atol_tree"]
     proposal = flow.get("proposal")
     previous = state["_atol_tree"]
-    # Only a new free-text proposal needs a model. Buttons, confirmations and
-    # all steps inside an instruction keep their deterministic behavior.
+    origin = previous.get("proposal", {}).get("return_node")
+    if proposal is not None and origin:
+        proposal["return_node"] = origin
+    # Branch routing handles descriptions only; answer interpretation above
+    # is scoped separately. Exact choices still bypass both model calls.
     if (
         proposal is None
         or proposal == previous.get("proposal")

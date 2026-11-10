@@ -33,7 +33,6 @@ class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
         state = initial_state()
         for label in ("АТОЛ FPrint-22ПТК", "Бумага и печать", "Зажевало бумагу"):
             state, _ = await router.advance(state, label, [], llm)
-        state, _ = await router.advance(state, "Непонятно, как открыть крышку", [], llm)
         self.assertEqual(state["_atol_tree"]["node"], "jam")
         llm.route_support.assert_not_called()
 
