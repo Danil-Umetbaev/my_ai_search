@@ -99,6 +99,22 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("injected", policy("pc_details")["evidence"]["0"])
         self.assertNotIn("injected", policy("date")["evidence"]["0"])
 
+    async def test_error_report_is_not_a_problem_correction(self):
+        for node in ("unfinished", "ofd_diagnostics"):
+            message = "Ошибка: касса заблокирована, лампочка мигает"
+            model = SimpleNamespace(route_support=Mock())
+            updated, _ = await advance(self.states[node], message, [], model)
+            self.assertEqual(updated["_atol_tree"]["node"], "handoff")
+            self.assertEqual(updated["additional_context"], message)
+            model.route_support.assert_not_called()
+
+    async def test_explicit_delivery_confirmation_does_not_need_model(self):
+        for node in ("ofd", "ofd_settings"):
+            model = SimpleNamespace(route_support=Mock())
+            updated, _ = await advance(self.states[node], "ОФД получил все документы", [], model)
+            self.assertEqual(updated["_atol_tree"]["node"], "resolved")
+            model.route_support.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
