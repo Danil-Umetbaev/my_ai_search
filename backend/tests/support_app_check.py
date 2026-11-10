@@ -62,7 +62,8 @@ async def lifecycle(clients):
     assert len(row["history"]) == 2
     await call(other, "GET", f"/support/sessions/{session}", expected=404)
     reply = replies[0]
-    for label in ("Пирит 2Ф", "Бумаги нет", "Да", "Да"):
+    for label in ("Пирит 2Ф", "Нет", "Да", "Да"):
+        assert any(c["label"] == label for c in reply["choices"]), (label, reply)
         choice = next(c for c in reply["choices"] if c["label"] == label)
         reply = await send(client, session, label, choice["id"])
     assert reply["phase"] == "diagnosing" and "1." in reply["answer"], reply
@@ -161,3 +162,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
