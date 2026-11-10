@@ -48,7 +48,14 @@ def is_ready(state):
 
 
 def ticket_details(state):
-    return {key: value for key, value in state.items() if not key.startswith("_")}
+    details = deepcopy(
+        {key: value for key, value in state.items() if not key.startswith("_")}
+    )
+    flow = state.get("_receipt", {})
+    for key in ("fact_changes", "completed_procedures"):
+        if flow.get(key):
+            details[key] = deepcopy(flow[key])
+    return details
 
 
 def summary(state):

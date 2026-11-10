@@ -2,10 +2,11 @@ import { knowledgeSpace, isSourceUrl } from "../knowledge";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { request } from "../api/client";
+import { pendingForSession, outgoingMessage } from "./supportPending";
 import "./SupportWorkspace.css";
 
 const STATUS = { open: "Новая", in_progress: "В работе", resolved: "Решена" };
-const LABELS = { problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
+const LABELS = { receipt_facts: "Факты о кассе", completed_procedures: "Пройденные процедуры", problem: "Проблема", environment: "Окружение", impact: "Влияние", attempts: "Проверки", check_result: "Результат проверки", hypotheses: "Гипотезы — не подтверждены", unknowns: "Нужно уточнить", additional_context: "Дополнение", observations: "Ответы на вопросы", fact_changes: "Уточнения фактов", resolution: "Результат" };
 
 function readStorage(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -28,9 +29,12 @@ function ReplyText({ text }) {
 }
 
 function FactValue({ value }) {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return <ul>{value.map((entry, index) => <li key={index}>{typeof entry === "string" ? entry : Object.entries(entry).map(([key, text]) => `${{ answer: "Ответ", question: "Вопрос", field: "Поле", previous: "Раньше", current: "Теперь" }[key] || key}: ${text}`).join(" · ")}</li>)}</ul>;
-  return null;
+  if (value == null) return "Неизвестно";
+  if (typeof value === "boolean") return value ? "Да" : "Нет";
+  if (typeof value !== "object") return String(value);
+  if (Array.isArray(value)) return <ul>{value.map((entry, index) => <li key={index}><FactValue value={entry} /></li>)}</ul>;
+  const labels = { model: "Модель", symptom: "Симптом", paper_present: "Рулон установлен", paper_width_mm: "Ширина ленты, мм", layout: "Расположение", error_text: "Сообщение устройства", error_status: "Наличие ошибки", problem_resolved: "Проблема решена", cover_opens: "Крышка открывается", suitable_roll_available: "Есть подходящий рулон", question: "Вопрос", answer: "Ответ", field: "Факт", before: "Раньше", after: "Теперь", text: "Сообщение пользователя", reason: "Причина изменения" };
+  return <dl>{Object.entries(value).map(([key, entry]) => <div key={key}><dt>{labels[key] || key}</dt><dd><FactValue value={entry} /></dd></div>)}</dl>;
 }
 
 export default function SupportWorkspace({ user, onClose }) {
@@ -43,6 +47,7 @@ export default function SupportWorkspace({ user, onClose }) {
   const [choices, setChoices] = useState([]);
   const [phase, setPhase] = useState("collect");
   const [input, setInput] = useState("");
+  const [pendingSend, setPendingSend] = useState(null);
   const [mode, setMode] = useState(null);
   const [view, setView] = useState("diagnosis");
   const [tickets, setTickets] = useState([]);
@@ -84,7 +89,9 @@ export default function SupportWorkspace({ user, onClose }) {
       if (!active) return;
       restore(data); writeStorage(storageKey, data.id);
       const pending = readStorage(pendingKey);
-      if (pending?.session === data.id) setInput(pending.message);
+      const remaining = pendingForSession(pending, data);
+      setPendingSend(remaining);
+      if (pending?.session === data.id && !remaining) writeStorage(pendingKey, null);
     })().catch(err => { if (active) setError(err.userMessage || err.message); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; controller.abort(); };
   }, [user.id]);
@@ -124,15 +131,20 @@ export default function SupportWorkspace({ user, onClose }) {
     const message = text.trim();
     if (!message || !session || busy) return;
     await run(async () => {
-      const pending = readStorage(pendingKey);
-      const requestId = pending?.session === session && pending.message === message && pending.choiceId === choiceId ? pending.id : crypto.randomUUID();
-      writeStorage(pendingKey, { id: requestId, session, message, choiceId });
+      const outgoing = outgoingMessage(pendingSend, session, message, choiceId, () => crypto.randomUUID());
+      const requestId = outgoing.id;
+      writeStorage(pendingKey, outgoing);
+      setPendingSend(outgoing);
+      const clearPending = () => {
+        if (readStorage(pendingKey)?.id === requestId) writeStorage(pendingKey, null);
+        setPendingSend(null);
+      };
       try {
-        const result = await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message, request_id: requestId, choice_id: choiceId }), signal: AbortSignal.timeout(65000) });
+        await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message: outgoing.message, request_id: requestId, choice_id: outgoing.choiceId }), signal: AbortSignal.timeout(65000) });
         const data = await request(`/support/sessions/${session}`);
-        restore(data); setPhase(result.phase); setInput(""); writeStorage(pendingKey, null);
+        restore(data); setInput(""); clearPending();
       } catch (err) {
-        if (err.status === 409) restore(await request(`/support/sessions/${session}`));
+        if (err.status === 409) { restore(await request(`/support/sessions/${session}`)); clearPending(); }
         throw err;
       }
     });
@@ -161,16 +173,17 @@ export default function SupportWorkspace({ user, onClose }) {
       {view === "diagnosis" ? <>
 
         <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
-        {!terminal && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
-        {!terminal && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input); }}>
+        {!terminal && !pendingSend && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
+        {pendingSend && <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" disabled={busy} onClick={() => send(pendingSend.message, pendingSend.choiceId)}>Повторить отправку</button></div>}
+        {!terminal && !pendingSend && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input); }}>
           <textarea id="support-message" aria-label="Ваш ответ" maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder="Опишите симптомы или результат проверки" />
           <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>Отправить</button>{phase === "confirm" && <button type="button" disabled={busy} onClick={() => send("да")}>Подтвердить заявку</button>}<button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button><button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>
         </form>}
-        <button type="button" disabled={busy} onClick={() => run(async () => { const data = await request("/support/sessions", { method: "POST" }); restore(data); writeStorage(storageKey, data.id); writeStorage(pendingKey, null); setInput(""); })}>Новое обращение</button>
+        <button type="button" disabled={busy} onClick={() => run(async () => { const data = await request("/support/sessions", { method: "POST" }); restore(data); writeStorage(storageKey, data.id); writeStorage(pendingKey, null); setPendingSend(null); setInput(""); })}>Новое обращение</button>
       </> : detail ? <>
         <button type="button" disabled={busy} onClick={() => setDetail(null)}>← К списку</button>
         <h3>Заявка {detail.id}</h3><p>{STATUS[detail.status]} · {new Date(detail.created_at).toLocaleString()} · Исполнитель: {detail.assigned_to || "не назначен"}</p>
-        <dl className="support-facts">{Object.entries(detail.details).filter(([key]) => !["sources", "transcript"].includes(key)).map(([key, value]) => <div key={key}><dt>{LABELS[key] || key}</dt><dd><FactValue value={value} /></dd></div>)}</dl>
+        <dl className="support-facts">{Object.entries(detail.details).filter(([key]) => key in LABELS).map(([key, value]) => <div key={key}><dt>{LABELS[key] || key}</dt><dd><FactValue value={value} /></dd></div>)}</dl>
         <Sources sources={detail.details.sources} />
         {detail.resolution && <p className="support-resolution"><strong>Решение:</strong> {detail.resolution}</p>}
         {staff && <form onSubmit={event => { event.preventDefault(); run(async () => { await request(`/support/tickets/${detail.id}`, { method: "PATCH", body: JSON.stringify({ ...edit, version: detail.version, assign_to_me: true }) }); await openTicket(detail.id); await loadTickets(); }); }}>
