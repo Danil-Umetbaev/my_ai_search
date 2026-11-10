@@ -62,7 +62,7 @@ def advance(state, message):
         target = "handoff"
     if state.get("_phase") == "confirm":
         if normalized in {"нет", "не отправлять"}:
-            target = "menu"
+            return state, "Заявка не отправлена. Можно подтвердить передачу или отменить обращение."
         else:
             state["additional_context"] = message
             return state, "Передать обращение специалисту? Нажмите «Подтвердить заявку» или отмените обращение."
@@ -73,7 +73,7 @@ def advance(state, message):
         state["environment"] = "АТОЛ FPrint-22ПТК"
     if flow["node"] == "menu":
         state["problem"] = message
-    if current["kind"] == "instruction":
+    if current["kind"] == "instruction" and selected and selected.get("action") == "outcome":
         state.setdefault("performed_checks", []).append({"instruction": current["text"], "result": message, "sources": current.get("sources", [])})
         state["check_result"] = message
     flow.update(node=target, revision=flow["revision"] + 1)
