@@ -8,6 +8,7 @@ from copy import deepcopy
 from src.middleware.ai_capacity import run_support_model
 from src.services import atol_support_tree
 from src.services.atol_answer_state import configuration
+from src.services import atol_answer_validation as validation
 
 logger = logging.getLogger(__name__)
 
@@ -73,20 +74,32 @@ async def interpret(state, message, llm, timeout=15):
         return None
     allowed = questions(state)
     updated = deepcopy(state)
+    updated["_engine"] = "rules"
     clarification = "Не удалось однозначно понять ответ. " + allowed[current_id]["text"] + " Выберите подходящую кнопку или уточните ответ."
-    if llm is None:
-        return updated, clarification
     payload = json.dumps({
         "current": allowed[current_id],
         "previous": [dict(allowed[item["node"]], answer=item["value"]) for item in flow.get("answers", []) if item["node"] != current_id],
         "message": message,
     }, ensure_ascii=False)
-    try:
-        raw = await run_support_model(llm.route_support, PROMPT, payload, timeout=timeout)
-        selection = parse_answer(raw, allowed)
-    except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:
-        logger.warning("ATOL answer fallback | reason=%s", type(error).__name__)
+    selection = None
+    explicit = validation.explicit_choice(current_id, message)
+    if explicit is not None:
+        selection = current_id, explicit
+    elif llm is not None and not validation.blocked(current_id, message):
+        try:
+            raw = await run_support_model(llm.route_support, PROMPT, payload, timeout=timeout)
+            selection = parse_answer(raw, allowed)
+            updated["_engine"] = "llm"
+        except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:
+            logger.warning("ATOL answer fallback | reason=%s", type(error).__name__)
+    if selection is not None and not validation.supported(*selection, message):
         selection = None
+    if selection is not None and selection[0] != current_id:
+        question, index = selection
+        binding = configuration()["facts"].get(question)
+        prior = next((item for item in flow.get("answers", []) if item["node"] == question), None)
+        if binding and prior and prior["value"] == binding["values"][index]:
+            selection = None
     if selection is None:
         updated.setdefault("observations", []).append({"question": allowed[current_id]["text"], "answer": message})
         return updated, clarification
@@ -97,5 +110,5 @@ async def interpret(state, message, llm, timeout=15):
     label = atol_support_tree.catalog()["nodes"][question]["choices"][index]["label"]
     updated, answer = atol_support_tree.advance(updated, label)
     updated["observations"][-1].update(answer=message, selected_answer=label)
-    updated["_engine"] = "llm"
+    updated["_engine"] = "rules" if explicit is not None else "llm"
     return updated, answer

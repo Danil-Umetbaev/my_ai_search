@@ -56,6 +56,14 @@ class PaperAnswerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(corrected["_atol_tree"]["node"], "width")
         self.assertEqual(corrected["paper_facts"]["Наличие рулона"], "Бумага закончилась")
 
+    async def test_repeating_known_condition_does_not_reset_later_answers(self):
+        state = self.paper()
+        for label in ("Бумага закончилась", "80 мм", "Горизонтально"):
+            state, _ = tree.advance(state, label)
+        updated, _ = await advance(state, "Бумага закончилась", [], self.llm("paper", 0))
+        self.assertEqual(updated["_atol_tree"], state["_atol_tree"])
+        self.assertEqual(updated["paper_facts"], state["paper_facts"])
+
     async def test_unknown_is_not_absent(self):
         state, _ = await advance(self.paper(), "Не могу разглядеть рулон", [], self.llm("paper", 2))
         self.assertIsNone(state["paper_facts"]["Наличие рулона"])
@@ -68,7 +76,7 @@ class PaperAnswerTests(unittest.IsolatedAsyncioTestCase):
                     '{"question":"paper","choice":-1}', '{"question":"paper","choice":7}', 'broken'):
             state = self.paper()
             llm = SimpleNamespace(route_support=Mock(return_value=raw))
-            updated, _ = await advance(state, "Вроде есть, а может и нет", [], llm)
+            updated, _ = await advance(state, "Объясните ещё", [], llm)
             self.assertEqual(updated["_atol_tree"], state["_atol_tree"])
             self.assertNotIn("paper_facts", updated)
 
@@ -90,6 +98,34 @@ class PaperAnswerTests(unittest.IsolatedAsyncioTestCase):
             state = json.loads(json.dumps(state))
         self.assertEqual(state["_atol_tree"]["node"], "paper_failed")
         llm.route_support.assert_not_called()
+
+    async def test_model_cannot_invent_sizes_orientation_or_outcomes(self):
+        cases = [
+            (("Бумага закончилась",), "Обычная", "width", 1),
+            (("Бумага закончилась",), "Широкая", "width", 0),
+            (("Бумага закончилась",), "Нет", "width", 1),
+            (("Бумага закончилась", "80 мм"), "Стоит на столе", "layout80", 2),
+            (("Бумага закончилась", "80 мм", "Горизонтально"), "Еще не пробовал", "paper80h", 1),
+            (("Бумага закончилась", "80 мм", "Горизонтально"), "Не знаю, помогло ли", "paper80h", 2),
+            ((), "На экране написано Нет бумаги", "paper", 0),
+            ((), "Вроде есть, а может и нет", "paper", 2),
+        ]
+        for labels, message, node, choice in cases:
+            state = self.paper()
+            for label in labels:
+                state, _ = tree.advance(state, label)
+            updated, _ = await advance(state, message, [], self.llm(node, choice))
+            self.assertEqual(updated["_atol_tree"], state["_atol_tree"], message)
+            self.assertEqual(updated.get("paper_facts"), state.get("paper_facts"), message)
+
+    async def test_known_error_after_filling_does_not_change_roll_presence(self):
+        state = self.paper()
+        for label in ("Бумага закончилась", "80 мм", "Горизонтально", "Не помогло"):
+            state, _ = tree.advance(state, label)
+        updated, _ = await advance(state, "Она опять пишет что нет бумаги", [], None)
+        self.assertEqual(updated["_atol_tree"]["node"], "sensor")
+        self.assertEqual(updated["paper_facts"]["Сообщение после заправки"], "Нет бумаги")
+        self.assertEqual(updated["paper_facts"]["Наличие рулона"], state["paper_facts"]["Наличие рулона"])
 
 
 if __name__ == "__main__":
