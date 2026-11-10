@@ -5,7 +5,7 @@ from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
 
-from src.services import atol_problem_router
+from src.services import atol_problem_router, atol_answer_state
 
 
 @lru_cache(maxsize=1)
@@ -105,6 +105,8 @@ def advance(state, message):
     if current["kind"] == "instruction" and selected and selected.get("action") == "outcome":
         state.setdefault("performed_checks", []).append({"instruction": current["text"], "result": message, "sources": current.get("sources", [])})
         state["check_result"] = message
+    if selected and selected in current.get("choices", []):
+        atol_answer_state.record(state, flow["node"], current["choices"].index(selected))
     flow.update(node=target, revision=flow["revision"] + 1)
     node = catalog()["nodes"][target]
     state.update(_engine="rules", _phase={"handoff": "confirm", "resolved": "resolved"}.get(node["kind"], "diagnosing"))

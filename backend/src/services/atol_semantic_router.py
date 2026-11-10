@@ -5,7 +5,7 @@ import logging
 import re
 
 from src.middleware.ai_capacity import run_support_model
-from src.services import atol_support_tree
+from src.services import atol_support_tree, atol_answer_router
 from src.services.atol_problem_router import routing_catalog
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,10 @@ def parse_targets(raw):
 
 async def advance(state, message, history, llm=None, timeout=15):
     updated, answer = atol_support_tree.advance(state, message)
+    if updated == state:
+        interpreted = await atol_answer_router.interpret(state, message, llm, timeout)
+        if interpreted is not None:
+            return interpreted
     flow = updated["_atol_tree"]
     proposal = flow.get("proposal")
     previous = state["_atol_tree"]

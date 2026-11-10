@@ -1,0 +1,10 @@
+{
+  "nodes": ["paper", "width", "layout80", "layout58", "paper80h", "paper80v", "paper58h", "paper58v", "width_settings", "paper_failed", "sensor"],
+  "facts": {
+    "paper": {"field": "Наличие рулона", "values": ["Бумага закончилась", "Рулон установлен", null]},
+    "width": {"field": "Ширина ленты", "values": ["80 мм", "58 мм", null]},
+    "layout80": {"field": "Положение кассы", "values": ["Горизонтально", "Вертикально", null]},
+    "layout58": {"field": "Положение кассы", "values": ["Горизонтально", "Вертикально", null]},
+    "paper_failed": {"field": "Сообщение после заправки", "values": ["Нет бумаги", null]}
+  }
+}
