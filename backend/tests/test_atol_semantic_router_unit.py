@@ -32,7 +32,7 @@ class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
         llm = SimpleNamespace(route_support=Mock(side_effect=AssertionError("Model called for button")))
         state = initial_state()
         for label in ("АТОЛ FPrint-22ПТК", "Бумага и печать", "Зажевало бумагу"):
-            state, _ = await router.advance(state, label, [], llm)
+            state, _ = await router.advance(state, label, [], llm, button=True)
         self.assertEqual(state["_atol_tree"]["node"], "jam")
         llm.route_support.assert_not_called()
 

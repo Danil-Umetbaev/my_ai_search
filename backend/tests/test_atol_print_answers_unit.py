@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 from src.services import atol_support_tree as tree
 from src.services.atol_semantic_router import advance
+from atol_turns import confirm_answer
 from src.services.atol_answer_state import configuration
 from src.services.atol_answer_router import parse_answer, questions
 
@@ -40,7 +41,7 @@ class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
                     state = self.state(node)
                     label = tree.catalog()["nodes"][node]["choices"][index]["label"]
                     expected, expected_text = tree.advance(state, label)
-                    result, text = await advance(state, message, [], self.model({"question": node, "choice": index}))
+                    result, text = await confirm_answer(self, state, message, self.model({"question": node, "choice": index}))
                     self.assertEqual(text, expected_text)
                     self.assertEqual(result["_atol_tree"]["node"], expected["_atol_tree"]["node"])
                     self.assertEqual(result.get("performed_checks"), expected.get("performed_checks"))
@@ -79,7 +80,7 @@ class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
         for node in ("jam", "blank", "heat", "blank_details", "heat_details", "dots"):
             state = self.state(node)
             for choice in tree.choices(state):
-                await advance(state, choice["label"], [], model)
+                await advance(state, choice["label"], [], model, button=True)
         model.route_support.assert_not_called()
 
     async def test_unavailable_model_preserves_the_current_check(self):
@@ -89,7 +90,7 @@ class PrintAnswerTests(unittest.IsolatedAsyncioTestCase):
             result, _ = await advance(state, "Ничего не понятно", [], model)
             self.assertEqual(result["_atol_tree"], state["_atol_tree"])
             self.assertEqual(tree.choices(result), tree.choices(state))
-        result, _ = await advance(self.state("heat"), "Где изменить яркость", [], None)
+        result, _ = await confirm_answer(self, self.state("heat"), "Где изменить яркость", None)
         self.assertEqual(result["_atol_tree"]["node"], "heat_details")
         self.assertNotIn("performed_checks", result)
 

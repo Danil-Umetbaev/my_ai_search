@@ -6,8 +6,9 @@ import re
 from copy import deepcopy
 
 from src.middleware.ai_capacity import run_support_model
-from src.services import atol_support_tree, atol_answer_router
-from src.services.atol_problem_router import routing_catalog
+from src.services import atol_support_tree, atol_answer_router, atol_document_search
+from src.services.atol_problem_router import routing_catalog, suggest
+from src.services.equipment_scope import canonical_model
 from src.services.atol_answer_state import configuration
 from src.services.atol_answer_validation import matches
 
@@ -59,28 +60,92 @@ def parse_targets(raw):
     return targets
 
 
-async def advance(state, message, history, llm=None, timeout=15):
+async def advance(state, message, history, llm=None, timeout=15, *, button=False, lookup=None):
+    flow = state["_atol_tree"]
+    normalized = message.strip().casefold().rstrip(".!?")
+    controls = {"отмена", "отменить", "нужен специалист", "передать специалисту"}
+    active = state.get("_phase") not in {"confirm", "resolved", "cancelled", "ticket_created"}
+    if flow.get("manual") and active:
+        if normalized in controls:
+            state = deepcopy(state)
+            state["_atol_tree"].pop("manual")
+            state["_atol_tree"].pop("manual_offer", None)
+            return atol_support_tree.advance(state, message)
+        if other_model(message):
+            return state, "Эта проверка относится к АТОЛ FPrint-22ПТК. Уточните модель или обратитесь к специалисту."
+        return await atol_document_search.search(state, message, lookup, button=button)
+    if flow["node"] == "other" and active and normalized not in controls:
+        state = deepcopy(state)
+        state["_atol_tree"]["node"] = "categories"
+        state["additional_context"] = message
+    updated, answer = await route(state, message, llm, timeout, button=button)
+    proposal = updated["_atol_tree"].get("proposal")
+    if (lookup and proposal and not proposal["targets"] and not proposal.get("other_model")
+            and not proposal.get("return_node") and updated.get("_phase") == "diagnosing"
+            and updated["_atol_tree"]["revision"] != flow["revision"]):
+        search_state = atol_document_search.start(updated, message)
+        return await atol_document_search.search(search_state, message, lookup)
+    return updated, answer
+
+
+def other_model(message):
+    return matches(routing_catalog()["other_models"], message)
+
+
+async def route(state, message, llm, timeout, *, button=False):
+    flow = state["_atol_tree"]
+    node = flow["node"]
+    normalized = message.strip().casefold().rstrip(".!?")
+    if state.get("_phase") in {"confirm", "resolved", "cancelled", "ticket_created"}:
+        return atol_support_tree.advance(state, message)
+    if "answer_offer" in flow:
+        state = deepcopy(state)
+        flow = state["_atol_tree"]
+        offer = flow.pop("answer_offer")
+        flow["revision"] += 1
+        if normalized in {"да, верно", "да", "верно", "правильно"}:
+            return atol_answer_router.accept(state, offer)
+        if normalized in {"нет, выбрать снова", "нет", "назад"}:
+            return state, atol_support_tree.render(state)
+    if button or normalized in {"отмена", "отменить", "нужен специалист", "передать специалисту"}:
+        return atol_support_tree.advance(state, message)
+    nodes = atol_support_tree.catalog()["nodes"]
+    if node in configuration()["nodes"] and nodes[node]["kind"] != "input" and other_model(message):
+        return state, "Эта проверка относится к АТОЛ FPrint-22ПТК. Уточните модель или обратитесь к специалисту."
+    if not flow.get("proposal") and nodes[node]["kind"] != "input":
+        options = nodes[node]["choices"]
+        label = next((item["label"] for item in options if item["label"].casefold() == normalized), None)
+        if not label and node in {"model", "unsupported"}:
+            if other_model(message) or re.search(r"не\s+(?:атол|atol)\b|другая касса|не знаю", normalized):
+                label = options[1]["label"] if node == "model" else None
+            elif canonical_model(message) == "АТОЛ FPrint-22ПТК" or re.search(r"\b(?:атол|atol|22[ -]?(?:птк|ptk))\b", normalized):
+                label = options[0 if node == "model" else 1]["label"]
+        if not label and nodes[node]["kind"] == "instruction":
+            match = {"да": "Да, помогло", "помогло": "Да, помогло", "нет": "Не помогло",
+                     "не получилось": "Не помогло", "не могу": "Не могу выполнить"}.get(normalized)
+            label = next((item["label"] for item in options if item["label"] == match), None)
+        if label:
+            return atol_answer_router.propose(state, node, label, message)
     correction = configuration().get("problem_correction", {})
     previous_flow = state["_atol_tree"]
     if (
         previous_flow["node"] in correction.get("nodes", [])
         and not previous_flow.get("proposal")
-        and state.get("_phase") not in {"confirm", "resolved", "cancelled", "ticket_created"}
         and matches(correction["markers"], message)
         and matches(correction["symptoms"], message)
     ):
-        selection = deepcopy(state)
-        selection["_atol_tree"]["node"] = "categories"
-        updated, _ = await advance(selection, message, history, llm, timeout)
-        proposal = updated["_atol_tree"].get("proposal")
-        if proposal is not None:
-            proposal["return_node"] = previous_flow["node"]
-            return updated, atol_support_tree.render(updated)
-        return state, "Уточните новую проблему или продолжите текущую проверку кнопками."
+        return await propose_change(state, message, llm, timeout)
     updated, answer = atol_support_tree.advance(state, message)
     if updated == state:
         interpreted = await atol_answer_router.interpret(state, message, llm, timeout)
         if interpreted is not None:
+            current_problem = flow.get("problem_node", node)
+            current_targets = {node, current_problem}
+            current_targets.update(key for key in nodes if key.startswith("group_")
+                                   and any(c["next"] == current_problem for c in nodes[key]["choices"]))
+            if ("answer_offer" not in interpreted[0]["_atol_tree"]
+                    and set(suggest(message)) - current_targets):
+                return await propose_change(state, message, llm, timeout)
             return interpreted
     flow = updated["_atol_tree"]
     proposal = flow.get("proposal")
@@ -88,21 +153,24 @@ async def advance(state, message, history, llm=None, timeout=15):
     origin = previous.get("proposal", {}).get("return_node")
     if proposal is not None and origin:
         proposal["return_node"] = origin
-    # Branch routing handles descriptions only; answer interpretation above
-    # is scoped separately. Exact choices still bypass both model calls.
     if (
         proposal is None
         or proposal == previous.get("proposal")
         or updated.get("_phase") in {"confirm", "resolved", "cancelled", "ticket_created"}
     ):
         return updated, answer
+    return await rank_proposal(state, updated, message, llm, timeout)
+
+
+async def rank_proposal(state, updated, message, llm, timeout):
+    proposal = updated["_atol_tree"]["proposal"]
     updated["_engine"] = "rules"
-    if any(re.search(pattern, message.casefold()) for pattern in routing_catalog()["other_models"]):
+    if other_model(message):
         proposal["targets"] = []
         proposal["other_model"] = True
         return updated, atol_support_tree.render(updated)
     if llm is None:
-        return updated, answer
+        return updated, atol_support_tree.render(updated)
     payload = json.dumps(
         {
             "model": "АТОЛ FPrint-22ПТК",
@@ -119,4 +187,13 @@ async def advance(state, message, history, llm=None, timeout=15):
         return updated, atol_support_tree.render(updated)
     except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:
         logger.warning("ATOL routing fallback | reason=%s", type(error).__name__)
-        return updated, answer
+        return updated, atol_support_tree.render(updated)
+
+
+async def propose_change(state, message, llm, timeout):
+    updated = deepcopy(state)
+    flow = updated["_atol_tree"]
+    flow["proposal"] = {"targets": suggest(message), "description": message, "return_node": flow["node"]}
+    flow["revision"] += 1
+    updated.setdefault("observations", []).append({"question": "Уточнение проблемы", "answer": message})
+    return await rank_proposal(state, updated, message, llm, timeout)

@@ -43,6 +43,7 @@ export default function SupportWorkspace({ user, onClose }) {
   const storageKey = `support-session-${knowledgeSpace}-${user.id}`;
   const pendingKey = `support-pending-${knowledgeSpace}-${user.id}`;
   const panelRef = useRef(null);
+  const latestReply = useRef(null);
   const sendingRef = useRef(false);
   const [session, setSession] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -75,6 +76,10 @@ export default function SupportWorkspace({ user, onClose }) {
     setPhase(data.ticket_id ? "ticket_created" : data.state?._phase || "collect");
     setMessages(data.history?.length ? data.history : [{ role: "assistant", content: data.answer || "Опишите неисправность и текст ошибки. Не отправляйте пароли и коды подтверждения." }]);
   }
+
+  useEffect(() => {
+    latestReply.current?.scrollIntoView({ block: "start" });
+  }, [messages, view]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -133,7 +138,7 @@ export default function SupportWorkspace({ user, onClose }) {
     const message = text.trim();
     if (!message || !session || busy) return;
     await run(async () => {
-      const outgoing = outgoingMessage(pendingSend, session, message, choiceId, () => crypto.randomUUID());
+      const outgoing = outgoingMessage(pendingSend, session, message, choiceId);
       if (!pendingSend) outgoing.action = action;
       const requestId = outgoing.id;
       writeStorage(pendingKey, outgoing);
@@ -143,9 +148,11 @@ export default function SupportWorkspace({ user, onClose }) {
         setPendingSend(null);
       };
       try {
-        await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message: outgoing.message, request_id: requestId, choice_id: outgoing.choiceId, action: outgoing.action || null }), signal: AbortSignal.timeout(65000) });
-        const data = await request(`/support/sessions/${session}`);
-        restore(data); setInput(""); clearPending();
+        const reply = await request(`/support/sessions/${session}/messages`, { method: "POST", body: JSON.stringify({ message: outgoing.message, request_id: requestId, choice_id: outgoing.choiceId, action: outgoing.action || null }), signal: AbortSignal.timeout(65000) });
+        setMessages(previous => [...previous, { role: "user", content: outgoing.message }, { role: "assistant", content: reply.answer }]);
+        setChoices(reply.choices);
+        setPhase(reply.phase);
+        setInput(""); clearPending();
       } catch (err) {
         if (err.status === 409) { restore(await request(`/support/sessions/${session}`)); clearPending(); }
         throw err;
@@ -175,8 +182,8 @@ export default function SupportWorkspace({ user, onClose }) {
       {busy && <p className="support-progress" role="status">Обрабатываем запрос…</p>}
       {view === "diagnosis" ? <>
 
-        <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
-        {!terminal && !pendingSend && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
+        <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article ref={index === messages.length - 1 ? latestReply : null} key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
+        {!terminal && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy || !!pendingSend} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
         {pendingSend && <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" disabled={busy} onClick={() => send(pendingSend.message, pendingSend.choiceId, pendingSend.action)}>Повторить отправку</button></div>}
         {!terminal && !pendingSend && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input, null, phase === "confirm" ? "send_with_details" : null); }}>
           {phase === "confirm" && <label htmlFor="support-message">Что ещё стоит знать специалисту? Необязательно.</label>}

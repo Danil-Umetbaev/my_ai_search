@@ -37,7 +37,7 @@
 .support-panel header { padding-bottom: 8px; }
 .support-panel nav { position: sticky; top: -28px; z-index: 2; background: #f5faf7; padding-top: 12px; }
 .support-conversation { gap: 24px; padding: 8px 0 24px; }
-.support-message { min-width: 0; max-width: 86%; box-shadow: 0 3px 16px #244a4105; }
+.support-message { min-width: 0; max-width: 86%; scroll-margin-top: 5rem; box-shadow: 0 3px 16px #244a4105; }
 .support-message--assistant { border: 0; border-left: 2px solid #b8dfce; border-radius: 0 16px 16px 0; background: transparent; }
 .support-message--user { border-color: #c7e7d8; border-radius: 18px 18px 4px 18px; }
 .support-reply p { margin: 8px 0; }

@@ -91,7 +91,8 @@ class SupportDialogueService(BaseService):
                     409, "Вопрос изменился. Обновите диалог и выберите ответ снова."
                 )
             message = choice["label"]
-            selected_fact = choice_fact(state, data.choice_id)
+            if "_atol_tree" not in state:
+                selected_fact = choice_fact(state, data.choice_id)
         normalized = message.casefold().rstrip(".!?")
         if data.action and (not is_ready(state) or data.choice_id):
             raise HTTPException(409, "Передача специалисту ещё не предложена. Обновите диалог.")
@@ -106,9 +107,20 @@ class SupportDialogueService(BaseService):
                 )
             answer = ""
         elif "_atol_tree" in state:
+            async def lookup_atol(query, flow):
+                if flow["facts"].get("model") != "АТОЛ FPrint-22ПТК":
+                    return {"status": "blocked", "reason": "Для другой модели нужен специалист."}
+                role = await self.role(user_id)
+                try:
+                    return await SupportKnowledgeService(self.db).lookup(query, flow, role)
+                finally:
+                    await self.db.rollback()
+
             state, answer = await atol_semantic_router.advance(
                 state, message, row["history"],
                 llm=models.get("llm") if models.get("status") == "ready" else None,
+                button=bool(data.choice_id),
+                lookup=lookup_atol,
             )
         else:
 

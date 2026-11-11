@@ -84,6 +84,24 @@ def parse_answer(raw, allowed):
     return question, choice
 
 
+def propose(state, question, label, message):
+    updated = deepcopy(state)
+    flow = updated["_atol_tree"]
+    flow["answer_offer"] = {"question": question, "label": label, "description": message}
+    flow["revision"] += 1
+    return updated, atol_support_tree.render(updated)
+
+
+def accept(state, offer):
+    flow = state["_atol_tree"]
+    if offer["question"] != flow["node"]:
+        flow["node"] = offer["question"]
+        state.pop("check_result", None)
+    state, answer = atol_support_tree.advance(state, offer["label"])
+    state["observations"][-1].update(answer=offer["description"], selected_answer=offer["label"])
+    return state, answer
+
+
 async def interpret(state, message, llm, timeout=15):
     flow = state["_atol_tree"]
     current_id = flow["node"]
@@ -112,6 +130,11 @@ async def interpret(state, message, llm, timeout=15):
             updated["_engine"] = "llm"
         except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:
             logger.warning("ATOL answer fallback | reason=%s", type(error).__name__)
+    if selection is None and (llm is None or updated["_engine"] == "rules"):
+        candidates = [int(index) for index in validation.policy(current_id).get("evidence", {})
+                      if validation.supported(current_id, int(index), message)]
+        if len(candidates) == 1:
+            selection = current_id, candidates[0]
     if selection is not None and not validation.supported(*selection, message):
         selection = None
     if selection is not None and selection[0] != current_id:
@@ -124,11 +147,5 @@ async def interpret(state, message, llm, timeout=15):
         updated.setdefault("observations", []).append({"question": allowed[current_id]["text"], "answer": message})
         return updated, clarification
     question, index = selection
-    if question != current_id:
-        updated["_atol_tree"].update(node=question, revision=flow["revision"] + 1)
-        updated.pop("check_result", None)
     label = atol_support_tree.catalog()["nodes"][question]["choices"][index]["label"]
-    updated, answer = atol_support_tree.advance(updated, label)
-    updated["observations"][-1].update(answer=message, selected_answer=label)
-    updated["_engine"] = "rules" if explicit is not None else "llm"
-    return updated, answer
+    return propose(updated, question, label, message)

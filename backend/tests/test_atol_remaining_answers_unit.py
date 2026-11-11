@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 from src.services import atol_support_tree as tree
 from src.services.atol_semantic_router import advance
+from atol_turns import confirm_answer
 from src.services.atol_answer_validation import policy
 import test_atol_tree_unit as tree_tests
 
@@ -47,7 +48,10 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
                     label = tree.catalog()["nodes"][node]["choices"][index]["label"]
                     model = SimpleNamespace(route_support=Mock(return_value=json.dumps({"question": node, "choice": label})))
                     expected, answer = tree.advance(state, label)
-                    actual, text = await advance(state, message, [], model)
+                    if tree.catalog()["nodes"][node]["kind"] == "input":
+                        actual, text = await advance(state, message, [], model)
+                    else:
+                        actual, text = await confirm_answer(self, state, message, model)
                     self.assertEqual(actual["_atol_tree"]["node"], expected["_atol_tree"]["node"])
                     self.assertEqual(text, answer)
                     self.assertEqual(actual.get("performed_checks"), expected.get("performed_checks"))
@@ -74,7 +78,7 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
         state, _ = tree.advance(state, "Wi-Fi")
         state, _ = tree.advance(state, "Показать настройки канала")
         model = SimpleNamespace(route_support=Mock(return_value='{"question":"interface","choice":"Ethernet"}'))
-        updated, _ = await advance(state, "Ошибся, написано Ethernet, не Wi-Fi", [], model)
+        updated, _ = await confirm_answer(self, state, "Ошибся, написано Ethernet, не Wi-Fi", model)
         self.assertEqual(updated["_atol_tree"]["node"], "interface_help")
         self.assertEqual(updated["diagnostic_facts"]["Выключенный интерфейс"], "Ethernet")
         self.assertEqual(state["diagnostic_facts"]["Выключенный интерфейс"], "Wi-Fi")
@@ -88,7 +92,7 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
             ("ofd", "Разбудил компьютер, подтверждения нет", "ofd_lock"),
         ):
             model = SimpleNamespace(route_support=Mock(return_value=json.dumps({"question": node, "choice": "Да, помогло"})))
-            updated, _ = await advance(self.states[node], message, [], model)
+            updated, _ = await confirm_answer(self, self.states[node], message, model)
             self.assertEqual(updated["_atol_tree"]["node"], target)
             self.assertEqual(updated["check_result"], "Не помогло")
             model.route_support.assert_not_called()
@@ -111,7 +115,7 @@ class RemainingAnswerTests(unittest.IsolatedAsyncioTestCase):
     async def test_explicit_delivery_confirmation_does_not_need_model(self):
         for node in ("ofd", "ofd_settings"):
             model = SimpleNamespace(route_support=Mock())
-            updated, _ = await advance(self.states[node], "ОФД получил все документы", [], model)
+            updated, _ = await confirm_answer(self, self.states[node], "ОФД получил все документы", model)
             self.assertEqual(updated["_atol_tree"]["node"], "resolved")
             model.route_support.assert_not_called()
 

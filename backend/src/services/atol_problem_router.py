@@ -48,12 +48,14 @@ def proposal_options(flow, nodes):
     ]
     if proposal.get("return_node"):
         return options + [{"label": "Продолжить прежнюю проверку", "next": proposal["return_node"]}]
-    return options + [{"label": "Выбрать по кнопкам", "next": "categories"}]
+    return options + [{"label": "Выбрать по кнопкам", "next": flow["node"] if flow["node"].startswith("group_") else "categories"}]
 
 
 def proposal_text(flow):
+    if flow["proposal"].get("search_reply"):
+        return flow["proposal"]["search_reply"]
     if flow["proposal"].get("other_model"):
-        return "Сейчас выбрана АТОЛ FPrint-22ПТК, а в описании указана другая касса. Для другой модели обратитесь к специалисту или вернитесь к выбору кассы."
+        return "Сейчас выбрана АТОЛ FPrint-22ПТК, а в описании указана другая касса. Уточните модель или обратитесь к специалисту."
     targets = flow["proposal"]["targets"]
     if flow["proposal"].get("return_node"):
         return "Вы хотите изменить выбранную проблему? Подтвердите новый вариант или продолжите прежнюю проверку." if targets else "Не удалось определить новую проблему. Уточните описание или продолжите прежнюю проверку."

@@ -54,7 +54,7 @@ def ticket_details(state):
     flow = state.get("_receipt", {})
     for key in ("fact_changes", "completed_procedures"):
         if flow.get(key):
-            details[key] = deepcopy(flow[key])
+            details[key] = details.get(key, []) + deepcopy(flow[key]) if "_atol_tree" in state else deepcopy(flow[key])
     return details
 
 
