@@ -1,55 +1,133 @@
 .support-launch { position: fixed; right: 18px; bottom: 18px; z-index: 70; padding: 13px 20px; border: 0; border-radius: 24px; background: #087f68; color: white; box-shadow: 0 4px 20px #087f6833; cursor: pointer; }
-.support-backdrop { position: fixed; inset: 0; z-index: 100; background: #102f4399; display: flex; justify-content: center; padding: 24px; }
-.support-panel { width: min(1060px, 100%); background: #f5faf7; color: #244a41; border-radius: 20px; padding: 28px; overflow: auto; box-shadow: 0 20px 80px #102f4344; }
-.support-panel header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.support-panel h2 { margin: 6px 0 22px; font-size: 28px; }
-.support-eyebrow { color: #52727c; font-size: 11px; letter-spacing: .16em; font-weight: 700; }
-.support-panel nav { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid #dce6ea; }
-.support-panel button, .support-panel select { font: inherit; padding: 10px 14px; border: 1px solid #c9d9df; border-radius: 10px; background: white; color: #244a41; cursor: pointer; }
-.support-panel button:disabled { opacity: .55; cursor: default; }
-.support-panel button[aria-current="page"], .support-panel .support-primary { background: #087f68; border-color: #087f68; color: white; }
-.support-panel button:focus-visible, .support-panel textarea:focus-visible, .support-panel select:focus-visible { outline: 3px solid #b8d6e0; outline-offset: 2px; }
-.support-panel p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
-.support-mode, .support-progress { color: #597079; font-size: 13px; }
-.support-conversation { margin: 20px 0; display: grid; gap: 14px; }
-.support-message { max-width: 90%; border: 1px solid #dde7eb; background: white; padding: 16px 20px; border-radius: 14px; }
-.support-message strong { font-size: 12px; color: #52727c; }
-.support-message p { margin-bottom: 0; }
-.support-message--user { justify-self: end; background: #e0f3eb; }
-.support-panel label { display: block; margin-top: 14px; font-size: 14px; font-weight: 600; }
-.support-panel textarea { display: block; box-sizing: border-box; width: 100%; min-height: 90px; resize: vertical; margin: 8px 0 12px; padding: 12px; color: #244a41; background: white; border: 1px solid #c9d9df; border-radius: 10px; font: inherit; }
-.support-actions, .support-list-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0; }
-.support-error { color: #9f2828; background: #fff0ee; padding: 12px; border-radius: 10px; }
-.support-ticket-card { display: grid; text-align: left; width: 100%; gap: 9px; margin: 12px 0; }
-.support-ticket-card span, .support-ticket-card small { color: #597079; font-size: 12px; }
+.support-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(17 41 32 / 34%);
+}
+.support-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  height: min(620px, 100%);
+  min-height: 0;
+  overflow: hidden;
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 20px 80px #122e2233;
+}
+.support-header, .support-footer { flex: none; padding: 16px 24px; }
+.support-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); }
+.support-header h2 { flex: 1; margin: 0; font-size: 18px; font-weight: 650; }
+.support-panel button, .support-panel select {
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+}
+.support-panel button:hover:not(:disabled), .support-menu summary:hover { background: var(--green-050); }
+.support-panel button:disabled { opacity: .48; }
+.support-panel :is(button, select, summary, a, textarea):focus-visible {
+  outline: 2px solid var(--green-700);
+  outline-offset: 2px;
+}
+.support-menu { position: relative; }
+.support-menu summary, .support-panel .support-icon-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: #466458;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.support-menu summary::-webkit-details-marker { display: none; }
+.support-panel .support-icon-button { font-size: 25px; font-weight: 400; }
+.support-menu-items {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 6px);
+  right: 0;
+  width: max-content;
+  padding: 5px;
+  background: white;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 28px #143a2421;
+  border-radius: 12px;
+}
+.support-menu-items button { display: block; width: 100%; text-align: left; border: none; }
+.support-thread, .support-ticket-view { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 24px; }
+.support-conversation { display: grid; gap: 20px; }
+.support-message { min-width: 0; scroll-margin: 18px; line-height: 1.55; font-size: 15px; }
+.support-message p, .support-ticket-view p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.support-message p { margin: 0; }
+.support-reply > * + * { margin-top: 8px; }
+.support-reply > p + p { margin-top: 8px; }
+.support-message--user { justify-self: end; max-width: 86%; padding: 9px 15px; background: var(--green-050); border-radius: 16px 16px 4px 16px; }
+.support-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.support-choices button { border-radius: 14px; color: var(--green-900); text-align: left; overflow-wrap: anywhere; }
+.support-choices button:hover:not(:disabled) { border-color: #a3cdb9; }
+.support-thread--start {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-inline: clamp(20px, 6vw, 58px);
+}
+.support-thread--start .support-conversation { margin-top: auto; }
+.support-thread--start .support-reply > p:first-child {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+.support-thread--start .support-reply > p + p { color: #567166; }
+.support-thread--start .support-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-block: 22px auto;
+}
+.support-thread--start .support-choices button { min-height: 44px; background: var(--page); }
+.support-manual-image { display: block; max-width: 100%; height: auto; margin-top: 10px; border-radius: 10px; }
+.support-references summary { width: fit-content; color: var(--green-800); font-size: 13px; cursor: pointer; }
+.support-sources { padding-left: 20px; overflow-wrap: anywhere; }
+.support-sources a { color: var(--green-800); }
+.support-sources blockquote { margin: 8px 0; padding-left: 14px; border-left: 2px solid var(--line); }
+.support-footer { border-top: 1px solid var(--line); }
+.support-composer { display: flex; align-items: flex-end; gap: 8px; border: 1px solid var(--line); border-radius: 16px; padding: 6px; }
+.support-composer:focus-within { border-color: var(--green-700); }
+.support-composer textarea { flex: 1; min-width: 0; margin: 0; padding: 8px; border: none; border-radius: 10px; resize: none; line-height: 1.45; max-height: 6em; field-sizing: content; }
+.support-composer textarea:focus-visible { outline: none; }
+.support-primary, .support-panel .support-send { font-weight: 600; }
+.support-panel .support-primary, .support-panel .support-send { background: var(--green-800); color: white; border-color: transparent; }
+.support-panel .support-primary:hover:not(:disabled), .support-panel .support-send:hover:not(:disabled) { background: var(--green-950); }
+.support-panel .support-send { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 11px; }
+.support-progress { color: #557266; font-size: 13px; }
+.support-error { margin: 8px 24px; padding: 10px; border-radius: 10px; background: #fff0ee; color: #902828; overflow-wrap: anywhere; }
+.support-ticket-view label { display: block; margin-top: 12px; }
+.support-ticket-view textarea { width: 100%; min-height: 80px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; margin: 6px 0; font: inherit; }
+.support-actions, .support-list-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+.support-list-tools label { margin: 0; }
+.support-ticket-card { display: grid; width: 100%; gap: 6px; margin: 10px 0; text-align: left; }
+.support-ticket-card span, .support-ticket-card small, .support-facts dt { color: #577165; font-size: 13px; }
 .support-ticket-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.support-facts > div { padding: 14px 0; border-bottom: 1px solid #dce6ea; }
-.support-facts dt { font-size: 12px; color: #597079; font-weight: 600; }
+.support-facts > div { padding: 12px 0; border-bottom: 1px solid var(--line); }
 .support-facts dd { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.support-sources { padding-left: 22px; }
-.support-sources a { color: #1c617d; }
-.support-sources blockquote { margin: 8px 0; padding-left: 14px; border-left: 3px solid #b6d0db; }
-.support-resolution { background: #e8f4ee; border-radius: 12px; padding: 16px; }
-.support-panel details { margin: 20px 0; }
-@media (max-width: 600px) { .support-backdrop { padding: 0; } .support-panel { border-radius: 0; padding: 18px; } .support-panel h2 { font-size: 23px; } .support-message { max-width: 100%; } }
-
-.support-panel { max-width: 900px; scrollbar-gutter: stable; }
-.support-panel header { padding-bottom: 8px; }
-.support-panel nav { position: sticky; top: -28px; z-index: 2; background: #f5faf7; padding-top: 12px; }
-.support-conversation { gap: 24px; padding: 8px 0 24px; }
-.support-message { min-width: 0; max-width: 86%; scroll-margin-top: 5rem; box-shadow: 0 3px 16px #244a4105; }
-.support-message--assistant { border: 0; border-left: 2px solid #b8dfce; border-radius: 0 16px 16px 0; background: transparent; }
-.support-message--user { border-color: #c7e7d8; border-radius: 18px 18px 4px 18px; }
-.support-reply p { margin: 8px 0; }
-.support-source-link { display: block; width: fit-content; margin: 8px 0; padding: 9px 12px; background: white; border: 1px solid #c7e7d8; border-radius: 10px; color: #087f68; text-decoration: none; overflow-wrap: anywhere; }
-.support-source-link:hover { background: #e0f3eb; }
-.support-composer { background: white; padding: 12px; border: 1px solid #c7e7d8; border-radius: 18px; box-shadow: 0 8px 24px #244a4108; }
-.support-composer textarea { border: 0; min-height: 64px; margin: 0; resize: vertical; }
-.support-composer .support-actions { margin: 8px 0 0; }
-@media (max-width: 600px) { .support-panel { padding: 16px; } .support-panel nav { top: -16px; } .support-message { max-width: 95%; padding: 12px; } .support-panel h2 { font-size: 22px; } .support-actions button { flex: 1 1 auto; } }
-
-.support-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
-.support-choices button { border-color: #9acdb9; color: #087f68; background: #edf8f1; }
-.support-choices button:hover:not(:disabled) { background: #d7eee2; }
-
-.support-manual-image { display: block; max-width: 100%; width: 620px; height: auto; border-radius: 12px; border: 1px solid #d6e5df; margin: 12px 0; }
+.support-resolution { padding: 12px; background: var(--green-050); border-radius: 10px; }
+@media (max-width: 600px) {
+  .support-backdrop { padding: 0; }
+  .support-panel { height: 100%; border: 0; border-radius: 0; }
+  .support-header, .support-thread, .support-ticket-view, .support-footer { padding: 14px 16px; }
+  .support-footer { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+  .support-composer:has(.support-primary) { flex-wrap: wrap; }
+  .support-composer:has(.support-primary) textarea { flex-basis: 100%; }
+}

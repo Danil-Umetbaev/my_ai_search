@@ -1,5 +1,6 @@
 import { knowledgeSpace, isSourceUrl } from "../knowledge";
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "./Icons";
 import { createPortal } from "react-dom";
 import { request } from "../api/client";
 import { pendingForSession, outgoingMessage } from "./supportPending";
@@ -21,13 +22,17 @@ function Sources({ sources = [] }) {
 }
 
 function ReplyText({ text }) {
+  const sources = [];
   return <div className="support-reply">{text.split("\n").filter(line => line.trim()).map((line, index) => {
     const picture = line.match(/^!\[([^\]]*)\]\((\/api\/v1\/knowledge-assets\/[a-f0-9]{64}\.png)\)$/);
     if (picture) return <a key={index} href={picture[2]} target="_blank" rel="noreferrer"><img className="support-manual-image" src={picture[2]} alt={picture[1]} loading="lazy" /></a>;
     const match = line.match(/^(.*?):\s*((?:https?:\/\/|\/api\/)[^\s]+)$/);
-    if (match && isSourceUrl(match[2])) return <a className="support-source-link" key={index} href={match[2]} target="_blank" rel="noreferrer">{match[1]} ↗</a>;
+    if (match && isSourceUrl(match[2])) {
+      sources.push({ title: match[1], url: match[2] });
+      return null;
+    }
     return <p key={index}>{line}</p>;
-  })}</div>;
+  })}{sources.length > 0 && <details className="support-references"><summary>Источники ({sources.length})</summary><Sources sources={sources} /></details>}</div>;
 }
 
 function FactValue({ value }) {
@@ -51,7 +56,8 @@ export default function SupportWorkspace({ user, onClose }) {
   const [phase, setPhase] = useState("collect");
   const [input, setInput] = useState("");
   const [pendingSend, setPendingSend] = useState(null);
-  const [mode, setMode] = useState(null);
+  const menuRef = useRef(null);
+  const menuSummary = useRef(null);
   const [view, setView] = useState("diagnosis");
   const [tickets, setTickets] = useState([]);
   const [page, setPage] = useState(0);
@@ -104,15 +110,6 @@ export default function SupportWorkspace({ user, onClose }) {
   }, [user.id]);
 
   useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-    const refresh = () => request("/support/status", { signal: controller.signal }).then(data => { if (active) setMode(data); }).catch(() => {});
-    refresh();
-    const timer = setInterval(refresh, 15000);
-    return () => { active = false; clearInterval(timer); controller.abort(); };
-  }, []);
-
-  useEffect(() => {
     const previous = document.activeElement;
     const shell = document.querySelector(".app-shell");
     const wasInert = shell?.inert;
@@ -125,9 +122,14 @@ export default function SupportWorkspace({ user, onClose }) {
   }, []);
 
   function trapFocus(event) {
+    if (event.key === "Escape" && menuRef.current?.open) {
+      menuRef.current.open = false;
+      menuSummary.current.focus();
+      return;
+    }
     if (event.key === "Escape" && !busy) { onClose(); return; }
     if (event.key !== "Tab") return;
-    const items = [...panelRef.current.querySelectorAll('button:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href]')];
+    const items = [...panelRef.current.querySelectorAll('button:not(:disabled), textarea:not(:disabled), select:not(:disabled), summary, a[href]')].filter(item => item.getClientRects().length);
     const first = items[0]; const last = items[items.length - 1];
     if (!first) { event.preventDefault(); return; }
     if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { event.preventDefault(); last.focus(); }
@@ -173,25 +175,76 @@ export default function SupportWorkspace({ user, onClose }) {
     setDetail(data); setEdit({ status: data.status, resolution: data.resolution, comment: "" });
   }
 
+  function newSession() {
+    return run(async () => {
+      const data = await request("/support/sessions", { method: "POST" });
+      restore(data);
+      writeStorage(storageKey, data.id);
+      writeStorage(pendingKey, null);
+      setPendingSend(null);
+      setInput("");
+    });
+  }
+
+  function closeMenu() {
+    menuRef.current.open = false;
+    menuSummary.current.focus();
+  }
+
   const terminal = ["cancelled", "resolved", "ticket_created"].includes(phase);
+  const diagnosing = view === "diagnosis";
+  const confirming = phase === "confirm";
+  const choosingModel = phase === "collect" && messages.length === 1 && choices.length > 0;
+  const title = diagnosing ? "Техподдержка" : view === "mine" ? "Мои заявки" : "Панель специалиста";
   return createPortal(<div className="support-backdrop">
     <section className="support-panel" role="dialog" aria-modal="true" aria-labelledby="support-title" ref={panelRef} tabIndex={-1} onKeyDown={trapFocus}>
-      <header><div><span className="support-eyebrow">СЛУЖБА ПОДДЕРЖКИ</span><h2 id="support-title">Разберёмся с проблемой</h2></div><button type="button" disabled={busy} onClick={onClose}>Закрыть</button></header>
-      <nav aria-label="Разделы поддержки">{[["diagnosis", "Диагностика"], ["mine", "Мои заявки"], ...(staff ? [["queue", "Панель специалиста"]] : [])].map(([key, label]) => <button type="button" key={key} disabled={busy} aria-current={view === key ? "page" : undefined} onClick={() => key === "diagnosis" ? (setView(key), setDetail(null)) : run(async () => { await loadTickets(key, 0, ""); setDetail(null); })}>{label}</button>)}</nav>
+      <header className="support-header">
+        <span className="assistant-avatar"><Icon name={diagnosing ? "chat" : "file"} size={18} /></span>
+        <h2 id="support-title">{title}</h2>
+        {!diagnosing && <button type="button" disabled={busy} onClick={() => { setView("diagnosis"); setDetail(null); }}>В чат</button>}
+        {(diagnosing || staff || view !== "mine") && <details className="support-menu" ref={menuRef} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}>
+          <summary aria-label="Ещё" title="Ещё" ref={menuSummary}><Icon name="menu" /></summary>
+          <div className="support-menu-items" onClick={closeMenu}>
+            {view !== "mine" && <button disabled={busy} onClick={() => run(async () => { await loadTickets("mine", 0, ""); setDetail(null); })}>Мои заявки</button>}
+            {staff && view !== "queue" && <button disabled={busy} onClick={() => run(async () => { await loadTickets("queue", 0, ""); setDetail(null); })}>Панель специалиста</button>}
+            {diagnosing && !terminal && !pendingSend && <>
+              {!confirming && <button disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button>}
+              <button disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button>
+            </>}
+            {diagnosing && !terminal && <button disabled={busy || !!pendingSend} onClick={newSession}>Новое обращение</button>}
+          </div>
+        </details>}
+        <button className="support-icon-button" type="button" aria-label="Закрыть" title="Закрыть" disabled={busy} onClick={onClose}>×</button>
+      </header>
       {error && <p className="support-error" role="alert">{error}</p>}
-      {busy && <p className="support-progress" role="status">Обрабатываем запрос…</p>}
-      {view === "diagnosis" ? <>
-
-        <div className="support-conversation" aria-live="polite">{messages.map((message, index) => <article ref={index === messages.length - 1 ? latestReply : null} key={index} className={`support-message support-message--${message.role}`}><strong>{message.role === "user" ? "Вы" : "Диагност"}</strong><ReplyText text={message.content} /></article>)}</div>
-        {!terminal && choices.length > 0 && <div className="support-choices" aria-label="Варианты ответа">{choices.map(choice => <button type="button" key={choice.id} disabled={busy || !!pendingSend} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>)}</div>}
-        {pendingSend && <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" disabled={busy} onClick={() => send(pendingSend.message, pendingSend.choiceId, pendingSend.action)}>Повторить отправку</button></div>}
-        {!terminal && !pendingSend && <form className="support-composer" onSubmit={event => { event.preventDefault(); send(input, null, phase === "confirm" ? "send_with_details" : null); }}>
-          {phase === "confirm" && <label htmlFor="support-message">Что ещё стоит знать специалисту? Необязательно.</label>}
-          <textarea id="support-message" aria-label={phase === "confirm" ? "Дополнение для специалиста" : "Ваш ответ"} maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)} placeholder={phase === "confirm" ? "Когда началось, что видно на экране или что уже пробовали. Уже отправленное повторять не нужно." : "Опишите симптомы или результат проверки"} />
-          <div className="support-actions"><button className="support-primary" disabled={busy || !session || !input.trim()}>{phase === "confirm" ? "Отправить с дополнением" : "Отправить"}</button>{phase === "confirm" ? <button type="button" disabled={busy || !session} onClick={() => send("Отправить без дополнения", null, "send_without_details")}>Отправить без дополнения</button> : <button type="button" disabled={busy || !session} onClick={() => send("передать специалисту")}>Нужен специалист</button>}<button type="button" disabled={busy || !session} onClick={() => send("отмена")}>Отменить обращение</button></div>
-        </form>}
-        <button type="button" disabled={busy} onClick={() => run(async () => { const data = await request("/support/sessions", { method: "POST" }); restore(data); writeStorage(storageKey, data.id); writeStorage(pendingKey, null); setPendingSend(null); setInput(""); })}>Новое обращение</button>
-      </> : detail ? <>
+      {diagnosing ? <>
+        <div className={choosingModel ? "support-thread support-thread--start" : "support-thread"}>
+          <div className="support-conversation" role="log" aria-label="Диалог с поддержкой">{messages.map((message, index) => (
+            <article ref={index === messages.length - 1 ? latestReply : null} key={index} className={`support-message support-message--${message.role}`} aria-label={message.role === "user" ? "Вы" : "Поддержка"}>
+              {message.role === "user" ? <p>{message.content}</p> : <ReplyText text={message.content} />}
+            </article>
+          ))}</div>
+          {!terminal && choices.length > 0 && <div className="support-choices" role="group" aria-label="Варианты ответа">{choices.map(choice => (
+            <button type="button" key={choice.id} disabled={busy || !!pendingSend} onClick={() => send(choice.label, choice.id)}>{choice.label}</button>
+          ))}</div>}
+          {busy && <p className="support-progress" role="status">Обрабатываем запрос…</p>}
+        </div>
+        <footer className="support-footer">
+          {pendingSend && !busy ? <div role="status"><p>Отправка не подтверждена: {pendingSend.message}</p><button type="button" onClick={() => send(pendingSend.message, pendingSend.choiceId, pendingSend.action)}>Повторить отправку</button></div>
+          : terminal ? <button className="support-primary" type="button" disabled={busy} onClick={newSession}>Новое обращение</button>
+          : <form className="support-composer" onSubmit={event => {
+            event.preventDefault();
+            if (confirming && !input.trim()) send("Отправить без дополнения", null, "send_without_details");
+            else send(input, null, confirming ? "send_with_details" : null);
+          }}>
+            <textarea id="support-message" rows={1} aria-label={confirming ? "Дополнение для специалиста" : "Ваш ответ"} maxLength={4000} disabled={busy || !session} value={input} onChange={event => setInput(event.target.value)}
+              onKeyDown={event => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }}
+              placeholder={confirming ? "Дополнение для специалиста (необязательно)" : "Напишите ответ…"} />
+            {confirming ? <button className="support-primary" disabled={busy || !session}>{input.trim() ? "Отправить с дополнением" : "Отправить без дополнения"}</button>
+            : <button className="support-send" aria-label="Отправить" title="Отправить" disabled={busy || !session || !input.trim()}><Icon name="send" size={18} /></button>}
+          </form>}
+        </footer>
+      </> : <div className="support-ticket-view">{busy && <p role="status">Загрузка…</p>}{detail ? <>
         <button type="button" disabled={busy} onClick={() => setDetail(null)}>← К списку</button>
         <h3>Заявка {detail.id}</h3><p>{STATUS[detail.status]} · {new Date(detail.created_at).toLocaleString()} · Исполнитель: {detail.assigned_to || "не назначен"}</p>
         <dl className="support-facts">{Object.entries(detail.details).filter(([key]) => key in LABELS).map(([key, value]) => <div key={key}><dt>{LABELS[key] || key}</dt><dd><FactValue value={value} /></dd></div>)}</dl>
@@ -210,7 +263,7 @@ export default function SupportWorkspace({ user, onClose }) {
         {!tickets.length && <p>Заявок пока нет.</p>}
         {tickets.map(ticket => <button className="support-ticket-card" key={ticket.id} disabled={busy} onClick={() => run(() => openTicket(ticket.id))}><span>{STATUS[ticket.status]} · {new Date(ticket.created_at).toLocaleString()}</span><strong>{ticket.details.problem || "Обращение в поддержку"}</strong><small>{ticket.id}</small></button>)}
         <div className="support-actions"><button disabled={busy || page === 0} onClick={() => run(() => loadTickets(view, page - 1))}>Назад</button><span>Страница {page + 1}</span><button disabled={busy || !hasNext} onClick={() => run(() => loadTickets(view, page + 1))}>Далее</button></div>
-      </>}
+      </>}</div>}
     </section>
   </div>, document.body);
 }
