@@ -1,0 +1,1629 @@
+{
+  "viki_categories": {
+    "text": "Что происходит с Вики Принт?",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Бумага и протяжка",
+        "next": "viki_paper"
+      },
+      {
+        "label": "Что напечатано на чеке",
+        "next": "viki_print"
+      },
+      {
+        "label": "Связь с компьютером",
+        "next": "viki_pc"
+      },
+      {
+        "label": "Передача чеков в ОФД",
+        "next": "viki_exchange"
+      },
+      {
+        "label": "Ошибки смены и ФН",
+        "next": "viki_fiscal"
+      },
+      {
+        "label": "Назад",
+        "next": "model"
+      }
+    ]
+  },
+  "viki_paper": {
+    "text": "Бумага и протяжка. Какой симптом вы наблюдаете?",
+    "kind": "question",
+    "pattern": "бумаг|рулон|лент",
+    "choices": [
+      {
+        "label": "Горит красный индикатор бумаги",
+        "next": "viki_red",
+        "action": "select_problem"
+      },
+      {
+        "label": "Бумага закончилась",
+        "next": "viki_empty",
+        "action": "select_problem"
+      },
+      {
+        "label": "Зажевало ленту",
+        "next": "viki_jam",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "viki_categories"
+      }
+    ]
+  },
+  "viki_red": {
+    "answers": {
+      "Рулон есть, индикатор горит": "рулон.*(?:есть|на месте|установлен)|бумага есть",
+      "Бумаги нет": "бумаги нет|нет бумаги|отсек пуст",
+      "Не могу проверить": "не знаю|не могу.*(?:посмотреть|проверить)"
+    },
+    "kind": "question",
+    "pattern": "красн.*(?:ламп|индикатор)|(?:ламп|индикатор).*красн",
+    "text": "Если бумажный отсек доступен, посмотрите, есть ли рулон. Что вы видите?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Рулон есть, индикатор горит",
+        "next": "viki_sensor"
+      },
+      {
+        "label": "Бумаги нет",
+        "next": "viki_empty"
+      },
+      {
+        "label": "Не могу проверить",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_empty": {
+    "kind": "question",
+    "pattern": "нет бумаг|бумаг.*законч|рулон.*законч",
+    "text": "Откройте крышку бумажного отсека. Установите подходящий для вашей модели рулон термоленты по схеме на крышке, выведите свободный край наружу и закройте крышку. Коротко нажмите кнопку протяжки. Что произошло?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Лента выходит ровно",
+        "next": "viki_paper_verify"
+      },
+      {
+        "label": "Индикатор бумаги горит",
+        "next": "viki_sensor"
+      },
+      {
+        "label": "Лента стоит или мнётся",
+        "next": "viki_feed"
+      }
+    ],
+    "answers": {
+      "Лента выходит ровно": "(?:лент|бумаг).*выходит|подается ровно",
+      "Индикатор бумаги горит": "горит.*красн|индикатор.*горит",
+      "Лента стоит или мнётся": "стоит|мнется|не движется"
+    }
+  },
+  "viki_jam": {
+    "kind": "question",
+    "pattern": "зажев|замят|застря",
+    "text": "Остановите печать. Откройте обычную крышку отсека. Свободный смятый край можно убрать рукой и заново уложить рулон. Если крышка застряла или лента зажата у ножа, оставьте механизм на месте. Что видно?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Отключить отрезчик на Вики Принт 57 Плюс",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/otklyuchit-otrezchik-na-viki-print-57-plyus/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Удалось освободить ленту",
+        "next": "viki_empty"
+      },
+      {
+        "label": "Лента снова собирается складками",
+        "next": "viki_feed"
+      },
+      {
+        "label": "Крышку или нож заклинило",
+        "next": "viki_jam_blocked"
+      }
+    ],
+    "answers": {
+      "Удалось освободить ленту": "освободил|удалось убрать",
+      "Лента снова собирается складками": "снова|складк",
+      "Крышку или нож заклинило": "заклинило|не открывается"
+    }
+  },
+  "viki_sensor": {
+    "kind": "question",
+    "text": "Переустановите рулон по схеме в отсеке, выведите край и полностью закройте крышку. Проверьте индикатор и нажмите протяжку один раз.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Индикатор погас, лента выходит",
+        "next": "viki_paper_verify"
+      },
+      {
+        "label": "Индикатор горит при установленном рулоне",
+        "next": "viki_sensor_end"
+      },
+      {
+        "label": "Лента не движется",
+        "next": "viki_feed"
+      }
+    ],
+    "answers": {
+      "Индикатор погас, лента выходит": "(?<!не )погас",
+      "Индикатор горит при установленном рулоне": "горит|не погас",
+      "Лента не движется": "не движется|стоит"
+    }
+  },
+  "viki_print": {
+    "text": "Что напечатано на чеке. Какой симптом вы наблюдаете?",
+    "kind": "question",
+    "pattern": "чек|печата",
+    "choices": [
+      {
+        "label": "На чеке нет QR-кода",
+        "next": "viki_qr",
+        "action": "select_problem"
+      },
+      {
+        "label": "Чек бледный или пустой",
+        "next": "viki_faint",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "viki_categories"
+      }
+    ]
+  },
+  "viki_qr": {
+    "kind": "question",
+    "pattern": "qr|куар|кьюар",
+    "text": "Сравните проблемный документ с ранее напечатанным кассовым чеком. На проблемном есть номер ФД и фискальный признак? Читается ли текст в нижней части?",
+    "sources": [
+      {
+        "title": "Не печатается QR-код",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ne-pechataetsya-qr-kod-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Фискальный чек читается, только QR отсутствует",
+        "next": "viki_qr_macro"
+      },
+      {
+        "label": "Весь чек бледный или в полосах",
+        "next": "viki_faint"
+      },
+      {
+        "label": "Это слип терминала или служебный отчёт",
+        "next": "viki_qr_receipt"
+      }
+    ],
+    "answers": {
+      "Фискальный чек читается, только QR отсутствует": "только qr|только код",
+      "Весь чек бледный или в полосах": "бледн|полос",
+      "Это слип терминала или служебный отчёт": "слип|отчет"
+    }
+  },
+  "viki_faint": {
+    "kind": "instruction",
+    "pattern": "бледн|пуст.*чек|полос|яркост",
+    "text": "Проведите ногтем по обеим сторонам свободного края термоленты. На рабочей стороне останется тёмная черта. Установите свежий рулон по схеме на крышке так, чтобы эта сторона была обращена к печатающей головке. Проверьте читаемость следующей распечатки.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Изменить яркость на Вики Принт 80",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_quality_test",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_quality_test",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_pc": {
+    "text": "Связь с компьютером. Какой симптом вы наблюдаете?",
+    "kind": "question",
+    "pattern": "подключ|компьютер|windows|fito",
+    "choices": [
+      {
+        "label": "Программа не видит кассу",
+        "next": "viki_offline",
+        "action": "select_problem"
+      },
+      {
+        "label": "Жёлтый знак в диспетчере устройств",
+        "next": "viki_driver",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "viki_categories"
+      }
+    ]
+  },
+  "viki_offline": {
+    "answers": {
+      "Да, но компьютер не видит кассу": "чек (?:вышел|напечатался)|готова к работе",
+      "Чека нет, питание не горит": "не горит|не светится",
+      "Чека нет, питание горит": "(?:питание|индикатор) горит",
+      "Не знаю": "не знаю|не помню"
+    },
+    "kind": "question",
+    "pattern": "не видит|принтер недоступен|не подключена",
+    "text": "Проверьте результат последнего включения. Напечатался диагностический чек «ККТ готова к работе»?",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, но компьютер не видит кассу",
+        "next": "viki_cable"
+      },
+      {
+        "label": "Чека нет, питание не горит",
+        "next": "viki_power"
+      },
+      {
+        "label": "Чека нет, питание горит",
+        "next": "viki_nodiag"
+      },
+      {
+        "label": "Не знаю",
+        "next": "viki_startup"
+      }
+    ]
+  },
+  "viki_driver": {
+    "kind": "instruction",
+    "pattern": "желт.*(?:знак|восклиц)",
+    "text": "Для подключения по USB откройте ссылку на USB-драйвер в статье Дримкас ниже. Установите или обновите его, если у вас есть права. Снова подключите кассу, проверьте знак у порта и связь в программе.",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_second_pc",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_second_pc",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_cable": {
+    "text": "Проверьте оба конца кабеля USB или COM между кассой и ПК. Переподключите кабель передачи данных. Если есть заведомо исправный кабель того же типа, проверьте с ним связь в программе.",
+    "kind": "instruction",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_ports",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_ports",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_power": {
+    "text": "Проверьте тумблер на корпусе, разъёмы штатного блока питания и питание розетки. Включите кассу. Проверьте, вышел ли чек готовности и видит ли кассу программа.",
+    "kind": "instruction",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_power_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_power_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_nodiag": {
+    "text": "Убедитесь, что бумага заправлена. Между операциями выключите кассу, удерживайте кнопку протяжки и включите питание. Через несколько секунд отпустите кнопку. Вышла длинная распечатка SelfTest?",
+    "kind": "question",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, тест напечатался",
+        "next": "viki_print_setting"
+      },
+      {
+        "label": "Бумаги нет или она замята",
+        "next": "viki_paper"
+      },
+      {
+        "label": "Рулон заправлен, тест не вышел",
+        "next": "handoff"
+      }
+    ],
+    "answers": {
+      "Да, тест напечатался": "(?<!не )напечатался|тест вышел",
+      "Бумаги нет или она замята": "замят|нет бумаги",
+      "Рулон заправлен, тест не вышел": "не вышел|не напечатался"
+    }
+  },
+  "viki_exchange": {
+    "text": "Передача чеков в ОФД. Какой симптом вы наблюдаете?",
+    "kind": "question",
+    "pattern": "офд|отправ",
+    "choices": [
+      {
+        "label": "Чеки не доходят до ОФД",
+        "next": "viki_unsent",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "viki_categories"
+      }
+    ]
+  },
+  "viki_unsent": {
+    "kind": "question",
+    "pattern": "(?:чек|данн).*не (?:доход|отправ|уход)|офд.*не отвеч|нет связи с офд",
+    "text": "Откройте кабинет своего ОФД и найдите именно эту кассу по заводскому номеру. Действует ли тариф на её обслуживание?",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Тариф действует",
+        "next": "viki_network"
+      },
+      {
+        "label": "Тариф закончился",
+        "next": "viki_renew"
+      },
+      {
+        "label": "Нет доступа в кабинет",
+        "next": "viki_network"
+      }
+    ],
+    "answers": {
+      "Тариф действует": "(?<!не )действует|(?<!не )оплачен",
+      "Тариф закончился": "закончился|истек|не действует|не оплачен",
+      "Нет доступа в кабинет": "нет доступа"
+    }
+  },
+  "viki_fiscal": {
+    "text": "Ошибки смены и ФН. Какой симптом вы наблюдаете?",
+    "kind": "question",
+    "pattern": "смен|фн|регистрац",
+    "choices": [
+      {
+        "label": "Расходятся номера смен",
+        "next": "viki_shift",
+        "action": "select_problem"
+      },
+      {
+        "label": "Разница во времени при регистрации",
+        "next": "viki_time",
+        "action": "select_problem"
+      },
+      {
+        "label": "Исчерпан ресурс КС",
+        "next": "viki_resource",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "viki_categories"
+      }
+    ]
+  },
+  "viki_shift": {
+    "kind": "question",
+    "pattern": "расхожд|расходятся.*смен",
+    "text": "Сравните текст на диагностической распечатке с сообщением на экране. На бумаге прямо указано расхождение номеров смен в ФН и NVR?",
+    "sources": [
+      {
+        "title": "Расхождение номеров смен в ФН и NVR (Расхождение данных ФН)",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/raskhozhdenie-nomerov-smen-v-fn-i-nvr-raskhozhdenie-dannykh-fn/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, на распечатке указаны ФН и NVR",
+        "next": "viki_shift_status"
+      },
+      {
+        "label": "Различаются только номера в программе и на отчёте",
+        "next": "viki_shift_compare"
+      },
+      {
+        "label": "На чеке другая ошибка",
+        "next": "viki_fiscal"
+      }
+    ],
+    "answers": {
+      "Да, на распечатке указаны ФН и NVR": "nvr|на распечатке"
+    }
+  },
+  "viki_time": {
+    "kind": "question",
+    "pattern": "разниц.*времен",
+    "text": "Ошибка появилась в Кабинете Дримкас при регистрации? Сверьте дату, время и часовой пояс компьютера с местным временем.",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Время на ПК неверное",
+        "next": "viki_pc_clock"
+      },
+      {
+        "label": "На ПК время верное, ошибка при регистрации",
+        "next": "viki_kkt_clock"
+      },
+      {
+        "label": "Ошибка при другой операции",
+        "next": "viki_time_other"
+      }
+    ],
+    "answers": {
+      "Время на ПК неверное": "на пк неверное|часовой пояс",
+      "На ПК время верное, ошибка при регистрации": "на пк верное|при регистрации"
+    }
+  },
+  "viki_resource": {
+    "kind": "question",
+    "pattern": "ресурс.*кс|истек.*срок.*накопител",
+    "text": "Прочитайте точное сообщение. «Исчерпан ресурс КС» появилось при закрытии архива накопителя или касса сообщает о непереданных документах?",
+    "sources": [
+      {
+        "title": "Исчерпан ресурс КС. Истек срок работы фискального накопителя",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ischerpan-resurs-ks-istek-srok-raboty-fiskalnogo-nakopitelya-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Ресурс КС исчерпан при закрытии архива",
+        "next": "viki_archive"
+      },
+      {
+        "label": "Есть сообщение о хранении или связи с ОФД",
+        "next": "viki_unsent"
+      },
+      {
+        "label": "Ресурс КС исчерпан при другой операции",
+        "next": "viki_resource_date"
+      }
+    ],
+    "answers": {
+      "Ресурс КС исчерпан при закрытии архива": "закрыти.*архив",
+      "Есть сообщение о хранении или связи с ОФД": "хранени|офд"
+    }
+  },
+  "viki_paper_verify": {
+    "kind": "instruction",
+    "text": "Проверьте, что индикатор бумаги погас. Когда программа в следующий раз отправит документ на печать, посмотрите, вышел ли он целиком и читается ли текст.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_paper_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_paper_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_paper_result": {
+    "kind": "question",
+    "text": "Что получилось при обычной печати?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Лента вышла пустой или бледной",
+        "next": "viki_faint"
+      },
+      {
+        "label": "Лента остановилась",
+        "next": "viki_feed"
+      },
+      {
+        "label": "Протяжка работает, документа нет",
+        "next": "viki_nodiag"
+      }
+    ],
+    "answers": {
+      "Лента вышла пустой или бледной": "пуст|бледн",
+      "Лента остановилась": "останов|не движется",
+      "Протяжка работает, документа нет": "документа нет|не печатает"
+    }
+  },
+  "viki_jam_blocked": {
+    "kind": "question",
+    "text": "Выключите кассу. Посмотрите снаружи, где зажат край. Расположение замятия поможет определить, нужен ли ремонт крышки или отрезчика.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Отключить отрезчик на Вики Принт 57 Плюс",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/otklyuchit-otrezchik-na-viki-print-57-plyus/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Край зажат в щели выхода",
+        "next": "handoff"
+      },
+      {
+        "label": "Крышка заклинила, края не видно",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_sensor_end": {
+    "kind": "question",
+    "text": "Оптический датчик должен реагировать на установленную бумагу. Есть ли подача при закрытой крышке и горящем индикаторе?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Подача есть, индикатор горит",
+        "next": "handoff"
+      },
+      {
+        "label": "Подачи нет",
+        "next": "viki_feed"
+      }
+    ]
+  },
+  "viki_feed": {
+    "kind": "question",
+    "text": "С закрытой крышкой коротко нажмите протяжку и послушайте механизм. Что происходит с лентой?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Пошла ровно",
+        "next": "viki_paper_verify"
+      },
+      {
+        "label": "Слышно жужжание, лента стоит",
+        "next": "handoff"
+      },
+      {
+        "label": "Лента идёт, печать наслаивается",
+        "next": "handoff"
+      },
+      {
+        "label": "Механизм молчит",
+        "next": "viki_nodiag"
+      }
+    ],
+    "answers": {
+      "Пошла ровно": "пошла|ровно",
+      "Слышно жужжание, лента стоит": "жужж",
+      "Лента идёт, печать наслаивается": "наслаива",
+      "Механизм молчит": "молчит|тишина"
+    }
+  },
+  "viki_qr_receipt": {
+    "kind": "instruction",
+    "text": "Для проверки возьмите кассовый чек с номером ФД. Слип оплаты и диагностическая распечатка для этой проверки не подходят. Проверьте QR внизу кассового чека.",
+    "sources": [
+      {
+        "title": "Не печатается QR-код",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ne-pechataetsya-qr-kod-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_qr_macro",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_qr_macro",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_qr_macro": {
+    "kind": "instruction",
+    "text": "Если у вас есть доступ к Fito, завершите работу кассовой программы после текущей операции. Откройте статью «Не печатается QR-код» ниже и скачайте приложенный к ней макрос. В Fito выберите «Тестирование» → «Запуск», укажите файл. После сообщения об успехе выполните «Сервис» → «Рестарт ККТ», закройте Fito и проверьте QR на следующем кассовом чеке.",
+    "sources": [
+      {
+        "title": "Не печатается QR-код",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ne-pechataetsya-qr-kod-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_qr_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_qr_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_qr_result": {
+    "kind": "question",
+    "text": "На каком шаге остановилась проверка QR-кода?",
+    "sources": [
+      {
+        "title": "Не печатается QR-код",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ne-pechataetsya-qr-kod-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Fito не подключилась",
+        "next": "viki_offline"
+      },
+      {
+        "label": "Макрос выполнен, QR всё ещё отсутствует",
+        "next": "handoff"
+      },
+      {
+        "label": "Макрос недоступен или выдал ошибку",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_quality_test": {
+    "kind": "question",
+    "text": "Сравните качество со встроенным тестом. Между операциями выключите кассу. Удерживая протяжку, включите питание и через несколько секунд отпустите кнопку. Как выглядит длинная тестовая распечатка?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Изменить яркость на Вики Принт 80",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/"
+      },
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Тест чёткий, обычный документ бледный",
+        "next": "viki_quality_compare"
+      },
+      {
+        "label": "На тесте тот же дефект",
+        "next": "viki_quality_model"
+      },
+      {
+        "label": "Бумага не вышла",
+        "next": "viki_feed"
+      }
+    ],
+    "answers": {
+      "Тест чёткий, обычный документ бледный": "четкий|тест читается",
+      "На тесте тот же дефект": "тот же|та же|также",
+      "Бумага не вышла": "не вышла|не подается"
+    }
+  },
+  "viki_quality_compare": {
+    "kind": "question",
+    "text": "Сравните текст и графику на обычном документе. Какая часть пропадает?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Изменить яркость на Вики Принт 80",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Только QR-код",
+        "next": "viki_qr"
+      },
+      {
+        "label": "Текст или изображение при читаемом тесте",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_quality_model": {
+    "kind": "question",
+    "text": "Посмотрите обозначение модели на наклейке. Для Вики Принт 80 после замены печатающего механизма у производителя есть отдельная процедура настройки яркости. Был ли такой ремонт?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Изменить яркость на Вики Принт 80",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Вики Принт 80 после замены механизма",
+        "next": "handoff"
+      },
+      {
+        "label": "Другая модель или механизм не меняли",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_startup": {
+    "kind": "question",
+    "text": "Между операциями выключите и включите кассу тумблером на корпусе. Посмотрите на индикатор питания и первую распечатку.",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Вышел чек готовности",
+        "next": "viki_cable"
+      },
+      {
+        "label": "Питание горит, чека нет",
+        "next": "viki_nodiag"
+      },
+      {
+        "label": "Питание не горит",
+        "next": "viki_power"
+      }
+    ]
+  },
+  "viki_power_result": {
+    "kind": "question",
+    "text": "Что изменилось после проверки питания?",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Питание появилось, чека нет",
+        "next": "viki_nodiag"
+      },
+      {
+        "label": "Чек готовности есть, связи нет",
+        "next": "viki_cable"
+      },
+      {
+        "label": "Исправная розетка, индикатор не горит",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_print_setting": {
+    "kind": "question",
+    "text": "При успешном SelfTest проверьте настройку обычной печати. Закройте кассовую программу, если она свободна. В подключённой Fito откройте «Установка параметров кассы, часть 2» и нажмите «Считать». Отмечено ли «Не печатать документы на чековой ленте»?",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Отмечено, нужна бумажная печать",
+        "next": "viki_enable_print"
+      },
+      {
+        "label": "Флажок снят, документа нет",
+        "next": "viki_ports"
+      },
+      {
+        "label": "Fito не подключается",
+        "next": "viki_ports"
+      }
+    ]
+  },
+  "viki_enable_print": {
+    "kind": "instruction",
+    "text": "Если на этой кассе должна работать бумажная печать и вам доступна настройка, снимите флажок «Не печатать документы на чековой ленте» и сохраните изменение. Закройте Fito, откройте кассовую программу и проверьте следующую распечатку.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_ports",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_ports": {
+    "kind": "question",
+    "text": "В Windows откройте диспетчер устройств и разверните «Порты (COM и LPT)». Для USB ищите виртуальный COM-порт кассы. Запомните его номер. Что видно?",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Порт виден без предупреждения",
+        "next": "viki_service"
+      },
+      {
+        "label": "У порта жёлтый знак",
+        "next": "viki_driver"
+      },
+      {
+        "label": "Порт не появился",
+        "next": "viki_second_pc"
+      }
+    ],
+    "answers": {
+      "Порт виден без предупреждения": "без предупреждения|порт виден",
+      "У порта жёлтый знак": "желтый|восклиц",
+      "Порт не появился": "не появился|нет порта"
+    }
+  },
+  "viki_second_pc": {
+    "kind": "question",
+    "text": "Проверьте заведомо исправный кабель передачи данных и другой разъём. Если есть второй компьютер с драйвером, посмотрите, появляется ли там порт кассы.",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "На рабочем ПК порт появился",
+        "next": "viki_service"
+      },
+      {
+        "label": "Только второй компьютер видит порт",
+        "next": "handoff"
+      },
+      {
+        "label": "Оба не видят или второго ПК нет",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_service": {
+    "kind": "question",
+    "text": "На кассовом ПК посмотрите в списке служб Windows, используется ли Viki Driver либо ComProxy. Через какую службу подключена касса?",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Viki Driver",
+        "next": "viki_viki_port"
+      },
+      {
+        "label": "ComProxy",
+        "next": "viki_proxy_port"
+      },
+      {
+        "label": "Обе службы или ни одной",
+        "next": "handoff"
+      }
+    ],
+    "answers": {
+      "Viki Driver": "viki.?driver",
+      "ComProxy": "com.?proxy",
+      "Обе службы или ни одной": "обе|ни одной"
+    }
+  },
+  "viki_viki_port": {
+    "kind": "instruction",
+    "text": "Между операциями закройте кассовую программу. В VikiClient выберите свою кассу и посмотрите «Порты подключения». В Fito откройте «Функции» → «Параметры связи», выберите IP, адрес 127.0.0.1 и TCP-порт из VikiClient. Нажмите «Установить». При успехе закройте Fito и проверьте связь в кассовой программе с тем же портом.",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_connection_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_connection_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_proxy_port": {
+    "kind": "instruction",
+    "text": "Между операциями закройте кассовую программу. Посмотрите virtual_port_out в файле ComProxy.ini в папке ComProxy. В Fito выберите «Функции» → «Параметры связи» → COM и укажите этот порт. Нажмите «Установить». При успехе закройте Fito и проверьте тот же порт в кассовой программе.",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_connection_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_connection_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_connection_result": {
+    "kind": "question",
+    "text": "Где именно пропала связь?",
+    "sources": [
+      {
+        "title": "Кассовая программа не видит Вики Принт",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/kassovaya-programma-ne-vidit-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Fito соединяется, кассовая программа нет",
+        "next": "handoff"
+      },
+      {
+        "label": "Связь через службу в Fito не установлена",
+        "next": "handoff"
+      },
+      {
+        "label": "Не удалось проверить порт службы",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_renew": {
+    "kind": "instruction",
+    "text": "Передайте ответственному за оплату номер кассы и срок тарифа. После продления проверьте, стал ли ОФД принимать документы этой кассы и опустела ли очередь.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_network",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_network",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_network": {
+    "kind": "question",
+    "text": "На кассовом компьютере откройте сайт ОФД в браузере. Что получилось?",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Сайт открывается",
+        "next": "viki_ofd_service"
+      },
+      {
+        "label": "Интернет на кассовом ПК не работает",
+        "next": "viki_restore_net"
+      }
+    ],
+    "answers": {
+      "Сайт открывается": "(?<!не )открывается|интернет есть",
+      "Интернет на кассовом ПК не работает": "не работает|нет интернета"
+    }
+  },
+  "viki_restore_net": {
+    "kind": "instruction",
+    "text": "Проверьте подключение рабочего ПК к обычной сети точки: сетевой кабель или Wi-Fi. После восстановления доступа откройте кабинет ОФД и сравните время последнего принятого чека с последним выданным.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_net_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_net_result",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_net_result": {
+    "kind": "question",
+    "text": "Доступ в интернет восстановился?",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, но чеки остаются в очереди",
+        "next": "viki_ofd_service"
+      },
+      {
+        "label": "Нет связи даже с другими сайтами",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_ofd_service": {
+    "kind": "question",
+    "text": "Проверьте в Windows список служб. Для передачи чеков Вики Принт использует Viki Driver или ComProxy. При прямом подключении к физическому COM-порту касса может печатать, пока чеки остаются в очереди. Что видно?",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Одна служба работает",
+        "next": "viki_ofd_settings"
+      },
+      {
+        "label": "Служба установлена, но остановлена",
+        "next": "viki_ofd_start"
+      },
+      {
+        "label": "Службы нет или установлены обе",
+        "next": "handoff"
+      }
+    ],
+    "answers": {
+      "Одна служба работает": "работает|запущена",
+      "Служба установлена, но остановлена": "остановлена",
+      "Службы нет или установлены обе": "ни одной|обе"
+    }
+  },
+  "viki_ofd_start": {
+    "kind": "instruction",
+    "text": "Если вам доступно управление службами, запустите используемую на этой кассе службу. Сравните число непереданных документов до и после восстановления связи и проверьте поступление в кабинете ОФД.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_ofd_settings",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_ofd_settings",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_ofd_settings": {
+    "kind": "question",
+    "text": "Сверьте адрес сервера и порт вашего оператора с параметрами ОФД, считанными из кассы через Fito. В инструкции ниже есть раздел проверки настроек. Что показывает сравнение?",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Адрес или порт отличаются",
+        "next": "viki_ofd_correct"
+      },
+      {
+        "label": "Совпадают",
+        "next": "viki_ofd_queue"
+      },
+      {
+        "label": "Нет доступа к настройкам",
+        "next": "viki_ofd_queue"
+      }
+    ]
+  },
+  "viki_ofd_correct": {
+    "kind": "instruction",
+    "text": "Если вы настраиваете эту кассу, внесите адрес и порт, опубликованные вашим ОФД для этой кассы, по разделу проверки настроек в инструкции. Проверьте, уменьшается ли очередь до нуля.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_ofd_queue",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_ofd_queue",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_ofd_queue": {
+    "kind": "question",
+    "text": "Сравните число непереданных документов в двух последовательных проверках состояния обмена. В кабинете посмотрите, поступили ли новые документы именно с этой кассы.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Очередь убывает или уже пуста",
+        "next": "viki_ofd_verify"
+      },
+      {
+        "label": "Число не меняется и новых документов нет",
+        "next": "handoff"
+      },
+      {
+        "label": "Состояние обмена недоступно",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_ofd_verify": {
+    "kind": "instruction",
+    "text": "Дождитесь отправки оставшихся документов. Проверьте, что непереданных документов ноль и последний чек появился в кабинете ОФД.",
+    "sources": [
+      {
+        "title": "Не отправляются чеки в ОФД",
+        "url": "https://help.dreamkas.ru/kb/f-a-q/ne-otpravlyayutsya-cheki-v-ofd/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "handoff",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_shift_status": {
+    "kind": "question",
+    "text": "Между операциями закройте кассовую программу. При доступной Fito можно прочитать состояние смены в ФН: «Тестирование» → «Ручной ввод команды», команда 78, параметр 1 = 6. Выполните запрос и откройте детализацию ответа. Состояние определяет порядок восстановления NVR.",
+    "sources": [
+      {
+        "title": "Расхождение номеров смен в ФН и NVR (Расхождение данных ФН)",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/raskhozhdenie-nomerov-smen-v-fn-i-nvr-raskhozhdenie-dannykh-fn/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Получено 1 — смена открыта",
+        "next": "handoff"
+      },
+      {
+        "label": "Получено 0 — смена закрыта",
+        "next": "handoff"
+      },
+      {
+        "label": "Не удалось прочитать статус",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_shift_compare": {
+    "kind": "instruction",
+    "text": "Сверьте заводской номер кассы и номер смены на отчёте о закрытии с записью в программе за тот же период. Выберите в программе нужную кассу и смену и обновите список отчётов.",
+    "sources": [
+      {
+        "title": "Расхождение номеров смен в ФН и NVR (Расхождение данных ФН)",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/raskhozhdenie-nomerov-smen-v-fn-i-nvr-raskhozhdenie-dannykh-fn/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_shift_status",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_shift_status",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_pc_clock": {
+    "kind": "instruction",
+    "text": "Исправьте дату, часовой пояс и время в Windows. Обновите страницу регистрации и проверьте, сохраняется ли предупреждение до отправки данных.",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_kkt_clock",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_kkt_clock",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_kkt_clock": {
+    "kind": "instruction",
+    "text": "Перед регистрацией убедитесь, что часы ПК показывают верное время. Если вам доступна настройка регистрируемой ККТ, откройте в Fito «Сервис» → «Установка текущих даты/времени», нажмите «Установить». Закройте Fito и повторите проверку в Кабинете.",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_battery",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_battery",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_battery": {
+    "kind": "question",
+    "text": "В Fito откройте «Сервис» → «Запрос состояния ККТ» и нажмите «Считать из ККТ». Что указано в поле «Состояние батареи»?",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Разряжена",
+        "next": "handoff"
+      },
+      {
+        "label": "Заряд в норме, время расходится",
+        "next": "handoff"
+      },
+      {
+        "label": "Статус прочитать не удалось",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_time_other": {
+    "kind": "question",
+    "text": "Сверьте время последнего фискального документа со временем на ПК. Какая дата отличается от текущей?",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Отстают или спешат часы ПК",
+        "next": "viki_pc_clock_other"
+      },
+      {
+        "label": "Отличается время кассы",
+        "next": "viki_battery"
+      },
+      {
+        "label": "Даты совпадают, сообщение сохраняется",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_pc_clock_other": {
+    "kind": "instruction",
+    "text": "Установите правильные дату, время и часовой пояс Windows. Перечитайте состояние кассы в программе и проверьте предупреждение.",
+    "sources": [
+      {
+        "title": "Ошибка «Разница во времени»",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/oshibka-raznitsa-vo-vremeni/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "viki_battery",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "viki_battery",
+        "action": "outcome"
+      }
+    ]
+  },
+  "viki_archive": {
+    "kind": "question",
+    "text": "Найдите последний принятый чек этой кассы в кабинете ОФД и запишите его дату и время. По последнему отчёту проверьте, закрывалась ли смена до истечения срока ФН. Для восстановления важно фактическое состояние смены в ФН.",
+    "sources": [
+      {
+        "title": "Исчерпан ресурс КС. Истек срок работы фискального накопителя",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ischerpan-resurs-ks-istek-srok-raboty-fiskalnogo-nakopitelya-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Есть открытая смена",
+        "next": "handoff"
+      },
+      {
+        "label": "Есть отчёт о закрытии",
+        "next": "handoff"
+      },
+      {
+        "label": "Статус неизвестен",
+        "next": "handoff"
+      }
+    ]
+  },
+  "viki_resource_date": {
+    "kind": "question",
+    "text": "Посмотрите дату окончания срока ФН в сведениях об этой кассе и дату последнего принятого чека в кабинете ОФД. Что удалось установить?",
+    "sources": [
+      {
+        "title": "Исчерпан ресурс КС. Истек срок работы фискального накопителя",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/ischerpan-resurs-ks-istek-srok-raboty-fiskalnogo-nakopitelya-viki-print/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Срок ФН истёк",
+        "next": "handoff"
+      },
+      {
+        "label": "Срок не истёк, есть очередь ОФД",
+        "next": "viki_unsent"
+      },
+      {
+        "label": "Срок не истёк или дата неизвестна",
+        "next": "handoff"
+      }
+    ]
+  }
+}

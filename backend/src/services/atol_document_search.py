@@ -38,7 +38,7 @@ def match_option(state, message):
 
 def start(state, description):
     state = deepcopy(state)
-    facts = {**state.get("receipt_facts", {}), "model": "АТОЛ FPrint-22ПТК"}
+    facts = {**state.get("receipt_facts", {}), "model": state.get("environment", "АТОЛ FPrint-22ПТК")}
     bindings = {
         "Наличие рулона": ("paper_present", {"Рулон установлен": True, "Бумага закончилась": False}),
         "Ширина ленты": ("paper_width_mm", {"80 мм": 80, "58 мм": 58}),
@@ -69,7 +69,7 @@ async def search(state, message, lookup, *, button=False):
         state["_receipt"].pop("pending", None)
         state["_receipt"].pop("question_options", None)
         state["_receipt"].pop("active_procedure", None)
-        flow["node"] = "categories"
+        flow["node"] = {"Пирит 2Ф": "pirit_categories", "Вики Принт": "viki_categories"}.get(state.get("environment"), "categories")
         return state, tree.render(state)
     original = message
     if offer:
@@ -93,7 +93,7 @@ async def search(state, message, lookup, *, button=False):
         flow.pop("manual", None)
         flow["node"] = "handoff" if updated["_phase"] == "confirm" else "resolved"
         flow.pop("manual_reply", None)
-        if updated["_phase"] == "confirm" and not state["_receipt"].get("pending"):
+        if updated["_phase"] == "confirm" and not state["_receipt"].get("pending") and state.get("environment") not in {"Пирит 2Ф", "Вики Принт"}:
             flow.update(node="categories", proposal={"targets": [], "description": message})
             updated["_phase"] = "diagnosing"
             answer = answer.partition("\n\nПередать обращение специалисту")[0]

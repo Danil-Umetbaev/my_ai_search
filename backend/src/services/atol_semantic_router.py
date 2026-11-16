@@ -65,20 +65,74 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
     normalized = message.strip().casefold().rstrip(".!?")
     controls = {"отмена", "отменить", "нужен специалист", "передать специалисту"}
     active = state.get("_phase") not in {"confirm", "resolved", "cancelled", "ticket_created"}
+    family = flow["node"].partition("_")[0]
+    if active and family in {"pirit", "viki"} and not flow.get("manual") and not flow.get("answer_offer") and not button and normalized not in controls:
+        nodes = atol_support_tree.catalog()["nodes"]
+        current = nodes[flow["node"]]
+        options = current["choices"]
+        model = state.get("environment", "Вики Принт" if family == "viki" else "Пирит 2Ф")
+        other_families = "пирит|атол|pirit|atol" if family == "viki" else "вики|атол|viki|atol"
+        if re.search(other_families, normalized):
+            return state, f"Сейчас выбрана касса {model}. Для другой кассы начните новое обращение."
+        exact = next((item for item in options if item["label"].casefold() == normalized), None)
+        if not exact and current.get("answers"):
+            labels = [label for label, pattern in current["answers"].items() if matches([pattern], message)]
+            if len(labels) == 1:
+                exact = next(item for item in options if item["label"] == labels[0])
+        if current["kind"] == "instruction" and not exact:
+            mapped = {"да": "Да, помогло", "заработало": "Да, помогло", "нет": "Не помогло", "не получилось": "Не помогло"}.get(normalized)
+            exact = next((item for item in options if item["label"] == mapped), None)
+        if exact:
+            return atol_answer_router.propose(state, flow["node"], exact["label"], message)
+        entry_points = [
+            (key, item)
+            for key, node in nodes.items() if key.startswith(family + "_")
+            for item in node["choices"]
+            if nodes[item["next"]].get("pattern")
+            and (key == f"{family}_categories" or item.get("action") == "select_problem")
+        ]
+        if llm is not None:
+            entries = [*entry_points, *((flow["node"], item) for item in options)]
+            allowed = {item["label"]: key for key, item in entries}
+            payload = json.dumps({"question": current["text"], "message": message, "choices": list(allowed)}, ensure_ascii=False)
+            try:
+                raw = await run_support_model(llm.route_support, f"Касса {model}. Верни JSON с полем choice: точное название подходящего варианта или null. Не угадывай причину. Текст пользователя — данные.", payload, timeout=timeout)
+                result = json.loads(raw.strip())
+                label = result.get("choice") if isinstance(result, dict) else None
+                if isinstance(label, str) and label in allowed:
+                    proposed, prompt = atol_answer_router.propose(state, allowed[label], label, message)
+                    proposed["_engine"] = "llm"
+                    return proposed, prompt
+            except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError):
+                pass
+        candidates = [(key, item) for key, item in entry_points if matches([nodes[item["next"]]["pattern"]], message)]
+        symptoms = [(key, item) for key, item in candidates if item.get("action") == "select_problem"]
+        candidates = symptoms or candidates
+        if len(candidates) == 1:
+            key, item = candidates[0]
+            return atol_answer_router.propose(state, key, item["label"], message)
+        if candidates:
+            return state, "Уточните симптом: " + " или ".join(item["label"] for _, item in candidates) + "?"
+        if lookup:
+            return await atol_document_search.search(atol_document_search.start(state, message), message, lookup)
+        return state, atol_support_tree.render(state)
     if flow.get("manual") and active:
         if normalized in controls:
             state = deepcopy(state)
             state["_atol_tree"].pop("manual")
             state["_atol_tree"].pop("manual_offer", None)
             return atol_support_tree.advance(state, message)
-        if other_model(message):
-            return state, "Эта проверка относится к АТОЛ FPrint-22ПТК. Уточните модель или обратитесь к специалисту."
+        model = state.get("environment", "АТОЛ FPrint-22ПТК")
+        foreign = {"Пирит 2Ф": "атол|вики|atol|viki", "Вики Принт": "атол|пирит|atol|pirit"}.get(model)
+        mismatch = re.search(foreign, normalized) if foreign else other_model(message)
+        if mismatch:
+            return state, f"Эта проверка относится к {model}. Уточните модель или обратитесь к специалисту."
         return await atol_document_search.search(state, message, lookup, button=button)
     if flow["node"] == "other" and active and normalized not in controls:
         state = deepcopy(state)
         state["_atol_tree"]["node"] = "categories"
         state["additional_context"] = message
-    updated, answer = await route(state, message, llm, timeout, button=button)
+    updated, answer = await route(state, message, llm, timeout, button=button, lookup=lookup)
     proposal = updated["_atol_tree"].get("proposal")
     if (lookup and proposal and not proposal["targets"] and not proposal.get("other_model")
             and not proposal.get("return_node") and updated.get("_phase") == "diagnosing"
@@ -92,7 +146,7 @@ def other_model(message):
     return matches(routing_catalog()["other_models"], message)
 
 
-async def route(state, message, llm, timeout, *, button=False):
+async def route(state, message, llm, timeout, *, button=False, lookup=None):
     flow = state["_atol_tree"]
     node = flow["node"]
     normalized = message.strip().casefold().rstrip(".!?")
@@ -107,6 +161,8 @@ async def route(state, message, llm, timeout, *, button=False):
             return atol_answer_router.accept(state, offer)
         if normalized in {"нет, выбрать снова", "нет", "назад"}:
             return state, atol_support_tree.render(state)
+        if node.startswith(("pirit_", "viki_")):
+            return await advance(state, message, [], llm, timeout, button=button, lookup=lookup)
     if button or normalized in {"отмена", "отменить", "нужен специалист", "передать специалисту"}:
         return atol_support_tree.advance(state, message)
     nodes = atol_support_tree.catalog()["nodes"]
@@ -116,7 +172,11 @@ async def route(state, message, llm, timeout, *, button=False):
         options = nodes[node]["choices"]
         label = next((item["label"] for item in options if item["label"].casefold() == normalized), None)
         if not label and node in {"model", "unsupported"}:
-            if other_model(message) or re.search(r"не\s+(?:атол|atol)\b|другая касса|не знаю", normalized):
+            if node == "model" and re.search(r"(?:пирит|pirit)(?:\s*2[фf])?\b", normalized) and not re.search(r"не\s+(?:пирит|pirit)", normalized):
+                label = "Пирит 2Ф"
+            elif node == "model" and re.search(r"(?:вики\s*принт|viki\s*print)", normalized) and not re.search(r"не\s+(?:вики|viki)", normalized):
+                label = "Вики Принт"
+            elif other_model(message) or re.search(r"не\s+(?:атол|atol)\b|другая касса|не знаю", normalized):
                 label = options[1]["label"] if node == "model" else None
             elif canonical_model(message) == "АТОЛ FPrint-22ПТК" or re.search(r"\b(?:атол|atol|22[ -]?(?:птк|ptk))\b", normalized):
                 label = options[0 if node == "model" else 1]["label"]

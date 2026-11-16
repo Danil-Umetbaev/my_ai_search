@@ -11,7 +11,13 @@ from src.services import atol_problem_router, atol_answer_state
 @lru_cache(maxsize=1)
 def catalog():
     path = Path(__file__).resolve().parents[2] / "data" / "atol_support_tree.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["nodes"].update(json.loads(path.with_name("pirit_support_tree.json").read_text(encoding="utf-8")))
+    data["nodes"]["model"]["choices"].append({"label": "Пирит 2Ф", "next": "pirit_categories"})
+    data["nodes"].update(json.loads(path.with_name("viki_support_tree.json").read_text(encoding="utf-8")))
+    data["nodes"]["model"]["choices"].append({"label": "Вики Принт", "next": "viki_categories"})
+    data["version"] += 4
+    return data
 
 
 def initial_state():
@@ -121,6 +127,10 @@ def advance(state, message):
         state.pop("check_result", None)
     if flow["node"] == "model" and target in {"menu", "categories"}:
         state["environment"] = "АТОЛ FPrint-22ПТК"
+    if target == "pirit_categories":
+        state["environment"] = "Пирит 2Ф"
+    if target == "viki_categories":
+        state["environment"] = "Вики Принт"
     if flow["node"] == "menu" or (selected and selected.get("action") == "select_problem"):
         state["problem"] = message
         flow["problem_node"] = target

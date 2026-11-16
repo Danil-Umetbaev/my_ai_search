@@ -108,7 +108,7 @@ class SupportDialogueService(BaseService):
             answer = ""
         elif "_atol_tree" in state:
             async def lookup_atol(query, flow):
-                if flow["facts"].get("model") != "АТОЛ FPrint-22ПТК":
+                if flow["facts"].get("model") != state.get("environment", "АТОЛ FPrint-22ПТК"):
                     return {"status": "blocked", "reason": "Для другой модели нужен специалист."}
                 role = await self.role(user_id)
                 try:

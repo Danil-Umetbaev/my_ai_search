@@ -1,0 +1,2277 @@
+{
+  "pirit_categories": {
+    "text": "С чем возникла проблема на Пирит 2Ф?",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Бумага и печать",
+        "next": "pirit_group_0"
+      },
+      {
+        "label": "Батарея и память",
+        "next": "pirit_group_1"
+      },
+      {
+        "label": "Фискальный накопитель",
+        "next": "pirit_group_2"
+      },
+      {
+        "label": "Закрытие смены",
+        "next": "pirit_group_3"
+      },
+      {
+        "label": "Проверка кассы",
+        "next": "pirit_group_4"
+      },
+      {
+        "label": "Назад",
+        "next": "model"
+      }
+    ]
+  },
+  "pirit_group_0": {
+    "kind": "question",
+    "text": "Бумага и печать. Что происходит?",
+    "pattern": "бумаг|лент|печат",
+    "choices": [
+      {
+        "label": "Закончилась лента",
+        "next": "pirit_group_0_case_0",
+        "action": "select_problem"
+      },
+      {
+        "label": "Полосы или пропадают точки",
+        "next": "pirit_group_0_case_1",
+        "action": "select_problem"
+      },
+      {
+        "label": "Замятие или горит индикатор ОШИБКА",
+        "next": "pirit_jam",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "pirit_categories"
+      }
+    ]
+  },
+  "pirit_group_0_case_0": {
+    "text": "Горящий индикатор «БУМАГА» означает, что касса не обнаруживает ленту. Откройте крышку бумажного отсека. Что внутри?",
+    "pattern": "законч.*(?:бумаг|лент|рулон)|(?:бумаг|лент|рулон).*законч|замен.*рулон|нет бумаги",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Рулон закончился",
+        "next": "pirit_load"
+      },
+      {
+        "label": "Рулон установлен",
+        "next": "pirit_seating"
+      },
+      {
+        "label": "Не знаю, какой рулон подходит",
+        "next": "pirit_stock"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Рулон закончился": "законч|отсек пуст|нет бумаги",
+      "Рулон установлен": "рулон (?:есть|на месте|стоит)|бумага есть",
+      "Не знаю, какой рулон подходит": "размер|ширин|какой рулон"
+    }
+  },
+  "pirit_group_0_case_1": {
+    "text": "Сравните проблемный документ с чеком самодиагностики, который печатается при включении. Где видны пропавшие точки, полосы или затемнения?",
+    "pattern": "полос|точк|нечита",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "На обоих документах",
+        "next": "pirit_quality_roll"
+      },
+      {
+        "label": "Диагностика читается, дефект на обычном документе",
+        "next": "pirit_quality_compare"
+      },
+      {
+        "label": "Диагностика не напечаталась",
+        "next": "pirit_indicators"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ],
+    "answers": {
+      "На обоих документах": "на обоих|везде",
+      "Диагностика читается, дефект на обычном документе": "только на чеке|диагностика читается",
+      "Диагностика не напечаталась": "не напечата|не выш"
+    }
+  },
+  "pirit_group_1": {
+    "kind": "question",
+    "text": "Батарея и память. Что происходит?",
+    "pattern": "батар|памят|озу",
+    "choices": [
+      {
+        "label": "Батарея разряжена",
+        "next": "pirit_group_1_case_0",
+        "action": "select_problem"
+      },
+      {
+        "label": "Ошибка контрольной суммы ОЗУ",
+        "next": "pirit_group_1_case_1",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "pirit_categories"
+      }
+    ]
+  },
+  "pirit_group_1_case_0": {
+    "text": "Где видно сообщение о батарее? Батарея часов и внешний блок питания проверяются по разным признакам.",
+    "pattern": "батар",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "На чеке напечатано «БАТАРЕЯ РАЗРЯЖЕНА»",
+        "next": "pirit_battery_clock"
+      },
+      {
+        "label": "Касса погасла, индикатор питания не горит",
+        "next": "pirit_power"
+      },
+      {
+        "label": "На чеке другая строка",
+        "next": "pirit_report_fields"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ],
+    "answers": {
+      "На чеке напечатано «БАТАРЕЯ РАЗРЯЖЕНА»": "на чеке|на распечатке",
+      "Касса погасла, индикатор питания не горит": "погасла|не горит"
+    }
+  },
+  "pirit_group_1_case_1": {
+    "text": "Прочитайте строку полностью. «Ошибка контрольной суммы ОЗУ» относится к программным счётчикам кассы. «Память ФН заполнена» относится к накопителю. Какая строка напечатана?",
+    "pattern": "озу|контрольн.*сумм",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Ошибка контрольной суммы ОЗУ на диагностике",
+        "next": "pirit_ram_report"
+      },
+      {
+        "label": "Память ФН заполнена или ресурс заканчивается",
+        "next": "pirit_fn_resource"
+      },
+      {
+        "label": "Текст не читается",
+        "next": "pirit_group_0_case_1"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ],
+    "answers": {
+      "Ошибка контрольной суммы ОЗУ на диагностике": "контрольн.*сумм",
+      "Память ФН заполнена или ресурс заканчивается": "память фн|ресурс"
+    }
+  },
+  "pirit_group_2": {
+    "kind": "question",
+    "text": "Фискальный накопитель. Что происходит?",
+    "pattern": "накопител|\\bфн\\b",
+    "choices": [
+      {
+        "label": "Ошибка модуля ФН",
+        "next": "pirit_group_2_case_0",
+        "action": "select_problem"
+      },
+      {
+        "label": "Ошибка связи с ФН",
+        "next": "pirit_group_2_case_1",
+        "action": "select_problem"
+      },
+      {
+        "label": "ФН не зарегистрирован",
+        "next": "pirit_group_2_case_2",
+        "action": "select_problem"
+      },
+      {
+        "label": "ФН закрыт",
+        "next": "pirit_group_2_case_3",
+        "action": "select_problem"
+      },
+      {
+        "label": "Ресурс или память ФН заканчиваются",
+        "next": "pirit_fn_resource",
+        "action": "select_problem"
+      },
+      {
+        "label": "Не передаются документы в ОФД",
+        "next": "pirit_ofd_mode",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "pirit_categories"
+      }
+    ]
+  },
+  "pirit_group_2_case_0": {
+    "text": "Сверьте строку диагностики. Если Fito доступна, распечатайте диагностический отчёт из меню «Сервис» и найдите статус ФН и код последней ошибки. Какая ошибка указана?",
+    "pattern": "модул.*фн",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Модуль ФН, без сообщения о связи",
+        "next": "pirit_fn_identity"
+      },
+      {
+        "label": "Указана ошибка связи с ФН",
+        "next": "pirit_group_2_case_1"
+      },
+      {
+        "label": "На отчёте предупреждение о ресурсе",
+        "next": "pirit_fn_resource"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Модуль ФН, без сообщения о связи": "модул",
+      "Указана ошибка связи с ФН": "связ",
+      "На отчёте предупреждение о ресурсе": "ресурс|заполн"
+    }
+  },
+  "pirit_group_2_case_1": {
+    "text": "Где появилась ошибка связи? Сообщение Fito при соединении ПК с кассой и строка «Ошибка связи с ФН» на чеке требуют разных действий.",
+    "pattern": "связ.*фн|не видит.*накопител",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "На экране Fito при подключении к кассе",
+        "next": "pirit_connection"
+      },
+      {
+        "label": "На диагностическом чеке кассы",
+        "next": "pirit_fn_link"
+      },
+      {
+        "label": "Касса не включается",
+        "next": "pirit_power"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ],
+    "answers": {
+      "На экране Fito при подключении к кассе": "на экране|в fito",
+      "На диагностическом чеке кассы": "на чеке|на распечатке"
+    }
+  },
+  "pirit_group_2_case_2": {
+    "text": "Найдите последний отчёт о регистрации или изменении её параметров. Сравните указанный там номер ФН с номером в паспорте установленного накопителя.",
+    "pattern": "не зарегистрирован",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Накопитель только что заменили",
+        "next": "pirit_reg_replacement"
+      },
+      {
+        "label": "Новая касса, первого отчёта нет",
+        "next": "pirit_reg_first"
+      },
+      {
+        "label": "Отчёт есть для этого ФН",
+        "next": "pirit_reg_existing"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 25",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=25"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Накопитель только что заменили": "замен",
+      "Новая касса, первого отчёта нет": "новая|перв",
+      "Отчёт есть для этого ФН": "совпад|этого фн"
+    }
+  },
+  "pirit_group_2_case_3": {
+    "text": "Сверьте формулировку на распечатке. Закрытый архив ФН и закрытая смена — разные состояния. Какой документ или сообщение у вас на руках?",
+    "pattern": "фн.*закрыт",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Именно «ФН закрыт»",
+        "next": "pirit_closed_archive"
+      },
+      {
+        "label": "Только отчёт о закрытии смены",
+        "next": "pirit_shift_closed"
+      },
+      {
+        "label": "Предупреждение о ресурсе ФН",
+        "next": "pirit_fn_resource"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 28",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=28"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Именно «ФН закрыт»": "фн закрыт|архив закрыт",
+      "Только отчёт о закрытии смены": "отчет.*закрытии смены",
+      "Предупреждение о ресурсе ФН": "ресурс"
+    }
+  },
+  "pirit_group_3": {
+    "kind": "question",
+    "text": "Закрытие смены. Что происходит?",
+    "pattern": "смен",
+    "choices": [
+      {
+        "label": "Не завершено закрытие смены",
+        "next": "pirit_group_3_case_0",
+        "action": "select_problem"
+      },
+      {
+        "label": "Расхождение номеров смен",
+        "next": "pirit_group_3_case_1",
+        "action": "select_problem"
+      },
+      {
+        "label": "Смена длится больше 24 часов",
+        "next": "pirit_long_shift",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "pirit_categories"
+      }
+    ]
+  },
+  "pirit_group_3_case_0": {
+    "text": "Что напечатано после попытки закрыть смену? Посмотрите последний документ именно с этой кассы.",
+    "pattern": "не заверш|не закрыва",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Не завершено закрытие, повторите операцию",
+        "next": "pirit_shift_retry"
+      },
+      {
+        "label": "Отчёт о закрытии уже напечатан",
+        "next": "pirit_shift_closed"
+      },
+      {
+        "label": "Расхождение номеров смен в ФН и NVR",
+        "next": "pirit_group_3_case_1"
+      },
+      {
+        "label": "Документ не вышел",
+        "next": "pirit_shift_no_paper"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ],
+    "answers": {
+      "Не завершено закрытие, повторите операцию": "повторите|не завершено",
+      "Отчёт о закрытии уже напечатан": "уже напечатан|есть отчет",
+      "Расхождение номеров смен в ФН и NVR": "расхожд|nvr",
+      "Документ не вышел": "не вышел|не напечата"
+    }
+  },
+  "pirit_group_3_case_1": {
+    "text": "Где расходятся номера смен? Найдите точную строку на чеке самодиагностики.",
+    "pattern": "расхожд|номер.*смен",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "На чеке прямо указано «ФН и NVR»",
+        "next": "pirit_shift_nvr"
+      },
+      {
+        "label": "Сравниваю номер в программе и на отчёте",
+        "next": "pirit_shift_compare"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "На чеке прямо указано «ФН и NVR»": "nvr|на чеке",
+      "Сравниваю номер в программе и на отчёте": "в программе|на экране"
+    }
+  },
+  "pirit_group_4": {
+    "kind": "question",
+    "text": "Проверка кассы. Что происходит?",
+    "pattern": "диагност|авториз|отчет",
+    "choices": [
+      {
+        "label": "ККТ не авторизована",
+        "next": "pirit_group_4_case_0",
+        "action": "select_problem"
+      },
+      {
+        "label": "Как напечатать диагностический отчёт",
+        "next": "pirit_group_4_case_1",
+        "action": "select_problem"
+      },
+      {
+        "label": "ККТ готова к работе",
+        "next": "pirit_group_4_case_2",
+        "action": "select_problem"
+      },
+      {
+        "label": "Нет диагностического чека при включении",
+        "next": "pirit_indicators",
+        "action": "select_problem"
+      },
+      {
+        "label": "Программа не видит кассу",
+        "next": "pirit_connection",
+        "action": "select_problem"
+      },
+      {
+        "label": "Назад",
+        "next": "pirit_categories"
+      }
+    ]
+  },
+  "pirit_group_4_case_0": {
+    "text": "Сообщение «ККТ не авторизована» указывает на отсутствие заводского номера в кассе. Сверьте номер на шильде снизу с полем заводского номера в диагностическом отчёте.",
+    "pattern": "не авториз",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Поле пустое или номер отличается",
+        "next": "handoff"
+      },
+      {
+        "label": "Номера совпали, сообщение есть на чеке",
+        "next": "handoff"
+      },
+      {
+        "label": "Не могу получить отчёт из Fito",
+        "next": "pirit_connection"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_group_4_case_1": {
+    "text": "В Fito откройте «Сервис» → «Печать диагностического отчёта» и нажмите «Выполнить». Что получилось?",
+    "pattern": "диагностическ.*отчет|отчет.*диагност|самодиагност",
+    "kind": "question",
+    "choices": [
+      {
+        "label": "Отчёт напечатан",
+        "next": "pirit_report_fields"
+      },
+      {
+        "label": "Fito не установила связь",
+        "next": "pirit_connection"
+      },
+      {
+        "label": "Связь есть, бумаги не вышло",
+        "next": "pirit_indicators"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Отчёт напечатан": "отчет (?:вышел|напечатался)|распечатал",
+      "Fito не установила связь": "нет связи|не установ|не подключ",
+      "Связь есть, бумаги не вышло": "бумаги не вышло|не печатает"
+    }
+  },
+  "pirit_group_4_case_2": {
+    "text": "Строка «ККТ готова к работе» означает, что самодиагностика завершилась без ошибок. Проверьте именно то, с чем обратились: читается ли документ, видит ли программа кассу или получен ли нужный отчёт.",
+    "pattern": "готова к работе",
+    "kind": "instruction",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_stock": {
+    "kind": "question",
+    "text": "Для Пирит 2Ф подходят терморулоны шириной 80 или 57 мм с допуском 0,5 мм. Наружный диаметр до 90 мм, внутренний от 10 мм, толщина бумаги 0,055–0,088 мм. Сверьте ширину со старым рулоном. Есть подходящая лента?",
+    "choices": [
+      {
+        "label": "Подходящий рулон есть",
+        "next": "pirit_load"
+      },
+      {
+        "label": "Сейчас нет подходящего рулона",
+        "next": "pirit_stock_wait"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      }
+    ]
+  },
+  "pirit_stock_wait": {
+    "kind": "question",
+    "text": "Для продолжения печати понадобится подходящая термолента. Когда рулон будет под рукой, вернитесь к заправке.",
+    "choices": [
+      {
+        "label": "Рулон нашли, заправить",
+        "next": "pirit_load"
+      },
+      {
+        "label": "Вернуться к разделам Пирит",
+        "next": "pirit_categories"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  },
+  "pirit_load": {
+    "kind": "instruction",
+    "text": "Уберите пустую втулку, положите новый рулон в направлении намотки на рисунке в руководстве. Выведите край, закройте крышку до щелчка и оторвите излишек. Проверьте постоянный зелёный индикатор и печать следующего документа.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_paper_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_paper_access",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      }
+    ]
+  },
+  "pirit_seating": {
+    "kind": "question",
+    "text": "Проверьте, свободно ли выходит край и защёлкнута ли крышка. Как ведёт себя касса?",
+    "choices": [
+      {
+        "label": "Край зажат, лента смялась",
+        "next": "pirit_jam"
+      },
+      {
+        "label": "Лента лежит свободно, горит БУМАГА",
+        "next": "pirit_reload"
+      },
+      {
+        "label": "Документ выходит с полосами",
+        "next": "pirit_group_0_case_1"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Край зажат, лента смялась": "зажат|смял|зажев",
+      "Лента лежит свободно, горит БУМАГА": "горит|индикатор",
+      "Документ выходит с полосами": "полос"
+    }
+  },
+  "pirit_reload": {
+    "kind": "instruction",
+    "text": "Сверьте размер рулона с руководством. Заново уложите подходящий рулон, выведите край и закройте крышку до щелчка. Проверьте, погас ли индикатор бумаги и появился ли читаемый документ.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_paper_result",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_paper_access",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      }
+    ]
+  },
+  "pirit_paper_result": {
+    "kind": "question",
+    "text": "После заправки посмотрите на переднюю панель. Какой результат сохраняется?",
+    "choices": [
+      {
+        "label": "БУМАГА горит с подходящим рулоном",
+        "next": "handoff"
+      },
+      {
+        "label": "ОШИБКА горит или ленту зажевало",
+        "next": "pirit_jam"
+      },
+      {
+        "label": "Лента вышла с дефектом",
+        "next": "pirit_quality_roll"
+      },
+      {
+        "label": "ПИТАНИЕ не горит",
+        "next": "pirit_power"
+      },
+      {
+        "label": "Индикаторы в норме, из программы не печатает",
+        "next": "pirit_connection"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "БУМАГА горит с подходящим рулоном": "бумага горит",
+      "ОШИБКА горит или ленту зажевало": "ошибка|зажев",
+      "Лента вышла с дефектом": "полос|бледн|нечит",
+      "ПИТАНИЕ не горит": "питание не горит"
+    }
+  },
+  "pirit_paper_access": {
+    "kind": "question",
+    "text": "Что мешает заправке?",
+    "choices": [
+      {
+        "label": "Нет подходящего рулона",
+        "next": "pirit_stock"
+      },
+      {
+        "label": "Крышка не открывается или не защёлкивается",
+        "next": "handoff"
+      },
+      {
+        "label": "В проёме застряла лента",
+        "next": "pirit_jam"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  },
+  "pirit_jam": {
+    "kind": "question",
+    "text": "Между операциями отключите питание и откройте только крышку для ленты. Осмотрите доступный тракт бумаги. Есть смятый край или свободный обрывок?",
+    "choices": [
+      {
+        "label": "Свободный обрывок можно убрать",
+        "next": "pirit_clear_jam"
+      },
+      {
+        "label": "Тракт свободен, рулон лежит криво",
+        "next": "pirit_reload"
+      },
+      {
+        "label": "Лента зажата механизмом или крышка заклинила",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Свободный обрывок можно убрать": "обрывок|свободный край",
+      "Лента зажата механизмом или крышка заклинила": "заклини|зажата"
+    },
+    "pattern": "замяти|зажев|зажал.*лент|индикатор.*ошибка"
+  },
+  "pirit_clear_jam": {
+    "kind": "instruction",
+    "text": "Уберите свободный обрывок через бумажный отсек, выровняйте рулон и закройте крышку до щелчка. Включите кассу и проверьте, полностью ли вышел читаемый чек диагностики.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_jam_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_jam_after",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  },
+  "pirit_jam_after": {
+    "kind": "question",
+    "text": "Что происходит после удаления обрывка?",
+    "choices": [
+      {
+        "label": "Лента снова застревает или горит ОШИБКА",
+        "next": "handoff"
+      },
+      {
+        "label": "Подача есть, текст с полосами",
+        "next": "pirit_quality_roll"
+      },
+      {
+        "label": "Печать восстановлена, но на чеке сообщение",
+        "next": "pirit_group_4"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_quality_roll": {
+    "kind": "instruction",
+    "text": "Установите новый подходящий терморулон по рисунку на стр. 9. Между операциями включите кассу заново и сравните диагностическую распечатку с предыдущей: все символы и точки должны читаться. Проверьте также обычную печать.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_quality_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_paper_access",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_quality_after": {
+    "kind": "question",
+    "text": "Как изменилась печать на новом рулоне?",
+    "choices": [
+      {
+        "label": "Та же полоса на диагностическом чеке",
+        "next": "handoff"
+      },
+      {
+        "label": "Самодиагностика чёткая, обычный документ с дефектом",
+        "next": "pirit_quality_compare"
+      },
+      {
+        "label": "Документ вообще не выходит",
+        "next": "pirit_indicators"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_quality_compare": {
+    "kind": "question",
+    "text": "Если известен номер ФД проблемного чека, в Fito откройте «Сервис» → «Функции налогового контроля» → «Печать документов из архива ФН». Для одного документа из 30-дневного архива задайте его номер как начальный и конечный. Как выглядит копия?",
+    "choices": [
+      {
+        "label": "Копия читается",
+        "next": "pirit_copy_verify"
+      },
+      {
+        "label": "Копия с тем же дефектом",
+        "next": "handoff"
+      },
+      {
+        "label": "Нет номера ФД или доступа к архиву",
+        "next": "pirit_report_fields"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 43",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=43"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_copy_verify": {
+    "kind": "instruction",
+    "text": "Сверьте номер ФД на копии с исходным чеком и проверьте, что нужные строки читаются. Если дефект повторяется при обычной печати, сохраните исходный чек и читаемую копию для сравнения.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "handoff",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 43",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=43"
+      }
+    ]
+  },
+  "pirit_battery_clock": {
+    "kind": "question",
+    "text": "Сообщение относится к батарее часов реального времени. Сравните время на последней распечатке с местным временем. Сохраните чек для сервиса: замена батареи предусмотрена в сервисном центре. Что удалось проверить?",
+    "choices": [
+      {
+        "label": "Время сбилось",
+        "next": "handoff"
+      },
+      {
+        "label": "Время верное, есть сообщение о батарее",
+        "next": "handoff"
+      },
+      {
+        "label": "Дату на чеке прочитать невозможно",
+        "next": "pirit_group_0_case_1"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Время сбилось": "сбил|неверн"
+    }
+  },
+  "pirit_ram_report": {
+    "kind": "question",
+    "text": "Сохраните чек с ошибкой ОЗУ. Если Fito доступна, запросите «Сервис» → «Печать диагностического отчёта» и посмотрите статус фатальных ошибок и код последней ошибки. Код можно добавить при передаче. Какой результат?",
+    "choices": [
+      {
+        "label": "Статус фатальных ошибок ненулевой",
+        "next": "handoff"
+      },
+      {
+        "label": "Статус ноль, сообщение ОЗУ было на чеке",
+        "next": "handoff"
+      },
+      {
+        "label": "Отчёт получить не удалось",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_fn_identity": {
+    "kind": "question",
+    "text": "Сравните номер ФН на диагностическом отчёте с паспортом установленного накопителя. Сохраните распечатку со статусом ФН и кодом последней ошибки.",
+    "choices": [
+      {
+        "label": "Номер совпал, ошибка модуля осталась",
+        "next": "handoff"
+      },
+      {
+        "label": "Номер отличается от паспорта",
+        "next": "handoff"
+      },
+      {
+        "label": "Номер отсутствует или отчёт недоступен",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_fn_link": {
+    "kind": "question",
+    "text": "Если касса доступна в Fito, получите диагностический отчёт из меню «Сервис». Проверьте, есть ли номер и статус накопителя. Что получилось?",
+    "choices": [
+      {
+        "label": "Номер ФН отсутствует",
+        "next": "handoff"
+      },
+      {
+        "label": "Номер виден, на чеке ошибка связи с ФН",
+        "next": "handoff"
+      },
+      {
+        "label": "Отчёт недоступен, ошибка связи на чеке",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_reg_replacement": {
+    "kind": "question",
+    "text": "При замене нужен отчёт об изменении параметров регистрации именно с новым ФН. Сравните номер ФН в уже оформленном отчёте с паспортом нового накопителя.",
+    "choices": [
+      {
+        "label": "В отчёте прежний номер или отчёта нет",
+        "next": "handoff"
+      },
+      {
+        "label": "Новый номер совпадает, сообщение осталось",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 25",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=25"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_reg_first": {
+    "kind": "question",
+    "text": "Уточните у ответственного за регистрацию, формировался ли на этой кассе отчёт о регистрации. Если распечатка уже есть, сверьте номер кассы и ФН.",
+    "choices": [
+      {
+        "label": "Отчёт найден для установленного ФН",
+        "next": "pirit_reg_existing"
+      },
+      {
+        "label": "Первичная регистрация не завершена",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 21",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=21"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 24",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=24"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_reg_existing": {
+    "kind": "question",
+    "text": "Сверьте заводской номер кассы на отчёте с шильдой на нижней стороне корпуса. Сохраните отчёт и чек с ошибкой регистрации.",
+    "choices": [
+      {
+        "label": "Номер кассы совпал",
+        "next": "handoff"
+      },
+      {
+        "label": "Отчёт относится к другой кассе",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_closed_archive": {
+    "kind": "question",
+    "text": "Продажи с закрытым ФН возобновляют после замены и изменения параметров регистрации. Сравните номер в отчёте о закрытии архива с паспортом установленного ФН.",
+    "choices": [
+      {
+        "label": "Установлен прежний закрытый ФН",
+        "next": "handoff"
+      },
+      {
+        "label": "Новый ФН уже установлен",
+        "next": "pirit_reg_replacement"
+      },
+      {
+        "label": "Номер определить не удалось",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 28",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=28"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_fn_resource": {
+    "kind": "question",
+    "text": "Найдите предупреждение на отчёте открытия или закрытия смены. Какое сообщение напечатано?",
+    "choices": [
+      {
+        "label": "Ресурс ФН менее 3 или 30 дней",
+        "next": "pirit_fn_prepare"
+      },
+      {
+        "label": "Память ФН заполнена",
+        "next": "pirit_fn_prepare"
+      },
+      {
+        "label": "Указаны непереданные документы ОФД",
+        "next": "pirit_ofd_mode"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ],
+    "answers": {
+      "Ресурс ФН менее 3 или 30 дней": "дн|дней",
+      "Память ФН заполнена": "заполн",
+      "Указаны непереданные документы ОФД": "непередан|офд"
+    },
+    "pattern": "ресурс фн|память фн|памят.*накопител"
+  },
+  "pirit_fn_prepare": {
+    "kind": "question",
+    "text": "Сверьте срок в паспорте ФН. Подготовьте замену совместимым накопителем. Перед заменой в режиме передачи в ОФД проверьте очередь документов. Как работает эта касса?",
+    "choices": [
+      {
+        "label": "С передачей в ОФД, проверить очередь",
+        "next": "pirit_replacement_queue"
+      },
+      {
+        "label": "В автономном режиме, подготовить замену",
+        "next": "handoff"
+      },
+      {
+        "label": "Режим неизвестен, требуется замена",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  },
+  "pirit_replacement_queue": {
+    "kind": "question",
+    "text": "В Fito откройте «Тестирование» → «Печать отчета о состоянии расчетов». Сколько непереданных документов указано перед заменой ФН?",
+    "choices": [
+      {
+        "label": "Ноль, можно передать на замену",
+        "next": "handoff"
+      },
+      {
+        "label": "Есть непереданные документы",
+        "next": "pirit_replacement_send"
+      },
+      {
+        "label": "Отчёт не удалось получить",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ]
+  },
+  "pirit_replacement_send": {
+    "kind": "question",
+    "text": "Проверьте подключение кассового ПК к сети, затем повторите передачу через кассовую программу. Ещё раз распечатайте отчёт о состоянии расчётов. С каким результатом передать кассу на замену?",
+    "choices": [
+      {
+        "label": "Очередь пуста, ФН требует замены",
+        "next": "handoff"
+      },
+      {
+        "label": "Очередь осталась, ФН требует замены",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ]
+  },
+  "pirit_shift_retry": {
+    "kind": "instruction",
+    "text": "При сообщении «Не завершено закрытие смены. Повторите операцию» повторите штатное закрытие. В Fito это «Тестирование» → «Печать отчетов» → «Печать Z-отчета», укажите имя кассира. Проверьте, получен ли отчёт о закрытии именно этой смены.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_shift_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_shift_no_paper",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_shift_after": {
+    "kind": "question",
+    "text": "Что произошло после повторной попытки?",
+    "choices": [
+      {
+        "label": "Та же ошибка при повторном закрытии",
+        "next": "handoff"
+      },
+      {
+        "label": "Появилось расхождение номеров",
+        "next": "pirit_group_3_case_1"
+      },
+      {
+        "label": "Отчёт напечатан, программа показывает другое",
+        "next": "pirit_shift_compare"
+      },
+      {
+        "label": "Нет бумаги для отчёта",
+        "next": "pirit_shift_no_paper"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_shift_no_paper": {
+    "kind": "question",
+    "text": "Проверьте рулон и индикатор «БУМАГА». Если лента закончилась, заправьте её по схеме и закройте крышку до щелчка. В кассовой программе проверьте, сформирован ли отчёт о закрытии, прежде чем повторять операцию.",
+    "choices": [
+      {
+        "label": "Закрытие зафиксировано, нужна копия",
+        "next": "pirit_shift_copy"
+      },
+      {
+        "label": "Есть сообщение «Повторите операцию»",
+        "next": "pirit_shift_retry"
+      },
+      {
+        "label": "Не удаётся определить статус смены",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 9",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=9"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 43",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=43"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      }
+    ]
+  },
+  "pirit_shift_copy": {
+    "kind": "instruction",
+    "text": "По номеру ФД уже сформированного отчёта запросите его копию из 30-дневного архива. В Fito откройте «Сервис» → «Функции налогового контроля» → «Печать документов из архива ФН». Укажите один и тот же номер ФД в обоих полях. Сверьте номер смены на копии.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "handoff",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 43",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=43"
+      }
+    ]
+  },
+  "pirit_shift_closed": {
+    "kind": "instruction",
+    "text": "Сверьте номер смены и кассы на отчёте о закрытии с записью в кассовой программе. Если это нужная смена и программа показывает закрытие, проверка завершена.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_shift_compare",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_shift_compare",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_shift_nvr": {
+    "kind": "question",
+    "text": "Расхождение в ФН и программных счётчиках требует сервисного восстановления. Сохраните диагностический чек. По последнему отчёту о закрытии проверьте, успела ли касса напечатать его перед ошибкой.",
+    "choices": [
+      {
+        "label": "Отчёт о закрытии есть",
+        "next": "handoff"
+      },
+      {
+        "label": "Отчёта нет или закрытие прервалось",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_shift_compare": {
+    "kind": "instruction",
+    "text": "Сверьте заводской номер кассы и смену на отчёте о закрытии. Выберите в кассовой программе эту же кассу и смену за соответствующую дату. Проверьте, совпали ли номера.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_shift_evidence",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_shift_evidence",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      }
+    ]
+  },
+  "pirit_shift_evidence": {
+    "kind": "question",
+    "text": "Что показывает самодиагностика этой кассы?",
+    "choices": [
+      {
+        "label": "Указано расхождение ФН и NVR",
+        "next": "pirit_shift_nvr"
+      },
+      {
+        "label": "ККТ готова, расхождение только в программе",
+        "next": "handoff"
+      },
+      {
+        "label": "Диагностический чек не вышел",
+        "next": "pirit_indicators"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 65",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=65"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_long_shift": {
+    "kind": "instruction",
+    "text": "Смена дольше 24 часов блокирует дальнейшие расчёты. Завершите смену штатным способом и проверьте отчёт о закрытии. В Fito команда находится в «Тестирование» → «Печать отчетов» → «Печать Z-отчета».",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_shift_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_shift_no_paper",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 44",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=44"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ],
+    "pattern": "24\\s*час|более суток|дольше суток"
+  },
+  "pirit_report_fields": {
+    "kind": "question",
+    "text": "На отчёте сравните номер ККТ с шильдой, номер ФН с паспортом. Проверьте статус фатальных ошибок (норма — 0), статус ФН и код последней ошибки. Что выделяется?",
+    "choices": [
+      {
+        "label": "Ошибок нет, номера совпадают",
+        "next": "pirit_report_verify"
+      },
+      {
+        "label": "Статус фатальных ошибок ненулевой",
+        "next": "pirit_fatal"
+      },
+      {
+        "label": "Отличается номер кассы или ФН",
+        "next": "pirit_identity"
+      },
+      {
+        "label": "Сообщение об ошибке ФН",
+        "next": "pirit_group_2"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Ошибок нет, номера совпадают": "ошибок нет|все совпадает",
+      "Статус фатальных ошибок ненулевой": "ненулевой|фатальная",
+      "Отличается номер кассы или ФН": "отличается|не совпад",
+      "Сообщение об ошибке ФН": "ошибка фн"
+    }
+  },
+  "pirit_report_verify": {
+    "kind": "instruction",
+    "text": "Проверьте программируемые заголовки отчёта и сравните версию прошивки с документом «Информация о версии ПО ККТ Пирит 2Ф». Если нужные данные получены и исходная проблема устранена, завершите проверку.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_fatal": {
+    "kind": "question",
+    "text": "Сохраните отчёт с ненулевым статусом и посмотрите код последней ошибки. При передаче можно вписать код в дополнение к обращению.",
+    "choices": [
+      {
+        "label": "Есть код и статус ФН",
+        "next": "handoff"
+      },
+      {
+        "label": "Код ошибки не читается",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_identity": {
+    "kind": "question",
+    "text": "Убедитесь, что паспорт ФН и шильда относятся к проверяемой кассе. Какое поле отличается?",
+    "choices": [
+      {
+        "label": "Заводской номер кассы",
+        "next": "handoff"
+      },
+      {
+        "label": "Номер установленного ФН",
+        "next": "handoff"
+      },
+      {
+        "label": "Нашли нужный паспорт, номера совпали",
+        "next": "pirit_report_verify"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 8",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=8"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_remaining": {
+    "kind": "question",
+    "text": "Самодиагностика прошла. При какой операции проявляется исходный симптом?",
+    "choices": [
+      {
+        "label": "При печати",
+        "next": "pirit_group_0"
+      },
+      {
+        "label": "При подключении к программе",
+        "next": "pirit_connection"
+      },
+      {
+        "label": "При закрытии смены",
+        "next": "pirit_group_3"
+      },
+      {
+        "label": "При передаче документов в ОФД",
+        "next": "pirit_ofd_mode"
+      },
+      {
+        "label": "Выбрать другой раздел",
+        "next": "pirit_categories"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_indicators": {
+    "kind": "question",
+    "text": "Посмотрите на переднюю панель. Какой индикатор изменился?",
+    "choices": [
+      {
+        "label": "Не горит ПИТАНИЕ",
+        "next": "pirit_power"
+      },
+      {
+        "label": "Горит БУМАГА",
+        "next": "pirit_group_0_case_0"
+      },
+      {
+        "label": "Горит ОШИБКА",
+        "next": "pirit_jam"
+      },
+      {
+        "label": "Питание есть, предупреждений нет",
+        "next": "pirit_connection"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ],
+    "answers": {
+      "Не горит ПИТАНИЕ": "питание не горит|не горит питание",
+      "Горит БУМАГА": "горит бумага",
+      "Горит ОШИБКА": "горит ошибка"
+    },
+    "pattern": "нет диагностическ.*чека|не вышел.*чек.*включен"
+  },
+  "pirit_power": {
+    "kind": "instruction",
+    "text": "На выключенной кассе проверьте соединение комплектного блока питания с разъёмом DC24V и сетевым кабелем. Подключите к исправной розетке и включите кассу. Проверьте сигнал загрузки, индикатор питания и печать чека диагностики.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_power_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_power_after",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_power_after": {
+    "kind": "question",
+    "text": "Что изменилось после проверки питания?",
+    "choices": [
+      {
+        "label": "Сигнал есть, загорелась БУМАГА",
+        "next": "pirit_group_0_case_0"
+      },
+      {
+        "label": "Питание есть, горит ОШИБКА",
+        "next": "pirit_jam"
+      },
+      {
+        "label": "Питание есть, программа не видит кассу",
+        "next": "pirit_connection"
+      },
+      {
+        "label": "Индикатор питания по-прежнему погашен",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 66",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=66"
+      }
+    ]
+  },
+  "pirit_connection": {
+    "kind": "question",
+    "text": "Проверьте подключение кабеля COM или USB к кассе и ПК. В Windows с ComProxy откройте в Fito «Функции» → «Параметры связи». Какой порт выбран?",
+    "choices": [
+      {
+        "label": "Выбран физический порт или номер неизвестен",
+        "next": "pirit_set_port"
+      },
+      {
+        "label": "Выбран виртуальный порт кассовой программы",
+        "next": "pirit_status"
+      },
+      {
+        "label": "На этом ПК другая схема подключения",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 12",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      }
+    ],
+    "answers": {
+      "Выбран физический порт или номер неизвестен": "физическ|не знаю|неизвест",
+      "Выбран виртуальный порт кассовой программы": "виртуальн"
+    },
+    "pattern": "не видит.*кассу|нет связи с кассой|fito не подключ"
+  },
+  "pirit_set_port": {
+    "kind": "instruction",
+    "text": "В Fito выберите COM и виртуальный порт, выделенный при установке ComProxy для кассовой программы (COM Z в руководстве). COM11 приведён как пример. Нажмите «Установить», запросите «Статус», затем проверьте связь в кассовой программе после выхода из Fito.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_status",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_service_check",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 12",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 14",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=14"
+      }
+    ]
+  },
+  "pirit_status": {
+    "kind": "question",
+    "text": "Запросите «Статус» в Fito по порту кассовой программы. Открылось окно со статусом устройства?",
+    "choices": [
+      {
+        "label": "Статус получен",
+        "next": "pirit_app_port"
+      },
+      {
+        "label": "Окно с ошибкой связи",
+        "next": "pirit_service_check"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 12",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 14",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=14"
+      }
+    ],
+    "answers": {
+      "Статус получен": "статус (?:есть|получен)|открылось окно",
+      "Окно с ошибкой связи": "ошибка|не удалось"
+    }
+  },
+  "pirit_app_port": {
+    "kind": "instruction",
+    "text": "Закройте Fito и сверьте порт кассовой программы с виртуальным COM Z, на котором удалось прочитать статус. Укажите тот же порт в настройках подключения программы и проверьте связь.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "handoff",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 12",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 14",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=14"
+      }
+    ]
+  },
+  "pirit_service_check": {
+    "kind": "question",
+    "text": "В диспетчере служб Windows посмотрите состояние ComProxy. Сверьте порт со значением для кассовой программы, выбранным при установке. Что обнаружили?",
+    "choices": [
+      {
+        "label": "Исправили номер порта, снова проверить",
+        "next": "pirit_status"
+      },
+      {
+        "label": "Служба отсутствует или остановлена",
+        "next": "handoff"
+      },
+      {
+        "label": "Служба работает, нужный порт не отвечает",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 10",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=10"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 12",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=12"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 13",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=13"
+      }
+    ]
+  },
+  "pirit_ofd_mode": {
+    "kind": "question",
+    "text": "Проверьте, используется ли передача в ОФД по параметрам регистрации этой кассы.",
+    "choices": [
+      {
+        "label": "Режим передачи в ОФД",
+        "next": "pirit_ofd_queue"
+      },
+      {
+        "label": "Касса зарегистрирована в автономном режиме",
+        "next": "pirit_autonomous"
+      },
+      {
+        "label": "Режим регистрации неизвестен",
+        "next": "pirit_ofd_registration"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ],
+    "answers": {
+      "Режим передачи в ОФД": "с передачей|онлайн",
+      "Касса зарегистрирована в автономном режиме": "автоном"
+    },
+    "pattern": "непередан|неотправлен|нет связи с офд|не (?:уходят|доходят|отправляются).*офд"
+  },
+  "pirit_ofd_registration": {
+    "kind": "question",
+    "text": "Найдите в отчёте о регистрации признак автономного режима. Что там указано?",
+    "choices": [
+      {
+        "label": "Автономный режим включён",
+        "next": "pirit_autonomous"
+      },
+      {
+        "label": "Передача через ОФД",
+        "next": "pirit_ofd_queue"
+      },
+      {
+        "label": "Нет отчёта или доступа к нему",
+        "next": "handoff"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 23",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=23"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ]
+  },
+  "pirit_autonomous": {
+    "kind": "instruction",
+    "text": "В зарегистрированном автономном режиме отправка каждого чека в ОФД не предусмотрена. Сверьте этот режим с отчётом о регистрации. Если вы проверяли причину отсутствия чеков в кабинете ОФД и режим подтвердился, проверка завершена.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_remaining",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 23",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=23"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ]
+  },
+  "pirit_ofd_queue": {
+    "kind": "question",
+    "text": "В Fito откройте «Тестирование» → «Печать отчета о состоянии расчетов». Что в строке количества непереданных документов?",
+    "choices": [
+      {
+        "label": "Ноль",
+        "next": "pirit_ofd_zero"
+      },
+      {
+        "label": "Больше нуля",
+        "next": "pirit_ofd_send"
+      },
+      {
+        "label": "Нет связи с кассой для печати",
+        "next": "pirit_connection"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ],
+    "answers": {
+      "Ноль": "ноль|^0$",
+      "Больше нуля": "больше нуля|^[1-9][0-9]*$"
+    }
+  },
+  "pirit_ofd_zero": {
+    "kind": "instruction",
+    "text": "Ноль означает, что в кассе нет очереди на отправку. Сверьте номер ФН в отчёте и в кабинете ОФД, найдите нужный документ по номеру ФД.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "handoff",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "handoff",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      }
+    ]
+  },
+  "pirit_ofd_send": {
+    "kind": "instruction",
+    "text": "Проверьте сетевое подключение кассового ПК. После восстановления сети повторите передачу через кассовую программу. Снова получите отчёт о состоянии расчётов и проверьте, стало ли количество непереданных документов равным нулю.",
+    "choices": [
+      {
+        "label": "Да, помогло",
+        "next": "resolved",
+        "action": "outcome"
+      },
+      {
+        "label": "Не помогло",
+        "next": "pirit_ofd_after",
+        "action": "outcome"
+      },
+      {
+        "label": "Не могу выполнить",
+        "next": "pirit_ofd_after",
+        "action": "outcome"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  },
+  "pirit_ofd_after": {
+    "kind": "question",
+    "text": "Что показывает повторная проверка? При доступной сети и сохраняющейся очереди руководство рекомендует поддержку вашего ОФД. Сохраните последний отчёт.",
+    "choices": [
+      {
+        "label": "Сети на кассовом ПК нет",
+        "next": "handoff"
+      },
+      {
+        "label": "Сеть доступна, в очереди остались документы",
+        "next": "handoff"
+      },
+      {
+        "label": "Очередь пуста, проверить чек в кабинете",
+        "next": "pirit_ofd_zero"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Руководство Пирит 2Ф, стр. 27",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=27"
+      },
+      {
+        "title": "Руководство Пирит 2Ф, стр. 64",
+        "url": "/api/v1/knowledge-assets/pirit-2f-manual.pdf#page=64"
+      }
+    ]
+  }
+}
