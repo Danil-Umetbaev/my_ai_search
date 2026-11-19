@@ -876,7 +876,7 @@
     "choices": [
       {
         "label": "Вики Принт 80 после замены механизма",
-        "next": "handoff"
+        "next": "viki_brightness_service"
       },
       {
         "label": "Другая модель или механизм не меняли",
@@ -1761,6 +1761,30 @@
         "label": "Не могу выполнить",
         "next": "handoff",
         "action": "outcome"
+      }
+    ]
+  },
+  "viki_brightness_service": {
+    "kind": "question",
+    "text": "Для Вики Принт 80 инструкция настройки яркости включает вскрытие корпуса, перемычки на материнской плате и обновление прошивки. Это работа для специалиста по кассам. Передадим ему, что механизм заменён, а дефект сохранился и на SelfTest. Инструкция производителя доступна по ссылке ниже.",
+    "sources": [
+      {
+        "title": "Вики Принт не печатает документы",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/viki-print-ne-pechataet-dokumenty/"
+      },
+      {
+        "title": "Изменить яркость на Вики Принт 80",
+        "url": "https://help.dreamkas.ru/kb/viki-printy/obsluzhivanie-kassy-viki-print/proshivka-materinskoy-platy-viki-print-80-pered-zamenoy-tpg/"
+      }
+    ],
+    "choices": [
+      {
+        "label": "Передать специалисту",
+        "next": "handoff"
+      },
+      {
+        "label": "Вернуться к проверке печати",
+        "next": "viki_quality_test"
       }
     ]
   }

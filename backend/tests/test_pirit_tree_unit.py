@@ -6,6 +6,22 @@ from src.services.atol_semantic_router import advance
 
 
 class PiritTreeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_present_paper_does_not_repeat_group_confirmation(self):
+        state, _ = await self.walk(("Бумага и печать",))
+        state, _ = await advance(state, "бумага не закончилась, но не печатает", [])
+        self.assertEqual(state['_atol_tree']['answer_offer']['label'], 'Бумага есть, но чек не выходит')
+        state, reply = await advance(state, 'Да, верно', [])
+        self.assertEqual(state['_atol_tree']['node'], 'pirit_indicators')
+        self.assertIn('индикатор', reply)
+
+    async def test_rejected_jam_is_not_proposed_again(self):
+        state, _ = await self.walk(())
+        state, _ = await advance(state, 'блять бамагу зажевало', [])
+        self.assertEqual(state['_atol_tree']['answer_offer']['label'], 'Зажевало бумагу')
+        state, _ = await advance(state, 'Нет, выбрать снова', [])
+        state, _ = await advance(state, 'бумагу зажевало блять', [])
+        self.assertNotEqual(state['_atol_tree'].get('answer_offer', {}).get('label'), 'Зажевало бумагу')
+
     async def walk(self, labels):
         state = tree.initial_state()
         for label in ("Пирит 2Ф", *labels):

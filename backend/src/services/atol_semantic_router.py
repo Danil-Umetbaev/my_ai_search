@@ -108,6 +108,8 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             if nodes[item["next"]].get("pattern")
             and (key == f"{family}_categories" or item.get("action") == "select_problem")
             and applicable_choice(nodes, key, item, message)
+            and item['next'] != flow['node']
+            and item['next'] not in flow.get('rejected_targets', [])
         ]
         matched_symptoms = [(key, item) for key, item in entry_points
                             if item.get('action') == 'select_problem'
@@ -117,7 +119,9 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             return atol_answer_router.propose(state, key, item['label'], message)
         if llm is not None:
             entries = [*entry_points, *((flow["node"], item) for item in options
-                       if applicable_choice(nodes, flow['node'], item, message))]
+                       if applicable_choice(nodes, flow['node'], item, message)
+                       and item['next'] != flow['node']
+                       and item['next'] not in flow.get('rejected_targets', []))]
             allowed = {item["label"]: key for key, item in entries}
             payload = json.dumps({"question": current["text"], "message": message, "choices": list(allowed)}, ensure_ascii=False)
             try:
@@ -192,6 +196,10 @@ async def route(state, message, llm, timeout, *, button=False, lookup=None):
         if normalized in {"да, верно", "да", "верно", "правильно"}:
             return atol_answer_router.accept(state, offer)
         if normalized in {"нет, выбрать снова", "нет", "назад"}:
+            if node.startswith(("pirit_", "viki_")):
+                rejected = next(item['next'] for item in atol_support_tree.catalog()['nodes'][offer['question']]['choices']
+                                if item['label'] == offer['label'])
+                flow.setdefault('rejected_targets', []).append(rejected)
             return state, atol_support_tree.render(state)
         if node.startswith(("pirit_", "viki_")):
             return await advance(state, message, [], llm, timeout, button=button, lookup=lookup)

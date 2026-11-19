@@ -9,6 +9,18 @@ from src.services.atol_semantic_router import advance
 
 
 class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_brightness_explains_service_work_before_handoff(self):
+        state = tree.initial_state()
+        for label in ('Вики Принт', 'Что напечатано на чеке', 'Чек бледный или пустой',
+                      'Рулон установлен, проверить печать', 'На тесте тот же дефект',
+                      'Вики Принт 80 после замены механизма'):
+            state, reply = await advance(state, label, [], button=True)
+        self.assertNotEqual(state['_phase'], 'confirm')
+        self.assertIn('перемычки', reply)
+        self.assertIn('прошивки', reply)
+        state, _ = await advance(state, 'Передать специалисту', [], button=True)
+        self.assertEqual(state['_phase'], 'confirm')
+
     async def test_text_offer_reload_rejection_and_result(self):
         state, _ = await advance(tree.initial_state(), "у нас Viki Print 57", [])
         state, _ = await advance(state, "Да, верно", [], button=True)
