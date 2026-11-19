@@ -96,6 +96,9 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             exact = next((item for item in options if item["label"] == mapped), None)
         if exact:
             return atol_answer_router.propose(state, flow["node"], exact["label"], message)
+        if any(current.get('answer_rejections', {}).get(item['label'])
+               and not applicable_choice(nodes, flow['node'], item, message) for item in options):
+            return state, "Уточните результат текущей проверки или выберите подходящую кнопку.\n\n" + atol_support_tree.render(state)
         if matches([r"(?:ничего|все)\s+не\s+работает", r"все\s+сломалось"], message):
             return state, "Что именно происходит: не выходит бумага, на чеке ошибка или программа не видит кассу? Можно выбрать вариант кнопкой."
         entry_points = [
