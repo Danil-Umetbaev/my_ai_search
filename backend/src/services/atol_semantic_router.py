@@ -65,6 +65,11 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
     normalized = message.strip().casefold().rstrip(".!?")
     controls = {"отмена", "отменить", "нужен специалист", "передать специалисту"}
     active = state.get("_phase") not in {"confirm", "resolved", "cancelled", "ticket_created"}
+    if active and normalized in {"проблема решена", "проблема решена самостоятельно"}:
+        updated = deepcopy(state)
+        updated["_atol_tree"] = {"node": "resolved", "revision": flow["revision"] + 1}
+        updated.update(_phase="resolved", _engine="rules", resolution=message)
+        return updated, atol_support_tree.render(updated)
     family = flow["node"].partition("_")[0]
     if active and family in {"pirit", "viki"} and not flow.get("manual") and not flow.get("answer_offer") and not button and normalized not in controls:
         nodes = atol_support_tree.catalog()["nodes"]

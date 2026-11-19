@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from src.api.dependencies import check_optional_session
+from fastapi import APIRouter, Depends, Request
+from src.api.dependencies import check_optional_session, get_current_user_data
 from src.schemas.chat import ChatRequest, ChatResponse
 from src.exceptions import (
     NoConversationFoundException,
@@ -16,10 +16,12 @@ chat_router = APIRouter(
 
 @chat_router.post("")
 async def send_message(
-    chat_service: ChatServiceDep, request: ChatRequest
+    chat_service: ChatServiceDep, request: ChatRequest, http_request: Request
 ) -> ChatResponse:
     try:
-        return await chat_service.send_message(request)
+        token = http_request.cookies.get("access_token")
+        user = await get_current_user_data(chat_service.db, token) if token else None
+        return await chat_service.send_message(request, user=user)
     except NoConversationFoundException:
         raise NoConversationFoundHTTPException
     except RAGProcessingException:

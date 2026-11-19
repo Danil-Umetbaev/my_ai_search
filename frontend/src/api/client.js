@@ -192,13 +192,17 @@ export function getMessageHistory(conversationId) {
 
 export function sendMessage(
   conversationId,
-  message
+  message,
+  choiceId = null,
+  requestId = undefined
 ) {
   return request("/chat/messages", {
     method: "POST",
     body: JSON.stringify({
       conversation_id: conversationId,
       message,
+      choice_id: choiceId,
+      request_id: requestId,
     }),
   })
 }

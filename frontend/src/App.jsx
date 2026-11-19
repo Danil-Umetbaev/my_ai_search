@@ -68,6 +68,8 @@ function mergeMessagesWithMeta(
 
       return {
         ...message,
+        choices: message.response_meta?.choices || messageMeta?.choices || [],
+        phase: message.response_meta?.phase || messageMeta?.phase || null,
 
 
         status:
@@ -128,6 +130,7 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
   const [loadingByConversation, setLoadingByConversation] = useState({});
   const pendingRef = useRef(new Set());
   const historyVersions = useRef({});
+  const outgoingRequests = useRef({});
   const creatingRef = useRef(false);
   const activeConversationRef = useRef(activeConversationId);
   const messageMetaRef = useRef(messageMetaStore);
@@ -464,7 +467,8 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
 
 
   async function handleSendMessage(
-    text
+    text,
+    choiceId = null
   ) {
     const question =
       text.trim();
@@ -525,12 +529,20 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
 
     setSendingByConversation((current) => ({ ...current, [conversationId]: true }));
 
+    const previousRequest = outgoingRequests.current[conversationId];
+    const outgoing = previousRequest?.question === question
+      ? previousRequest
+      : { question, choiceId, id: crypto.randomUUID() };
+    outgoingRequests.current[conversationId] = outgoing;
+
 
     try {
       const data =
         await sendMessageRequest(
           conversationId,
-          question
+          question,
+          outgoing.choiceId,
+          outgoing.id
         );
 
 
@@ -538,9 +550,12 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
         data.answer ||
         data.message ||
         "Ответ не получен.";
+      delete outgoingRequests.current[conversationId];
 
 
       const assistantMessage = {
+        choices: data.choices || [],
+        phase: data.phase || null,
         id:
           data.message_id,
 
@@ -581,6 +596,8 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
         conversationId,
         data.message_id,
         {
+          choices: data.choices || [],
+          phase: data.phase || null,
           status:
             data.status || null,
 
@@ -608,6 +625,12 @@ export default function App({ user, onLogin, onLogout, onAdmin, logoutBusy, logo
       }
 
     } catch (error) {
+      if (error.status === 409) {
+        delete outgoingRequests.current[conversationId];
+        const history = await getMessageHistory(conversationId);
+        setMessages(mergeMessagesWithMeta(history, messageMetaRef.current[conversationId] || {}));
+        return;
+      }
       console.error(
         "Ошибка отправки сообщения:",
         error

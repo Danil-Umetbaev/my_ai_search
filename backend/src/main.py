@@ -58,13 +58,6 @@ app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(AICapacityMiddleware)
 app.include_router(main_router)
 
-@app.middleware("http")
-async def require_search_ready(request: Request, call_next):
-    if request.url.path.rstrip("/") == "/api/v1/chat/messages":
-        if getattr(request.app.state, "models", {}).get("status") != "ready":
-            return JSONResponse(status_code=503, content={"code": "AI_SERVICE_UNAVAILABLE", "message": "Поиск подготавливается. Диагностика доступна через Техподдержку."}, headers={"Retry-After": "30"})
-    return await call_next(request)
-
 @app.exception_handler(BaseHTTPException)
 async def app_http_exception_handler(
     request: Request,

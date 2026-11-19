@@ -100,10 +100,10 @@ async def test_chat_escalated(client: AsyncClient):
 
     data = response.json()
 
-    assert data["status"] == "escalated"
+    assert data["status"] == "not_found"
     assert data["answer"] is None
     assert data["message"] == (
-        "Информация не найдена. Вопрос передан специалистам."
+        "В документации не найден ответ. Обращение сохранено для специалиста. Уведомление отправлено."
     )
     assert data["sources"] == []
     assert data["confidence"] == 0.10
@@ -129,9 +129,7 @@ async def test_chat_escalated(client: AsyncClient):
     )
 
     assert history[1]["role"] == "assistant"
-    assert history[1]["content"] == (
-        "Информация не найдена. Вопрос передан специалистам."
-    )
+    assert history[1]["content"] == data["message"]
 
 
 async def test_chat_escalated_when_notification_fails(
@@ -161,10 +159,10 @@ async def test_chat_escalated_when_notification_fails(
 
     data = response.json()
 
-    assert data["status"] == "escalated"
+    assert data["status"] == "not_found"
     assert data["answer"] is None
     assert data["message"] == (
-        "Информация не найдена. Вопрос передан специалистам."
+        "В документации не найден ответ. Обращение сохранено для специалиста. Уведомление доставить не удалось."
     )
 
     assert notification_provider.called is True

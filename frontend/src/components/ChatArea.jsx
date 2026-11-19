@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import { Icon } from "./Icons.jsx";
+import { ReplyText } from "./SupportWorkspace";
 
 
 function AssistantIcon() {
@@ -326,6 +327,9 @@ export default function ChatArea({
               <span>
                 Например: как заправить чековую ленту в Пирит 2Ф?
               </span>
+              <button className="diagnosis-start" onClick={() => onSend("Диагностика")}>
+                Помочь с неисправностью
+              </button>
 
             </div>
           ) : (
@@ -389,8 +393,15 @@ export default function ChatArea({
                           )}
 
                           <div className="message-text">
-                            {message.content}
+                            <ReplyText text={message.content} />
                           </div>
+                          {messageIndex === messages.length - 1 && message.choices?.length > 0 && (
+                            <div className="support-choices" role="group" aria-label="Варианты ответа">
+                              {message.choices.map(choice => (
+                                <button key={choice.id} disabled={sending} onClick={() => onSend(choice.label, choice.id)}>{choice.label}</button>
+                              ))}
+                            </div>
+                          )}
 
                         </div>
 

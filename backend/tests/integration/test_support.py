@@ -1,11 +1,13 @@
 import asyncio
 from uuid import uuid4
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from sqlalchemy import text
 
 from src.main import app
 from tests.conftest import test_session_maker as session_maker
-from tests.test_support_agent_unit import FakeLLM
+from src.services import atol_semantic_router
 
 
 async def account(client, email="cashier@example.com", role="kassir"):
@@ -27,6 +29,13 @@ async def account(client, email="cashier@example.com", role="kassir"):
                 {"id": user["id"], "role": role},
             )
             await session.commit()
+        assert (await client.get("/api/v1/auth/me")).status_code == 401
+        response = await client.post(
+            "/api/v1/auth/login", json={"email": email, "password": password}
+        )
+        assert response.status_code == 200
+        user = (await client.get("/api/v1/auth/me")).json()
+        assert user["role"] == role
     return user
 
 
@@ -103,7 +112,8 @@ async def test_replay_and_request_id_conflict(client):
     history = (await client.get(f"/api/v1/support/sessions/{session_id}")).json()[
         "history"
     ]
-    assert len(history) == 2
+    assert [entry["role"] for entry in history] == ["assistant", "user", "assistant"]
+    assert history[1]["request_id"] == history[2]["request_id"] == identifier
 
 
 async def test_confirmation_does_not_create_duplicate_ticket(client):
@@ -111,7 +121,9 @@ async def test_confirmation_does_not_create_duplicate_ticket(client):
     session_id, ticket_id = await create_ticket(client)
     assert (await send(client, session_id, "да")).json()["ticket_id"] == ticket_id
     detail = (await client.get(f"/api/v1/support/tickets/{ticket_id}")).json()
-    assert detail["details"]["transcript"][0]["content"] == "Ошибка приложения"
+    transcript = detail["details"]["transcript"]
+    assert transcript[0]["role"] == "assistant"
+    assert transcript[1] == {"role": "user", "content": "Ошибка приложения"}
     assert len(detail["events"]) == 1
 
 
@@ -193,32 +205,25 @@ async def test_validation_pagination_and_empty_knowledge(client):
     assert result.json()["knowledge_ready"] is False
 
 
-async def test_ai_plan_goes_through_real_api(client, monkeypatch):
+async def test_model_proposes_branch_through_real_api(client):
     await account(client)
+    rank = Mock(return_value='{"targets":["jam"]}')
     app.state.models = {
         "status": "ready",
-        "llm": FakeLLM(
-            {
-                "action": "ask",
-                "question": "На соседнем рабочем месте такая же ошибка?",
-                "facts": {"problem": "Нет связи"},
-            }
-        ),
-        "embedding": object(),
+        "llm": SimpleNamespace(route_support=rank),
     }
-
-    async def search(*args, **kwargs):
-        return []
-
-    monkeypatch.setattr(
-        "src.services.support_dialogue.VectorSearchService.search", search
-    )
     session_id = await conversation(client)
-    result = (await send(client, session_id, "Нет связи")).json()
+    await send(client, session_id, "АТОЛ FPrint-22ПТК")
+    await send(client, session_id, "да")
+    result = (await send(client, session_id, "жует ленту")).json()
     assert result["engine"] == "llm"
-    assert "соседнем" in result["answer"]
+    rank.assert_called_once()
     row = (await client.get(f"/api/v1/support/sessions/{session_id}")).json()
-    assert row["state"]["problem"] == "Нет связи"
+    assert row["state"]["_atol_tree"]["node"] == "categories"
+    assert row["state"]["_atol_tree"]["proposal"]["targets"] == ["jam"]
+    await send(client, session_id, "да")
+    row = (await client.get(f"/api/v1/support/sessions/{session_id}")).json()
+    assert row["state"]["_atol_tree"]["node"] == "jam"
 
 
 async def test_concurrent_messages_do_not_overwrite_history(client, monkeypatch):
@@ -228,15 +233,18 @@ async def test_concurrent_messages_do_not_overwrite_history(client, monkeypatch)
     release = asyncio.Event()
     calls = 0
 
-    async def delayed(state, history, message, *args, **kwargs):
+    advance = atol_semantic_router.advance
+    before = (await client.get(f"/api/v1/support/sessions/{session_id}")).json()
+
+    async def delayed(*args, **kwargs):
         nonlocal calls
         calls += 1
         if calls == 2:
             ready.set()
         await release.wait()
-        return {"problem": message, "_phase": "collect"}, "Уточните устройство"
+        return await advance(*args, **kwargs)
 
-    monkeypatch.setattr("src.services.support_dialogue.respond", delayed)
+    monkeypatch.setattr(atol_semantic_router, "advance", delayed)
     tasks = [
         asyncio.create_task(send(client, session_id, message))
         for message in ["Ошибка А", "Ошибка Б"]
@@ -248,5 +256,6 @@ async def test_concurrent_messages_do_not_overwrite_history(client, monkeypatch)
     responses = await asyncio.gather(*tasks)
     assert sorted(response.status_code for response in responses) == [200, 409]
     row = (await client.get(f"/api/v1/support/sessions/{session_id}")).json()
-    assert len(row["history"]) == 2
-    assert row["version"] == 1
+    assert row["history"][:-2] == before["history"]
+    assert row["history"][-2]["content"] in {"Ошибка А", "Ошибка Б"}
+    assert row["version"] == before["version"] + 1

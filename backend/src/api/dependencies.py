@@ -62,10 +62,13 @@ rerankerDep = Annotated[RerankerProvider, Depends(get_reranker_provider)]
 
 
 def get_rag_service(
-    db: DBDep, embedding: embeddingDep, llm: llmDep, reranker: rerankerDep
+    db: DBDep, request: Request
 ):
-    vector_search = VectorSearchService(db, embedding)
-    return RAGService(db, vector_search, llm, reranker)
+    models = getattr(request.app.state, "models", {})
+    if models.get("status") != "ready":
+        return None
+    vector_search = VectorSearchService(db, models["embedding"])
+    return RAGService(db, vector_search, models["llm"], models["reranker"])
 
 
 rag_serviceDep = Annotated[RAGService, Depends(get_rag_service)]

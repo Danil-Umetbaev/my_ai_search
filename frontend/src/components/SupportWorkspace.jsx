@@ -21,7 +21,7 @@ function Sources({ sources = [] }) {
   return <ul className="support-sources">{sources.filter(source => isSourceUrl(source.url)).map((source, index) => <li key={index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>{source.quote && <blockquote>{source.quote}</blockquote>}</li>)}</ul>;
 }
 
-function ReplyText({ text }) {
+export function ReplyText({ text }) {
   const sources = [];
   return <div className="support-reply">{text.split("\n").filter(line => line.trim()).map((line, index) => {
     const picture = line.match(/^!\[([^\]]*)\]\((\/api\/v1\/knowledge-assets\/[a-f0-9]{64}\.png)\)$/);
