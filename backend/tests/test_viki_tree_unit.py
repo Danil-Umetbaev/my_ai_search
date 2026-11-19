@@ -81,11 +81,20 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
         state = tree.initial_state()
         state['_atol_tree']['node'] = 'viki_ofd_service'
         lookup = AsyncMock()
-        model = SimpleNamespace(route_support=Mock(return_value='{"choice":null}'))
+        model = SimpleNamespace(route_support=Mock(return_value='{"choice":"Служба установлена, но остановлена"}'))
         updated, reply = await advance(state, 'Служба не работает', [], model, lookup=lookup)
         self.assertEqual(updated, state)
         self.assertIn('Уточните', reply)
         lookup.assert_not_called()
+        model.route_support.assert_not_called()
+
+    async def test_explicit_qr_symptom_cannot_be_overridden(self):
+        state = tree.initial_state()
+        state['_atol_tree']['node'] = 'viki_categories'
+        model = SimpleNamespace(route_support=Mock(return_value='{"choice":"Связь с компьютером"}'))
+        updated, _ = await advance(state, 'не печатает куар код блин', [], model)
+        self.assertEqual(updated['_atol_tree']['answer_offer']['label'], 'На чеке нет QR-кода')
+        model.route_support.assert_not_called()
 
     async def test_documented_continuations_before_handoff(self):
         cases = (
