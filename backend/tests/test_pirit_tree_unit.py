@@ -15,7 +15,7 @@ class PiritTreeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('индикатор', reply)
 
     async def test_rejected_jam_is_not_proposed_again(self):
-        state, _ = await self.walk(())
+        state, _ = await self.walk(('Бумага и печать',))
         state, _ = await advance(state, 'блять бамагу зажевало', [])
         self.assertEqual(state['_atol_tree']['answer_offer']['label'], 'Зажевало бумагу')
         state, _ = await advance(state, 'Нет, выбрать снова', [])
@@ -62,11 +62,11 @@ class PiritTreeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(accepted["_atol_tree"]["node"], "pirit_seating")
         self.assertEqual(accepted["observations"][-1]["answer"], "в отсеке рулон есть")
 
-    async def test_unknown_text_uses_pirit_manual_and_foreign_model_is_excluded(self):
+    async def test_unknown_text_stays_in_current_step_and_foreign_model_is_excluded(self):
         state, _ = await self.walk(("Батарея и память", "Батарея разряжена"))
         updated, _ = await advance(state, "У АТОЛ разрядилась батарея", [])
         self.assertEqual(updated, state)
         with patch("src.services.atol_document_search.search", new_callable=AsyncMock) as search:
             search.return_value = (state, "Поиск")
             await advance(state, "Необычный звук", [], lookup=AsyncMock())
-            self.assertEqual(search.await_args.args[0]["_receipt"]["facts"]["model"], "Пирит 2Ф")
+            search.assert_not_called()

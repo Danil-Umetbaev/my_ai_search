@@ -102,12 +102,10 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
         if matches([r"(?:ничего|все)\s+не\s+работает", r"все\s+сломалось"], message):
             return state, "Что именно происходит: не выходит бумага, на чеке ошибка или программа не видит кассу? Можно выбрать вариант кнопкой."
         entry_points = [
-            (key, item)
-            for key, node in nodes.items() if key.startswith(family + "_")
-            for item in node["choices"]
+            (flow['node'], item)
+            for item in options
             if nodes[item["next"]].get("pattern")
-            and (key == f"{family}_categories" or item.get("action") == "select_problem")
-            and applicable_choice(nodes, key, item, message)
+            and applicable_choice(nodes, flow['node'], item, message)
             and item['next'] != flow['node']
             and item['next'] not in flow.get('rejected_targets', [])
         ]
@@ -142,16 +140,7 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             return atol_answer_router.propose(state, key, item["label"], message)
         if candidates:
             return state, "Уточните симптом: " + " или ".join(item["label"] for _, item in candidates) + "?"
-        selecting_problem = flow['node'] == f'{family}_categories' or any(
-            item.get('action') == 'select_problem' for item in options
-        )
-        if not selecting_problem and any(
-            not applicable_choice(nodes, flow['node'], item, message) for item in options
-        ):
-            return state, "Уточните результат текущей проверки или выберите подходящую кнопку.\n\n" + atol_support_tree.render(state)
-        if lookup:
-            return await atol_document_search.search(atol_document_search.start(state, message), message, lookup)
-        return state, atol_support_tree.render(state)
+        return state, "Не удалось сопоставить ответ с текущими вариантами. Уточните ответ или выберите кнопку.\n\n" + atol_support_tree.render(state)
     if flow.get("manual") and active:
         if normalized in controls:
             state = deepcopy(state)
@@ -170,7 +159,7 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
         state["additional_context"] = message
     updated, answer = await route(state, message, llm, timeout, button=button, lookup=lookup)
     proposal = updated["_atol_tree"].get("proposal")
-    if (lookup and proposal and not proposal["targets"] and not proposal.get("other_model")
+    if (lookup and proposal and not flow['node'].startswith('group_') and not proposal["targets"] and not proposal.get("other_model")
             and not proposal.get("return_node") and updated.get("_phase") == "diagnosing"
             and updated["_atol_tree"]["revision"] != flow["revision"]):
         search_state = atol_document_search.start(updated, message)
@@ -264,6 +253,13 @@ async def route(state, message, llm, timeout, *, button=False, lookup=None):
 
 async def rank_proposal(state, updated, message, llm, timeout):
     proposal = updated["_atol_tree"]["proposal"]
+    current_node = state['_atol_tree']['node']
+    allowed_entries = entries()
+    if current_node.startswith('group_'):
+        allowed_entries = {item['next']: item['label']
+                           for item in atol_support_tree.catalog()['nodes'][current_node]['choices']
+                           if item.get('action') == 'select_problem'}
+        proposal['targets'] = [target for target in proposal['targets'] if target in allowed_entries]
     updated["_engine"] = "rules"
     if other_model(message):
         proposal["targets"] = []
@@ -276,13 +272,13 @@ async def rank_proposal(state, updated, message, llm, timeout):
             "model": "АТОЛ FPrint-22ПТК",
             "question": atol_support_tree.render(state),
             "message": message,
-            "entries": entries(),
+            "entries": allowed_entries,
         },
         ensure_ascii=False,
     )
     try:
         raw = await run_support_model(llm.route_support, PROMPT, payload, timeout=timeout)
-        proposal["targets"] = parse_targets(raw)
+        proposal["targets"] = [target for target in parse_targets(raw) if target in allowed_entries]
         updated["_engine"] = "llm"
         return updated, atol_support_tree.render(updated)
     except (TimeoutError, RuntimeError, ValueError, AttributeError, TypeError) as error:

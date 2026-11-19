@@ -8,6 +8,17 @@ from src.services.atol_support_tree import advance, initial_state, choices
 
 
 class SemanticRoutingTests(unittest.IsolatedAsyncioTestCase):
+    async def test_selected_group_cannot_route_to_another_group(self):
+        state, _ = advance(self.selected_model(), 'Бумага и печать')
+        llm = SimpleNamespace(route_support=Mock(return_value='{"targets":["pc"]}'))
+        lookup = AsyncMock()
+        updated, _ = await router.advance(state, 'программа не видит кассу', [], llm, lookup=lookup)
+        self.assertEqual(updated['_atol_tree']['node'], 'group_print')
+        self.assertEqual(updated['_atol_tree']['proposal']['targets'], [])
+        payload = json.loads(llm.route_support.call_args.args[1])
+        self.assertNotIn('pc', payload['entries'])
+        lookup.assert_not_called()
+
     def selected_model(self):
         return advance(initial_state(), "АТОЛ FPrint-22ПТК")[0]
 

@@ -9,6 +9,18 @@ from src.services.atol_semantic_router import advance
 
 
 class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_model_only_receives_current_choices(self):
+        for node in ('viki_print', 'pirit_group_0', 'viki_ofd_service'):
+            state = tree.initial_state()
+            state['_atol_tree']['node'] = node
+            model = SimpleNamespace(route_support=Mock(return_value='{"choice":"Связь с компьютером"}'))
+            lookup = AsyncMock()
+            updated, _ = await advance(state, 'какой-то непонятный звук', [], model, lookup=lookup)
+            self.assertEqual(updated, state)
+            payload = json.loads(model.route_support.call_args.args[1])
+            self.assertEqual(set(payload['choices']), {c['label'] for c in tree.choices(state)})
+            lookup.assert_not_called()
+
     async def test_brightness_explains_service_work_before_handoff(self):
         state = tree.initial_state()
         for label in ('Вики Принт', 'Что напечатано на чеке', 'Чек бледный или пустой',
@@ -29,6 +41,7 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
         state, _ = await advance(state, "горит красный индикатор", [])
         state, _ = await advance(state, "Нет, выбрать снова", [], button=True)
         self.assertEqual(state["_atol_tree"]["node"], "viki_categories")
+        state, _ = await advance(state, "Связь с компьютером", [], button=True)
         state, _ = await advance(state, "принтер недоступен", [])
         state, _ = await advance(state, "да", [])
         state, _ = await advance(state, "диагностический чек напечатался", [])
@@ -102,7 +115,7 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_explicit_qr_symptom_cannot_be_overridden(self):
         state = tree.initial_state()
-        state['_atol_tree']['node'] = 'viki_categories'
+        state['_atol_tree']['node'] = 'viki_print'
         model = SimpleNamespace(route_support=Mock(return_value='{"choice":"Связь с компьютером"}'))
         updated, _ = await advance(state, 'не печатает куар код блин', [], model)
         self.assertEqual(updated['_atol_tree']['answer_offer']['label'], 'На чеке нет QR-кода')
