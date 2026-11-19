@@ -1,4 +1,7 @@
 import unittest
+import json
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from src.services import atol_support_tree as tree
 from src.services.atol_semantic_router import advance
@@ -22,7 +25,7 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
         state, _ = await advance(state, "Не помогло", [], button=True)
         self.assertEqual(state["_atol_tree"]["node"], "viki_ports")
         for answer in ("Порт виден без предупреждения", "ComProxy", "Не помогло",
-                       "Fito соединяется, кассовая программа нет"):
+                       "Fito соединяется, кассовая программа нет", "Другая программа или не знаю"):
             state, _ = await advance(state, answer, [], button=True)
         self.assertEqual(state["_phase"], "confirm")
         self.assertEqual(state["observations"][-1]["answer"], answer)
@@ -49,3 +52,41 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
         state, _ = await advance(tree.initial_state(), "Вики Принт", [], button=True)
         updated, _ = await advance(state, "У Пирит закончилась бумага", [])
         self.assertEqual(state, updated)
+
+    async def test_negations_cannot_be_overridden_by_model(self):
+        for node, message, wrong in (
+            ('viki_ofd_service', 'Служба не работает', 'Одна служба работает'),
+            ('viki_network', 'Сайт не открывается, блять', 'Сайт открывается'),
+            ('pirit_categories', 'Бумага не закончилась, но не печатает', 'Закончилась лента'),
+            ('viki_categories', 'Бумага не закончилась', 'Бумага закончилась'),
+        ):
+            state = tree.initial_state()
+            state['_atol_tree']['node'] = node
+            model = SimpleNamespace(route_support=Mock(return_value=json.dumps({'choice': wrong})))
+            updated, _ = await advance(state, message, [], model)
+            self.assertNotEqual(updated['_atol_tree'].get('answer_offer', {}).get('label'), wrong)
+
+    async def test_vague_complaint_does_not_invent_symptom(self):
+        for node in ('viki_categories', 'pirit_categories'):
+            state = tree.initial_state()
+            state['_atol_tree']['node'] = node
+            model = SimpleNamespace(route_support=Mock())
+            updated, reply = await advance(state, 'касса ебать ничего не работает', [], model)
+            self.assertEqual(updated, state)
+            self.assertIn('Что именно', reply)
+            model.route_support.assert_not_called()
+
+    async def test_documented_continuations_before_handoff(self):
+        cases = (
+            ('pirit_ofd_send', ['Не помогло', 'Да, помогло']),
+            ('viki_ofd_queue', ['Число не меняется и новых документов нет', 'Да, показать шаги', 'Да, помогло']),
+            ('viki_connection_result', ['Fito соединяется, кассовая программа нет', 'Дримкас Старт', 'Да, помогло']),
+            ('viki_connection_result', ['Fito соединяется, кассовая программа нет', 'Вики Микро', 'Не могу выполнить']),
+        )
+        for node, answers in cases:
+            state = tree.initial_state()
+            state['_atol_tree']['node'] = node
+            for answer in answers:
+                self.assertIn(answer, [c['label'] for c in tree.choices(state)])
+                state, _ = await advance(state, answer, [], button=True)
+            self.assertEqual(state['_phase'], 'confirm' if answers[-1] == 'Не могу выполнить' else 'resolved')
