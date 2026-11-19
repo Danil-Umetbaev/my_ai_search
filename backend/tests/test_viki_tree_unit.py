@@ -2,6 +2,7 @@ import unittest
 import json
 from types import SimpleNamespace
 from unittest.mock import Mock
+from unittest.mock import AsyncMock
 
 from src.services import atol_support_tree as tree
 from src.services.atol_semantic_router import advance
@@ -75,6 +76,16 @@ class VikiTreeTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(updated, state)
             self.assertIn('Что именно', reply)
             model.route_support.assert_not_called()
+
+    async def test_unclear_check_result_does_not_escalate_through_search(self):
+        state = tree.initial_state()
+        state['_atol_tree']['node'] = 'viki_ofd_service'
+        lookup = AsyncMock()
+        model = SimpleNamespace(route_support=Mock(return_value='{"choice":null}'))
+        updated, reply = await advance(state, 'Служба не работает', [], model, lookup=lookup)
+        self.assertEqual(updated, state)
+        self.assertIn('Уточните', reply)
+        lookup.assert_not_called()
 
     async def test_documented_continuations_before_handoff(self):
         cases = (

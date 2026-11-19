@@ -106,6 +106,12 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             and (key == f"{family}_categories" or item.get("action") == "select_problem")
             and applicable_choice(nodes, key, item, message)
         ]
+        matched_symptoms = [(key, item) for key, item in entry_points
+                            if item.get('action') == 'select_problem'
+                            and matches([nodes[item['next']]['pattern']], message)]
+        if len(matched_symptoms) == 1:
+            key, item = matched_symptoms[0]
+            return atol_answer_router.propose(state, key, item['label'], message)
         if llm is not None:
             entries = [*entry_points, *((flow["node"], item) for item in options
                        if applicable_choice(nodes, flow['node'], item, message))]
@@ -129,6 +135,13 @@ async def advance(state, message, history, llm=None, timeout=15, *, button=False
             return atol_answer_router.propose(state, key, item["label"], message)
         if candidates:
             return state, "Уточните симптом: " + " или ".join(item["label"] for _, item in candidates) + "?"
+        selecting_problem = flow['node'] == f'{family}_categories' or any(
+            item.get('action') == 'select_problem' for item in options
+        )
+        if not selecting_problem and any(
+            not applicable_choice(nodes, flow['node'], item, message) for item in options
+        ):
+            return state, "Уточните результат текущей проверки или выберите подходящую кнопку.\n\n" + atol_support_tree.render(state)
         if lookup:
             return await atol_document_search.search(atol_document_search.start(state, message), message, lookup)
         return state, atol_support_tree.render(state)
