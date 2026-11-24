@@ -4,6 +4,10 @@ from src.schemas.chat import ChatRequest, ChatResponse
 from src.exceptions import (
     NoConversationFoundException,
     NoConversationFoundHTTPException,
+    ChatRequestConflictException,
+    ChatRequestConflictHTTPException,
+    AIServiceUnavailableException,
+    AIServiceUnavailableHTTPException,
     RAGProcessingException,
     RAGProcessingHTTPException,
 )
@@ -26,3 +30,7 @@ async def send_message(
         raise NoConversationFoundHTTPException
     except RAGProcessingException:
         raise RAGProcessingHTTPException
+    except ChatRequestConflictException as error:
+        raise ChatRequestConflictHTTPException from error
+    except AIServiceUnavailableException as error:
+        raise AIServiceUnavailableHTTPException from error

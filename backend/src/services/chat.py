@@ -1,7 +1,5 @@
 import logging
-import json
-from sqlalchemy import text
-from fastapi import HTTPException
+from src.services.conversation import ConversationService
 from src.services import conversation_diagnosis
 
 from src.schemas.chat import ChatRequest, ChatResponse, SourceResponse, ChatStatus
@@ -10,8 +8,8 @@ from src.utils.db import DBManager
 from src.services.base import BaseService
 from src.schemas.messages import MessageAddSchema, MessageSourceAddSchema
 from src.exceptions import (
-    NoResultFoundException,
-    NoConversationFoundException,
+    ChatRequestConflictException,
+    AIServiceUnavailableException,
     RAGProcessingException,
 )
 from src.models.enums import Role, Status
@@ -33,25 +31,18 @@ class ChatService(BaseService):
         self.escalation_service = escalation_service
 
     async def send_message(self, data: ChatRequest, user=None) -> ChatResponse:
-        try:
-            await self.db.conversations.get_one(id=data.conversation_id)
-        except NoResultFoundException:
-            raise NoConversationFoundException
-
-        stored = await self.db.session.scalar(
-            text("SELECT support_state FROM conversations WHERE id=:id FOR UPDATE"),
-            {"id": data.conversation_id},
+        stored = await ConversationService(self.db).accessible_state(
+            data.conversation_id, user, for_update=True
         )
-        stored = stored or {}
-        owner = stored.get("_chat_owner")
-        if owner is not None and (user is None or user.id != owner):
-            raise HTTPException(404, "Диалог не найден")
+        if user is not None and stored.get("_chat_owner") is None:
+            stored["_chat_owner"] = user.id
+            await self.db.conversations.save_state(data.conversation_id, stored)
         history = await self.db.messages.get_messages_by_conversation_id(data.conversation_id)
         for entry in history:
             meta = entry.response_meta
             if meta.get("request_id") == str(data.request_id):
                 if meta.get("question") != data.message or meta.get("choice_id") != data.choice_id:
-                    raise HTTPException(409, "Запрос уже использован для другого сообщения.")
+                    raise ChatRequestConflictException
                 return ChatResponse.model_validate({**meta["reply"], "message_id": entry.id})
         state = stored.get("diagnosis", {})
         active = state and state.get("_phase") not in {"resolved", "cancelled", "ticket_created"}
@@ -83,18 +74,13 @@ class ChatService(BaseService):
                 content=answer, response_meta=meta,
             ))
             stored["diagnosis"] = state
-            if user:
-                stored["_chat_owner"] = user.id
-            await self.db.session.execute(
-                text("UPDATE conversations SET support_state=CAST(:state AS jsonb) WHERE id=:id"),
-                {"id": data.conversation_id, "state": json.dumps(stored, ensure_ascii=False)},
-            )
+            await self.db.conversations.save_state(data.conversation_id, stored)
             await self.db.commit()
             reply.message_id = saved.id
             return reply
 
         if self.rag_service is None:
-            raise HTTPException(503, "Поиск подготавливается. Можно описать неисправность или начать диагностику.", headers={"Retry-After": "30"})
+            raise AIServiceUnavailableException
 
         await self.db.messages.add(
             MessageAddSchema(
@@ -146,6 +132,9 @@ class ChatService(BaseService):
                 content=content,
                 role=Role.assistant,
                 response_meta={
+                    "request_id": str(data.request_id),
+                    "choice_id": data.choice_id,
+                    "reply": response.model_dump(mode="json"),
                     "status": status.value,
                     "question": data.message,
                     "sources": [s.model_dump(mode="json") for s in sources],

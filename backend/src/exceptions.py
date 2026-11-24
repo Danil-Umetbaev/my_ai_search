@@ -228,3 +228,13 @@ class AuthUnavailableHTTPException(BaseHTTPException):
     status_code = 503
     code = "AUTH_UNAVAILABLE"
     detail = AuthUnavailableException.detail
+
+
+class ChatRequestConflictException(AppException):
+    detail = "Запрос уже использован для другого сообщения."
+
+
+class ChatRequestConflictHTTPException(BaseHTTPException):
+    status_code = 409
+    code = "CHAT_REQUEST_CONFLICT"
+    detail = ChatRequestConflictException.detail
