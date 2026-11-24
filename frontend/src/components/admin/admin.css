@@ -159,3 +159,9 @@
 .ad-message-source a { color: #338566; }
 .ad-advanced:empty { display: none; }
 @media(max-width:760px) { .ad-sidebar nav { overflow-x: auto; } .ad-sidebar nav button { flex: 0 0 auto; } .ad-heading-count { font-size: 13px; } .ad-delivery { flex-wrap: wrap; } }
+
+.ad-appeal-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.ad-appeal-tabs [aria-pressed="true"] { background: #075c47; border-color: #075c47; color: white; }
+.ad-resource-inline > .ad-heading h1 { font-size: 18px; }
+.ad-appeals .support-panel--embedded { width: 100%; height: auto; min-height: 320px; box-shadow: none; border-radius: 16px; }
+.ad-appeals .support-panel--embedded .support-ticket-view { overflow: visible; }

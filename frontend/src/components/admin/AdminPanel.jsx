@@ -4,6 +4,7 @@ import { adminRequest } from "../../api/client";
 import { Icon } from "../Icons";
 import { ROLE_LABELS } from "../AuthScreen";
 import AdminEditor from "./AdminEditor";
+import SupportWorkspace from "../SupportWorkspace";
 import "./admin.css";
 
 export const SECTIONS = {
@@ -45,11 +46,24 @@ export default function AdminPanel({ user, onBack, onLogout, logoutBusy, logoutE
       <nav aria-label="Разделы">{Object.entries(SECTIONS).map(([key, item]) => <button key={key} disabled={busy} aria-current={section === key ? "page" : undefined} className={section === key ? "is-active" : ""} onClick={() => setSection(key)}><Icon name={item.icon} /><span>{item.title}</span></button>)}</nav>
       <div className="ad-sidebar-bottom"><div className="ad-profile"><span className="ad-avatar">{user.email[0].toUpperCase()}</span><div><strong title={user.email}>{user.email}</strong><small>Администратор</small></div></div><button className="ad-back" disabled={busy} onClick={onBack}>← К поиску</button><button className="ad-logout" disabled={busy || logoutBusy} onClick={onLogout}>{logoutBusy ? "Выходим…" : "Выйти"}</button>{logoutError && <p role="alert">{logoutError}</p>}</div>
     </aside>
-    <main className="ad-main"><Resource key={section} section={section} user={user} onBusy={setBusy} /></main>
+    <main className="ad-main">{section === "escalations" ? <Appeals user={user} onBusy={setBusy} busy={busy} /> : <Resource key={section} section={section} user={user} onBusy={setBusy} />}</main>
   </div>;
 }
 
-function Resource({ section, user, onBusy }) {
+function Appeals({ user, onBusy, busy }) {
+  const [source, setSource] = useState("diagnosis");
+  return <section className="ad-content ad-appeals">
+    <div className="ad-heading"><h1>Обращения</h1></div>
+    <div className="ad-appeal-tabs" role="group" aria-label="Источник обращения">
+      <button className="ad-button" aria-pressed={source === "diagnosis"} disabled={busy} onClick={() => setSource("diagnosis")}>Из диагностики</button>
+      <button className="ad-button" aria-pressed={source === "search"} disabled={busy} onClick={() => setSource("search")}>Из поиска</button>
+    </div>
+    {source === "diagnosis" ? <SupportWorkspace user={user} embedded onBusy={onBusy} />
+      : <Resource section="escalations" user={user} onBusy={onBusy} compact />}
+  </section>;
+}
+
+function Resource({ section, user, onBusy, compact = false }) {
   const info = SECTIONS[section];
   const [page, setPage] = useState({ items: [], total: 0 });
   const [offset, setOffset] = useState(0);
@@ -74,8 +88,8 @@ function Resource({ section, user, onBusy }) {
   const filters = section === "escalations" ? { "": "Все обращения", ...WORK } : section === "documents" ? { "": "В поиске", archived: "Архив" } : null;
   const refresh = () => setRevision((v) => v + 1);
   const open = (row) => setEditor({ mode: ["conversations", "unanswered"].includes(section) ? "view" : "edit", row });
-  return <section className="ad-content">
-    <div className="ad-heading"><div><h1>{info.title}{!loading && !error && <span className="ad-heading-count">{page.total}</span>}</h1>{section === "unanswered" && <p>Вопросы, для которых не нашлось ответа в базе знаний.</p>}</div>{section === "documents" && <div className="ad-heading-actions"><button className="ad-button" onClick={() => setEditor({ mode: "create" })}>Написать документ</button><button className="ad-button ad-primary" onClick={() => setEditor({ mode: "import" })}>Добавить по ссылке</button></div>}</div>
+  return <section className={compact ? "ad-resource-inline" : "ad-content"}>
+    <div className="ad-heading"><div><h1>{compact ? "Обращения из поиска" : info.title}{!loading && !error && <span className="ad-heading-count">{page.total}</span>}</h1>{section === "unanswered" && <p>Вопросы, для которых не нашлось ответа в базе знаний.</p>}</div>{section === "documents" && <div className="ad-heading-actions"><button className="ad-button" onClick={() => setEditor({ mode: "create" })}>Написать документ</button><button className="ad-button ad-primary" onClick={() => setEditor({ mode: "import" })}>Добавить по ссылке</button></div>}</div>
     {notice && <div className="ad-notice" role="status">✓ {notice}<button aria-label="Закрыть уведомление" onClick={() => setNotice("")}>×</button></div>}
     <div className="ad-card"><div className="ad-tools">{filters && <select aria-label="Показать" value={filter} onChange={(e) => { setFilter(e.target.value); setOffset(0); }}>{Object.entries(filters).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>}<button className="ad-button" disabled={loading} onClick={refresh}>↻ Обновить</button></div>
       {loading ? <div className="ad-empty" role="status"><span className="ad-spinner" />Загрузка…</div> : error ? <div className="ad-empty"><p role="alert">{error}</p><button className="ad-button" onClick={refresh}>Повторить</button></div> : !page.items.length ? <div className="ad-empty"><Icon name={info.icon} size={36} /><h3>{section === "escalations" ? "Таких обращений пока нет" : section === "unanswered" ? "Вопросов без ответа пока нет" : "Здесь пока пусто"}</h3></div> : <div className="ad-table-scroll"><table className="ad-table"><thead><tr><th>{section === "users" ? "Пользователь" : ["unanswered", "escalations"].includes(section) ? "Вопрос" : "Название"}</th><th>{section === "users" ? "Роль" : section === "escalations" ? "Статус" : section === "documents" ? "Источник" : "Дата"}</th>{section === "users" && <th>Доступ</th>}<th><span className="ad-sr">Открыть</span></th></tr></thead><tbody>{page.items.map((row) => <tr key={row.id}><td><button className="ad-record" onClick={() => open(row)}><span className="ad-record-icon"><Icon name={info.icon} /></span><span><strong>{row.title || row.email || row.question}</strong>{section === "users" && row.id === user.id && <small>Это вы</small>}{section === "escalations" && <small>{dateLabel(row.created_at)}</small>}</span></button></td><td>{section === "users" ? ROLE_LABELS[row.role] || row.role : section === "escalations" ? <Badge value={row.work_status}>{WORK[row.work_status]}</Badge> : section === "documents" ? <SafeLink url={row.source_url} /> : <span className="ad-date">{dateLabel(row.created_at)}</span>}</td>{section === "users" && <td><Badge value={row.is_active ? "sent" : "failed"}>{row.is_active ? "Открыт" : "Заблокирован"}</Badge></td>}<td><button className="ad-row-open" aria-label="Открыть запись" onClick={() => open(row)}>↗</button></td></tr>)}</tbody></table></div>}

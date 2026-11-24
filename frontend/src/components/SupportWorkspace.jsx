@@ -44,7 +44,7 @@ function FactValue({ value }) {
   return <dl>{Object.entries(value).map(([key, entry]) => <div key={key}><dt>{labels[key] || key}</dt><dd><FactValue value={entry} /></dd></div>)}</dl>;
 }
 
-export default function SupportWorkspace({ user, onClose }) {
+export default function SupportWorkspace({ user, onClose, embedded = false, onBusy }) {
   const storageKey = `support-session-${knowledgeSpace}-${user.id}`;
   const pendingKey = `support-pending-${knowledgeSpace}-${user.id}`;
   const panelRef = useRef(null);
@@ -58,7 +58,7 @@ export default function SupportWorkspace({ user, onClose }) {
   const [pendingSend, setPendingSend] = useState(null);
   const menuRef = useRef(null);
   const menuSummary = useRef(null);
-  const [view, setView] = useState("diagnosis");
+  const [view, setView] = useState(embedded ? "queue" : "diagnosis");
   const [tickets, setTickets] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState("");
@@ -68,6 +68,8 @@ export default function SupportWorkspace({ user, onClose }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const staff = ["admin", "it"].includes(user.role);
+
+  useEffect(() => { onBusy?.(busy); }, [busy, onBusy]);
 
   async function run(action) {
     if (sendingRef.current) return;
@@ -92,6 +94,11 @@ export default function SupportWorkspace({ user, onClose }) {
     let active = true;
     setBusy(true);
     (async () => {
+      if (embedded) {
+        const data = await request("/support/tickets?queue=true&offset=0&limit=21", { signal: controller.signal });
+        if (active) { setTickets(data.slice(0, 20)); setHasNext(data.length > 20); }
+        return;
+      }
       const saved = readStorage(storageKey) || localStorage.getItem(storageKey);
       let data;
       if (saved) {
@@ -107,9 +114,10 @@ export default function SupportWorkspace({ user, onClose }) {
       if (pending?.session === data.id && !remaining) writeStorage(pendingKey, null);
     })().catch(err => { if (active) setError(err.userMessage || err.message); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; controller.abort(); };
-  }, [user.id]);
+  }, [user.id, embedded]);
 
   useEffect(() => {
+    if (embedded) return;
     const previous = document.activeElement;
     const shell = document.querySelector(".app-shell");
     const wasInert = shell?.inert;
@@ -119,7 +127,7 @@ export default function SupportWorkspace({ user, onClose }) {
       if (shell) shell.inert = wasInert;
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
     };
-  }, []);
+  }, [embedded]);
 
   function trapFocus(event) {
     if (event.key === "Escape" && menuRef.current?.open) {
@@ -196,13 +204,12 @@ export default function SupportWorkspace({ user, onClose }) {
   const confirming = phase === "confirm";
   const choosingModel = phase === "collect" && messages.length === 1 && choices.length > 0;
   const title = diagnosing ? "Техподдержка" : view === "mine" ? "Мои заявки" : "Панель специалиста";
-  return createPortal(<div className="support-backdrop">
-    <section className="support-panel" role="dialog" aria-modal="true" aria-labelledby="support-title" ref={panelRef} tabIndex={-1} onKeyDown={trapFocus}>
+  const panel = <section className={`support-panel${embedded ? " support-panel--embedded" : ""}`} role={embedded ? "region" : "dialog"} aria-modal={embedded ? undefined : true} aria-labelledby="support-title" ref={panelRef} tabIndex={-1} onKeyDown={embedded ? undefined : trapFocus}>
       <header className="support-header">
         <span className="assistant-avatar"><Icon name={diagnosing ? "chat" : "file"} size={18} /></span>
-        <h2 id="support-title">{title}</h2>
-        {!diagnosing && <button type="button" disabled={busy} onClick={() => { setView("diagnosis"); setDetail(null); }}>В чат</button>}
-        {(diagnosing || staff || view !== "mine") && <details className="support-menu" ref={menuRef} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}>
+        <h2 id="support-title">{embedded ? "Заявки диагностики" : title}</h2>
+        {!embedded && !diagnosing && <button type="button" disabled={busy} onClick={() => { setView("diagnosis"); setDetail(null); }}>В чат</button>}
+        {!embedded && (diagnosing || staff || view !== "mine") && <details className="support-menu" ref={menuRef} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}>
           <summary aria-label="Ещё" title="Ещё" ref={menuSummary}><Icon name="menu" /></summary>
           <div className="support-menu-items" onClick={closeMenu}>
             {view !== "mine" && <button disabled={busy} onClick={() => run(async () => { await loadTickets("mine", 0, ""); setDetail(null); })}>Мои заявки</button>}
@@ -214,7 +221,7 @@ export default function SupportWorkspace({ user, onClose }) {
             {diagnosing && !terminal && <button disabled={busy || !!pendingSend} onClick={newSession}>Новое обращение</button>}
           </div>
         </details>}
-        <button className="support-icon-button" type="button" aria-label="Закрыть" title="Закрыть" disabled={busy} onClick={onClose}>×</button>
+        {!embedded && <button className="support-icon-button" type="button" aria-label="Закрыть" title="Закрыть" disabled={busy} onClick={onClose}>×</button>}
       </header>
       {error && <p className="support-error" role="alert">{error}</p>}
       {diagnosing ? <>
@@ -264,6 +271,6 @@ export default function SupportWorkspace({ user, onClose }) {
         {tickets.map(ticket => <button className="support-ticket-card" key={ticket.id} disabled={busy} onClick={() => run(() => openTicket(ticket.id))}><span>{STATUS[ticket.status]} · {new Date(ticket.created_at).toLocaleString()}</span><strong>{ticket.details.problem || "Обращение в поддержку"}</strong><small>{ticket.id}</small></button>)}
         <div className="support-actions"><button disabled={busy || page === 0} onClick={() => run(() => loadTickets(view, page - 1))}>Назад</button><span>Страница {page + 1}</span><button disabled={busy || !hasNext} onClick={() => run(() => loadTickets(view, page + 1))}>Далее</button></div>
       </>}</div>}
-    </section>
-  </div>, document.body);
+    </section>;
+  return embedded ? panel : createPortal(<div className="support-backdrop">{panel}</div>, document.body);
 }
