@@ -87,7 +87,7 @@ export default function AdminEditor({ section, editor, user, onBusy, onClose, on
         {viewing ? <><h3>{record.title || record.question}</h3><Messages conversationId={section === "conversations" ? record.id : record.conversation_id} /></> : <>
         {archived && <div className="ad-tip">Документ в архиве. Он сохранён, но не используется в новых ответах.</div>}
         <form id="ad-record-form" onSubmit={submit}><fieldset disabled={busy || !!confirmation || archived}>
-          {importing ? field("url", "Ссылка на страницу SetRetail10", { type: "url", placeholder: "https://crystals.atlassian.net/wiki/…", maxLength: 2048 }) : section === "documents" ? <>
+          {importing ? field("url", "Ссылка на статью базы знаний", { type: "url", placeholder: "https://help.dreamkas.ru/kb/…", maxLength: 2048 }) : section === "documents" ? <>
             {field("title", "Название", { maxLength: 512 })}
             {editing ? <div className="ad-document-meta"><SafeLink url={record.source_url} /></div> : field("source_url", "Ссылка на источник", { type: "url", maxLength: 2048 })}
             {field("content", "Текст", { multiline: true, maxLength: 300000 })}
@@ -105,7 +105,7 @@ export default function AdminEditor({ section, editor, user, onBusy, onClose, on
         </fieldset></form>
         {section === "escalations" && <><details className="ad-details"><summary>Переписка</summary><Messages conversationId={record.conversation_id} /></details><div className="ad-delivery"><span>Уведомление VK: {DELIVERY[record.status]}</span>{record.status !== "sent" && <button className="ad-button" disabled={busy || !!dirty} onClick={() => perform("retry-notification")}>Повторить отправку</button>}</div></>}
         {editing && !confirmation && <div className="ad-advanced">
-          {section === "documents" && (archived ? <button className="ad-button ad-primary" disabled={busy} onClick={() => setConfirmation("restore")}>Вернуть в поиск</button> : <><div className="ad-action-line">{record.source_type === "confluence" && <button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("refresh")}>Обновить из источника</button>}<button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("archive")}>В архив</button></div><details className="ad-details"><summary>Дополнительно</summary><button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("reindex")}>Перестроить индекс</button></details></>)}
+          {section === "documents" && (archived ? <button className="ad-button ad-primary" disabled={busy} onClick={() => setConfirmation("restore")}>Вернуть в поиск</button> : <><div className="ad-action-line">{["confluence", "html"].includes(record.source_type) && <button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("refresh")}>Обновить из источника</button>}<button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("archive")}>В архив</button></div><details className="ad-details"><summary>Дополнительно</summary><button className="ad-button" disabled={busy || !!dirty} onClick={() => setConfirmation("reindex")}>Перестроить индекс</button></details></>)}
           {section === "users" && !self && <button className={`ad-button ${record.is_active ? "ad-danger" : ""}`} disabled={busy || !!dirty} onClick={() => setConfirmation(record.is_active ? "block" : "unblock")}>{record.is_active ? "Заблокировать доступ" : "Открыть доступ"}</button>}
         </div>}
         </>}

@@ -173,8 +173,11 @@ def build_admin_indexer(db):
 
 
 def get_admin_service(db: DBDep, notification: NotificationProviderDep):
+    from src.ai.ingestion.registry import RegisteredKnowledgeSource
+
     return AdminService(
-        db, indexer_factory=build_admin_indexer, notification_provider=notification
+        db, source=RegisteredKnowledgeSource(),
+        indexer_factory=build_admin_indexer, notification_provider=notification
     )
 
 

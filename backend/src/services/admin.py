@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from src.models.enums import UserRole, Status
 from src.exceptions import NotificationRetryException
 from src.services.base import BaseService
-from src.ai.ingestion.confluence import ConfluenceKnowledgeSource
+from src.ai.ingestion.base import KnowledgeSource
 from src.schemas.documents import DocumentAddSchema
 from src.schemas.admin import DocumentImport
 from src.exceptions import (
@@ -28,7 +28,7 @@ class AdminService(BaseService):
         self,
         db,
         indexer=None,
-        source=None,
+        source: KnowledgeSource | None = None,
         indexer_factory=None,
         notification_provider=None,
     ):
@@ -36,7 +36,7 @@ class AdminService(BaseService):
         self.notification_provider = notification_provider
         self.indexer = indexer
         self.indexer_factory = indexer_factory
-        self.source = source or ConfluenceKnowledgeSource()
+        self.source = source
 
     async def get_users(self, limit=50, offset=0):
         try:
@@ -267,7 +267,7 @@ class AdminService(BaseService):
 
     async def refresh_document(self, document_id):
         existing = await self.get_document_by_id(document_id)
-        if existing.source_type != "confluence":
+        if existing.source_type not in {"confluence", "html"}:
             raise AdminConflictException
         document = await self._fetch_document(existing.source_url)
         return await self._write_document(document=document, document_id=document_id)

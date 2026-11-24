@@ -66,20 +66,16 @@ class DocumentImport(AdminInput):
 
     @field_validator("url")
     @classmethod
-    def confluence_url(cls, value):
-        parsed = urlsplit(value)
+    def knowledge_url(cls, value):
+        parsed = urlsplit(value.strip())
+        if parsed.scheme != "https" or parsed.username or parsed.password or parsed.port not in (None, 443):
+            raise ValueError("Нужна HTTPS-ссылка на статью базы знаний")
+        if parsed.hostname == "help.dreamkas.ru" and parsed.path.startswith("/kb/"):
+            return f"https://help.dreamkas.ru{parsed.path}"
         match = re.match(r"^/wiki/spaces/[^/]+/pages/([0-9]+)(?:/|$)", parsed.path)
-        if (
-            parsed.scheme != "https"
-            or parsed.netloc != "crystals.atlassian.net"
-            or not match
-        ):
-            raise ValueError(
-                "Укажите ссылку на страницу базы знаний crystals.atlassian.net"
-            )
-        return (
-            f"https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/{match[1]}"
-        )
+        if parsed.hostname == "crystals.atlassian.net" and match:
+            return f"https://crystals.atlassian.net/wiki/spaces/SR10SUPPORT/pages/{match[1]}"
+        raise ValueError("Поддерживаются статьи help.dreamkas.ru/kb/ и crystals.atlassian.net")
 
 
 class UserPatch(PatchInput):
